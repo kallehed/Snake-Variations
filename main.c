@@ -283,13 +283,13 @@ GOTO_START:;
                 goto GOTO_START;
             }
 
-            for (int32_t i = 0; i < evil_snake_index; ++i)
+            for (int32_t i = 0; i < evil_snake_index; ++i) 
                 evil_snake_move(&evil_snakes[i]);
 
             food_player_collision_logic(&player, &food);
 
             // spawn evil snakes
-            /*if (player.length > 2) */ {
+            if (player.length > 2)  {
                 if (GetRandomValue(1, 10) == 1 && evil_snake_index < total_evil_snakes)
                 {
                     // spawn
