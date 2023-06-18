@@ -3,3 +3,4 @@ debuild
 webbuild
 relbuild
 .cache
+ninjabuild

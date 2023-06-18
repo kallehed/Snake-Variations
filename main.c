@@ -53,18 +53,18 @@ typedef struct Evil_Snake
     Pos positions[EVIL_SNAKE_MAX_LENGTH];
 } Evil_Snake;
 
-bool pos_equal(Pos p, Pos q)
+static bool pos_equal(Pos p, Pos q)
 {
     return p.x == q.x && p.y == q.y;
 }
 
-void draw_block_at(Pos pos, Color color)
+static void draw_block_at(Pos pos, Color color)
 {
     DrawRectangle(pos.x * BLOCK_PIXEL_LEN, pos.y * BLOCK_PIXEL_LEN, BLOCK_PIXEL_LEN, BLOCK_PIXEL_LEN, color);
 }
 
 // Cycle through positions of player
-void player_draw(const Player *player)
+static void player_draw(const Player *player)
 {
     int32_t drawn_cells = 0;
     for (int32_t i = player->idx_pos; drawn_cells < player->length; ++drawn_cells)
@@ -80,13 +80,15 @@ void player_draw(const Player *player)
     }
 }
 
-Pos player_nth_position(const Player* player, int32_t idx) {
-	int32_t i = player->idx_pos - idx;
-	while (i < 0) i += PLAYER_MAX_POSITIONS;
-	return player->positions[i];
+static Pos player_nth_position(const Player *player, int32_t idx)
+{
+    int32_t i = player->idx_pos - idx;
+    while (i < 0)
+        i += PLAYER_MAX_POSITIONS;
+    return player->positions[i];
 }
 
-void player_set_direction(Player *player)
+static void player_set_direction(Player *player)
 {
     if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_L))
     {
@@ -110,7 +112,7 @@ void player_set_direction(Player *player)
     }
 }
 
-Pos move_inside_grid(Pos pos, const Dir dir)
+static Pos move_inside_grid(Pos pos, const Dir dir)
 {
     switch (dir)
     {
@@ -141,7 +143,7 @@ Pos move_inside_grid(Pos pos, const Dir dir)
 }
 
 // returns true if player dies
-bool player_move(Player *player)
+static bool player_move(Player *player)
 {
     Pos prev_pos = player->positions[player->idx_pos];
 
@@ -173,12 +175,12 @@ bool player_move(Player *player)
     return false;
 }
 
-void draw_food(const Food *food)
+static void draw_food(const Food *food)
 {
     draw_block_at(food->pos, GREEN);
 }
 
-void food_init_position(Food *food)
+static void food_init_position(Food *food)
 {
     Coord x = GetRandomValue(0, WIDTH - 1);
     Coord y = GetRandomValue(0, HEIGHT - 1);
@@ -186,7 +188,7 @@ void food_init_position(Food *food)
     food->pos.y = y;
 }
 
-void food_player_collision_logic(Player *player, Food *food)
+static void food_player_collision_logic(Player *player, Food *food)
 {
     if (food->pos.x == player->positions[player->idx_pos].x && food->pos.y == player->positions[player->idx_pos].y)
     {
@@ -195,7 +197,7 @@ void food_player_collision_logic(Player *player, Food *food)
     }
 }
 
-void evil_snake_move(Evil_Snake *snake)
+static void evil_snake_move(Evil_Snake *snake)
 {
     for (int i = 0; i < snake->length; ++i)
     {
@@ -203,7 +205,7 @@ void evil_snake_move(Evil_Snake *snake)
     }
 }
 
-void evil_snakes_draw(const Evil_Snake snakes[], const int32_t length)
+static void evil_snakes_draw(const Evil_Snake snakes[], const int32_t length)
 {
     for (int32_t i = 0; i < length; ++i)
     {
@@ -216,26 +218,27 @@ void evil_snakes_draw(const Evil_Snake snakes[], const int32_t length)
 }
 
 // returns true on collision
-bool evil_snakes_player_collision_logic(const Evil_Snake snakes[], const int32_t length, const Player *player)
+static bool evil_snakes_player_collision_logic(const Evil_Snake snakes[], const int32_t length, const Player *player)
 {
     for (int32_t snake_idx = 0; snake_idx < length; ++snake_idx)
     {
         const Evil_Snake *snake = &snakes[snake_idx];
 
-        for (int i = 0; i < player->length; ++i)
+        for (int i = 0; i < 1; ++i) // only collide with the head
         {
             for (int j = 0; j < snake->length; ++j)
             {
-                if (pos_equal(player_nth_position(player, i), snake->positions[j])) {
-					return true;
-				}
+                if (pos_equal(player_nth_position(player, i), snake->positions[j]))
+                {
+                    return true;
+                }
             }
         }
     }
-	return false;
+    return false;
 }
 
-void game_loop()
+static void game_loop()
 {
 
 GOTO_START:;
@@ -283,13 +286,19 @@ GOTO_START:;
                 goto GOTO_START;
             }
 
-            for (int32_t i = 0; i < evil_snake_index; ++i) 
+            if (evil_snakes_player_collision_logic(evil_snakes, evil_snake_index, &player))
+            {
+                goto GOTO_START;
+            }
+
+            for (int32_t i = 0; i < evil_snake_index; ++i)
                 evil_snake_move(&evil_snakes[i]);
 
             food_player_collision_logic(&player, &food);
 
             // spawn evil snakes
-            if (player.length > 2)  {
+            if (player.length > 2)
+            {
                 if (GetRandomValue(1, 10) == 1 && evil_snake_index < total_evil_snakes)
                 {
                     // spawn
