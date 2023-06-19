@@ -48,14 +48,6 @@ typedef struct
     Int block_pixel_len;
 } World_State0;
 
-World_State0 world_state0_init()
-{
-    World_State0 w = {.width = 30, .height = 25, .block_pixel_len = 20};
-    w.block_pixel_len = GetRandomValue(20, 25);
-    SetWindowSize(w.block_pixel_len * w.width, w.block_pixel_len * w.height);
-    return w;
-}
-
 #define PLAYER_MAX_POSITIONS (100)
 typedef struct Player
 {
@@ -88,6 +80,14 @@ static void draw_block_at(Pos pos, Color color, const World_State0 *w)
 {
     DrawRectangle(pos.x * w->block_pixel_len, pos.y * w->block_pixel_len, w->block_pixel_len, w->block_pixel_len,
                   color);
+}
+
+World_State0 world_state0_init()
+{
+    World_State0 w = {.width = 30, .height = 25, .block_pixel_len = 20};
+    w.block_pixel_len = 25;
+    SetWindowSize(w.block_pixel_len * w.width, w.block_pixel_len * w.height);
+    return w;
 }
 
 static Pos player_nth_position(const Player *player, Int idx)
@@ -289,7 +289,7 @@ typedef struct
     World_State0 w;
 } Game_And_World_State0;
 
-Game_State0 game_state0_init(const World_State0 *w)
+static Game_State0 game_state0_init(const World_State0 *w)
 {
     Game_State0 g;
     g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Nothing};
@@ -301,7 +301,73 @@ Game_State0 game_state0_init(const World_State0 *w)
     return g;
 }
 
-void game_state0_frame0(Game_And_World_State0 *gw)
+static void draw_fps()
+{
+    char myText[100];
+    int fps = GetFPS();
+    snprintf(myText, sizeof(myText), "FPS: %d", fps);
+    DrawText(myText, 10, 10, 20, LIGHTGRAY);
+}
+
+static bool time_move_logic(double *time_for_move)
+{
+    double time = GetTime();
+    if (time >= *time_for_move)
+    {
+        *time_for_move = time + 0.1;
+        return true;
+    }
+    return false;
+}
+
+static Int game_state0_frame0(Game_And_World_State0 *gw)
+{
+    Game_State0 *g = &gw->g;
+    World_State0 *w = &gw->w;
+    // logic
+    player_set_direction(&g->player);
+
+    if (time_move_logic(&g->time_for_move))
+    {
+        if (player_move(&g->player, w))
+        {
+            // player died
+            TraceLog(LOG_INFO, "%s", "YOU DIED!");
+
+            *w = world_state0_init();
+            *g = game_state0_init(w);
+            return 0;
+        }
+        food_player_collision_logic(&g->player, &g->food, w);
+    }
+
+    Int food_left_to_win = 4 - g->player.length;
+
+    if (food_left_to_win <= 0)
+    {
+
+        return 1;
+    }
+
+    // drawing
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    {
+        char buffer[100];
+        snprintf(buffer, sizeof(buffer), "%d", food_left_to_win);
+        DrawText(buffer, 50, 50, 500, YELLOW);
+    }
+
+    player_draw(&g->player, w);
+    draw_food(&g->food, w);
+
+    draw_fps();
+    EndDrawing();
+    return 0;
+}
+
+static Int game_state0_frame2(Game_And_World_State0 *gw)
 {
     Game_State0 *g = &gw->g;
     World_State0 *w = &gw->w;
@@ -311,19 +377,9 @@ void game_state0_frame0(Game_And_World_State0 *gw)
         TraceLog(LOG_INFO, "%s", "also this works!");
     }
 
-    bool should_move = false;
-    {
-        double time = GetTime();
-        if (time >= g->time_for_move)
-        {
-            g->time_for_move = time + 0.1;
-            should_move = true;
-        }
-    }
-
     player_set_direction(&g->player);
 
-    if (should_move)
+    if (time_move_logic(&g->time_for_move))
     {
         if (player_move(&g->player, w))
         {
@@ -332,14 +388,14 @@ void game_state0_frame0(Game_And_World_State0 *gw)
 
             *w = world_state0_init();
             *g = game_state0_init(w);
-            return;
+            return 0;
         }
 
         if (evil_snakes_player_collision_logic(g->evil_snakes, g->evil_snake_index, &g->player))
         {
             *w = world_state0_init();
             *g = game_state0_init(w);
-            return;
+            return 0;
         }
 
         for (Int i = 0; i < g->evil_snake_index; ++i)
@@ -402,42 +458,50 @@ void game_state0_frame0(Game_And_World_State0 *gw)
     evil_snakes_draw(g->evil_snakes, g->evil_snake_index, w);
     draw_food(&g->food, w);
 
-    char myText[100];
-    int fps = GetFPS();
-    snprintf(myText, sizeof(myText), "FPS: %d", fps);
-    DrawText(myText, 10, 10, 20, LIGHTGRAY);
+    draw_fps();
     EndDrawing();
+    return 0;
 }
 
-typedef struct
+typedef Int (*Meta_Game_Frame_Code)(void *);
+
+typedef struct Meta_Game
 {
-    void (*frame_code)(void *);
+    Meta_Game_Frame_Code frame_code;
     void *data;
+    Int frame;
 
 } Meta_Game;
 
+static Meta_Game meta_game_init(Int frame)
+{
+    Meta_Game mg;
+
+    Int (*asd[2])(Game_And_World_State0 *) = {game_state0_frame0, game_state0_frame2};
+
+    mg.frame = frame;
+    mg.frame_code = (Meta_Game_Frame_Code)asd[frame];
+    mg.data = malloc(sizeof(Game_And_World_State0));
+
+    Game_And_World_State0 *gw = (Game_And_World_State0 *)mg.data;
+    gw->w = world_state0_init();
+    gw->g = game_state0_init(&gw->w);
+    return mg;
+}
+
 void meta_game_frame(Meta_Game *mg)
 {
-    mg->frame_code(mg->data);
+    if (mg->frame_code(mg->data))
+    {
+        free(mg->data);
+        *mg = meta_game_init(mg->frame + 1);
+    }
 }
 
 // ALLOCATES!
-Meta_Game meta_game_init()
-{
-	Meta_Game mg;
-	mg.frame_code = (void (*)(void *))game_state0_frame0;
-	mg.data = malloc(sizeof (Game_And_World_State0));
-
-    Game_And_World_State0 *gw = (Game_And_World_State0*)mg.data;
-    gw->w = world_state0_init();
-    gw->g = game_state0_init(&gw->w);
-	return mg;
-}
-
 static void game_loop()
 {
-
-	Meta_Game mg = meta_game_init();
+    Meta_Game mg = meta_game_init(0);
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop_arg((void (*)(void *))meta_game_frame, &mg, 0, 1);
 
@@ -448,7 +512,7 @@ static void game_loop()
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-		meta_game_frame(&mg);
+        meta_game_frame(&mg);
     }
 #endif
 }
