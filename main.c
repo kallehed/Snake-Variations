@@ -82,7 +82,7 @@ static void draw_block_at(Pos pos, Color color, const World_State0 *w)
                   color);
 }
 
-World_State0 world_state0_init()
+World_State0 world_state0_init(void)
 {
     World_State0 w = {.width = 30, .height = 25, .block_pixel_len = 20};
     w.block_pixel_len = 25;
@@ -301,7 +301,7 @@ static Game_State0 game_state0_init(const World_State0 *w)
     return g;
 }
 
-static void draw_fps()
+static void draw_fps(void)
 {
     char myText[100];
     int fps = GetFPS();
@@ -367,7 +367,7 @@ static Int game_state0_frame0(Game_And_World_State0 *gw)
     return 0;
 }
 
-static Int game_state0_frame2(Game_And_World_State0 *gw)
+static Int game_state0_frame1(Game_And_World_State0 *gw)
 {
     Game_State0 *g = &gw->g;
     World_State0 *w = &gw->w;
@@ -463,6 +463,33 @@ static Int game_state0_frame2(Game_And_World_State0 *gw)
     return 0;
 }
 
+typedef struct Game_Cutscene0
+{
+    double start_time;
+
+} Game_Cutscene0;
+
+Game_Cutscene0 game_cutscene0_init(void)
+{
+    Game_Cutscene0 g;
+    g.start_time = GetTime();
+    return g;
+}
+
+Int game_cutscene0_frame0(Game_Cutscene0 *g)
+{
+    double time_passed = GetTime() - g->start_time;
+
+    if (time_passed > 2.f)
+        return 1;
+
+    BeginDrawing();
+    DrawRectangle(time_passed * 500, 0, 10, 1000, LIME);
+    EndDrawing();
+
+    return 0;
+}
+
 typedef Int (*Meta_Game_Frame_Code)(void *);
 
 typedef struct Meta_Game
@@ -470,26 +497,44 @@ typedef struct Meta_Game
     Meta_Game_Frame_Code frame_code;
     void *data;
     Int frame;
-
 } Meta_Game;
 
 static Meta_Game meta_game_init(Int frame)
 {
     Meta_Game mg;
 
-    Int (*asd[2])(Game_And_World_State0 *) = {game_state0_frame0, game_state0_frame2};
-
     mg.frame = frame;
-    mg.frame_code = (Meta_Game_Frame_Code)asd[frame];
-    mg.data = malloc(sizeof(Game_And_World_State0));
 
-    Game_And_World_State0 *gw = (Game_And_World_State0 *)mg.data;
-    gw->w = world_state0_init();
-    gw->g = game_state0_init(&gw->w);
+    switch (frame)
+    {
+    case 0: {
+        mg.frame_code = (Meta_Game_Frame_Code)game_state0_frame0;
+        mg.data = malloc(sizeof(Game_And_World_State0));
+        Game_And_World_State0 *gw = (Game_And_World_State0 *)mg.data;
+        gw->w = world_state0_init();
+        gw->g = game_state0_init(&gw->w);
+    }
+    break;
+    case 1: {
+        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
+        mg.data = malloc(sizeof(Game_Cutscene0));
+        *(Game_Cutscene0 *)mg.data = game_cutscene0_init();
+    }
+    break;
+    case 2: {
+        mg.frame_code = (Meta_Game_Frame_Code)game_state0_frame1;
+        mg.data = malloc(sizeof(Game_And_World_State0));
+        Game_And_World_State0 *gw = (Game_And_World_State0 *)mg.data;
+        gw->w = world_state0_init();
+        gw->g = game_state0_init(&gw->w);
+    }
+    break;
+    }
+
     return mg;
 }
 
-void meta_game_frame(Meta_Game *mg)
+static void meta_game_frame(Meta_Game *mg)
 {
     if (mg->frame_code(mg->data))
     {
@@ -499,7 +544,7 @@ void meta_game_frame(Meta_Game *mg)
 }
 
 // ALLOCATES!
-static void game_loop()
+static void game_loop(void)
 {
     Meta_Game mg = meta_game_init(0);
 #if defined(PLATFORM_WEB)
