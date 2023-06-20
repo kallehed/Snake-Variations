@@ -12,7 +12,7 @@
 #include <emscripten/emscripten.h>
 #endif
 
-#define DEV 0
+#define DEV 1
 #define GAME_FPS 144
 
 #define WINDOW_WIDTH 840
@@ -76,6 +76,23 @@ typedef struct Evil_Snake
 static bool pos_equal(Pos p, Pos q)
 {
     return p.x == q.x && p.y == q.y;
+}
+
+static Pos dir_to_pos(Dir d)
+{
+    switch (d)
+    {
+    case Dir_Right:
+        return (Pos){1, 0};
+    case Dir_Left:
+        return (Pos){-1, 0};
+    case Dir_Up:
+        return (Pos){0, -1};
+    case Dir_Down:
+        return (Pos){0, 1};
+    case Dir_Nothing:
+        return (Pos){0, 0};
+    }
 }
 
 static void draw_block_at(Pos pos, Color color, const World_State0 *w)
@@ -345,6 +362,18 @@ static void box_draw(Box *b, World_State0 *w)
     draw_blocks_at(b->p, b->w_h, PINK, w);
 }
 
+static void box_player_collision_logic(Box *box, const Player *player)
+{
+    Pos p = player_nth_position(player, 0);
+    Pos b = box->p, w_h = box->w_h;
+    if (p.x >= b.x && p.x < b.x + w_h.x && p.y >= b.y && p.y < b.y + w_h.y)
+    {
+        Pos dir_pos = dir_to_pos(player->current_direction);
+        box->p.x += dir_pos.x;
+        box->p.y += dir_pos.y;
+    }
+}
+
 #define GAME_STATE2_BOXES 2
 typedef struct
 {
@@ -358,11 +387,13 @@ static Game_State2 game_state2_init(void)
 {
     Game_State2 g;
     g.w = world_state0_init(24);
-    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Nothing};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player = (Player){.length = 3, .idx_pos = 2, .current_direction = Dir_Right, .next_direction = Dir_Nothing};
+    g.player.positions[2] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player.positions[1] = (Pos){.x = g.w.width / 2 - 1, g.w.height / 2};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2 - 2, g.w.height / 2};
 
-	g.boxes[0] = (Box){.p = {1, 1}, .w_h = {1,1}};
-	g.boxes[1] = (Box){.p = {10, 5}, .w_h = {1,1}};
+    g.boxes[0] = (Box){.p = {1, 1}, .w_h = {1, 1}};
+    g.boxes[1] = (Box){.p = {10, 5}, .w_h = {1, 1}};
 
     g.time_for_move = 1.0;
 
@@ -629,13 +660,17 @@ static Int game_state2_frame0(Game_State2 *g)
             *g = game_state2_init();
             return 0;
         }
+
+        for (Int i = 0; i < GAME_STATE2_BOXES; ++i)
+        {
+            box_player_collision_logic(&g->boxes[i], &g->player);
+        }
     }
 
-    Int food_left_to_win = (DEV ? 2 : 6) - g->player.length;
+    Int food_left_to_win = (DEV ? 6 : 6) - g->player.length;
 
     if (food_left_to_win <= 0)
         return 1;
-
     // drawing
     BeginDrawing();
     ClearBackground(RAYWHITE);
@@ -714,6 +749,10 @@ static Meta_Game meta_game_init(Int frame)
         mg.frame_code = (Meta_Game_Frame_Code)game_state2_frame0;
         mg.data = malloc(sizeof(Game_State2));
         *((Game_State2 *)mg.data) = game_state2_init();
+    }
+    break;
+    case 7: {
+        printf("VERY BAD DEATH!!!!!!!!! AHHHHHHHH LEVEL NOT EXIST");
     }
     break;
     }
