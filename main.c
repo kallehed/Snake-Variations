@@ -50,7 +50,7 @@ typedef struct World_State0
     Int block_pixel_len;
 } World_State0;
 
-#define PLAYER_MAX_POSITIONS (100)
+#define PLAYER_MAX_POSITIONS (300)
 typedef struct Player
 {
     Int idx_pos;
@@ -93,6 +93,7 @@ static Pos dir_to_pos(Dir d)
     case Dir_Nothing:
         return (Pos){0, 0};
     }
+    abort();
 }
 
 static void draw_block_at(Pos pos, Color color, const World_State0 *w)
@@ -151,7 +152,7 @@ static void player_draw_extra(const Player *player, const World_State0 *w)
         }
         else
         {
-            color = ((i) % 2 == 0) ? ORANGE : MAROON;
+            color = (i % 6 == 0) ? GOLD : (i % 2 == 0) ? ORANGE : MAROON;
         }
         draw_block_at(pos, color, w);
     }
@@ -181,7 +182,7 @@ static void player_set_direction(Player *player)
     }
 }
 
-static Pos move_inside_grid(Pos pos, const Dir dir, World_State0 *w)
+static Pos move_inside_grid(Pos pos, const Dir dir, const World_State0 *w)
 {
     switch (dir)
     {
@@ -244,25 +245,43 @@ static bool player_move(Player *player, World_State0 *w)
     return false;
 }
 
-static void draw_food(const Food *food, const World_State0 *w)
+static bool player_intersection_point(const Player *player, const Pos point)
+{
+    for (Int i = 0; i < player->length; ++i)
+    {
+        Pos p_pos = player_nth_position(player, i);
+        if (pos_equal(p_pos, point))
+            return true;
+    }
+    return false;
+}
+
+static void food_draw(const Food *food, const World_State0 *w)
 {
     draw_block_at(food->pos, GREEN, w);
 }
 
-static void food_init_position(Food *food, const World_State0 *w)
+static void food_set_random_position(Food *food, const World_State0 *w)
 {
     Coord x = GetRandomValue(0, w->width - 1);
     Coord y = GetRandomValue(0, w->height - 1);
     food->pos.x = x;
     food->pos.y = y;
 }
-
-static void food_player_collision_logic(Player *player, Food *food, World_State0 *w)
+static void food_init_position(Food *food, const Player *player, const World_State0 *w)
 {
-    if (food->pos.x == player->positions[player->idx_pos].x && food->pos.y == player->positions[player->idx_pos].y)
+    do
+    {
+        food_set_random_position(food, w);
+    } while (player_intersection_point(player, food->pos));
+}
+
+static void food_player_collision_logic(Player *player, Food *food, const World_State0 *w)
+{
+    if (pos_equal(player_nth_position(player, 0), food->pos))
     {
         ++player->length;
-        food_init_position(food, w);
+        food_init_position(food, player, w);
     }
 }
 
@@ -307,6 +326,13 @@ static bool evil_snakes_player_collision_logic(const Evil_Snake snakes[], const 
     return false;
 }
 
+typedef enum Level_Return
+{
+    Level_Return_Continue = 0,
+    Level_Return_Next_Level,
+    Level_Return_Reset_Level,
+} Level_Return;
+
 typedef struct
 {
     World_State0 w;
@@ -315,15 +341,16 @@ typedef struct
     double time_for_move;
 } Game_State0;
 
-static Game_State0 game_state0_init(void)
+static void game_state0_init0(Game_State0 *new_g)
 {
     Game_State0 g;
     g.w = world_state0_init(12);
-    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Nothing};
+    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
     g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
-    food_init_position(&g.food, &g.w);
+    food_init_position(&g.food, &g.player, &g.w);
     g.time_for_move = 1.0;
-    return g;
+
+    *new_g = g;
 }
 
 #define GAME_STATE1_TOTAL_EVIL_SNAKES 10
@@ -337,17 +364,17 @@ typedef struct Game_State1
     Evil_Snake evil_snakes[GAME_STATE1_TOTAL_EVIL_SNAKES];
 } Game_State1;
 
-static Game_State1 game_state1_init(void)
+static void game_state1_init(Game_State1 *new_g)
 {
     Game_State1 g;
     g.w = world_state0_init(28);
-    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Nothing};
+    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
     g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
-    food_init_position(&g.food, &g.w);
+    food_init_position(&g.food, &g.player, &g.w);
     g.time_for_move = 1.0;
     g.evil_snake_index = 0;
 
-    return g;
+    *new_g = g;
 }
 
 typedef struct
@@ -362,15 +389,28 @@ static void box_draw(Box *b, World_State0 *w)
     draw_blocks_at(b->p, b->w_h, PINK, w);
 }
 
-static void box_player_collision_logic(Box *box, const Player *player)
+static bool rect_intersection(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2)
 {
-    Pos p = player_nth_position(player, 0);
-    Pos b = box->p, w_h = box->w_h;
-    if (p.x >= b.x && p.x < b.x + w_h.x && p.y >= b.y && p.y < b.y + w_h.y)
+    return r1.x < r2.x + w_h2.x && r1.x + w_h1.x > r2.x && r1.y < r2.y + w_h2.y && r1.y + w_h1.y > r2.y;
+}
+
+// For boxes, and their number, we have a position and a direction toghether with a width and height, that will move the
+// boxes, excluding one index of boxes. Also world
+static void boxes_player_collision_logic(Box boxes[], const Int nr_boxes, Pos pos, Dir dir, Pos w_h, Int exclude_idx,
+                                         const World_State0 *w)
+{
+    for (Int box_idx = 0; box_idx < nr_boxes; ++box_idx)
     {
-        Pos dir_pos = dir_to_pos(player->current_direction);
-        box->p.x += dir_pos.x;
-        box->p.y += dir_pos.y;
+        if (box_idx == exclude_idx)
+            continue;
+
+        Box *box = &boxes[box_idx];
+
+        if (rect_intersection(box->p, box->w_h, pos, w_h))
+        {
+            box->p = move_inside_grid(box->p, dir, w);
+            boxes_player_collision_logic(boxes, nr_boxes, box->p, dir, box->w_h, box_idx, w);
+        }
     }
 }
 
@@ -383,21 +423,76 @@ typedef struct
     double time_for_move;
 } Game_State2;
 
-static Game_State2 game_state2_init(void)
+static void game_state2_init(Game_State2 *new_g)
 {
     Game_State2 g;
     g.w = world_state0_init(24);
-    g.player = (Player){.length = 3, .idx_pos = 2, .current_direction = Dir_Right, .next_direction = Dir_Nothing};
-    g.player.positions[2] = (Pos){.x = g.w.width / 2, g.w.height / 2};
-    g.player.positions[1] = (Pos){.x = g.w.width / 2 - 1, g.w.height / 2};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2 - 2, g.w.height / 2};
+    g.player = (Player){.length = 5, .idx_pos = 4, .current_direction = Dir_Right, .next_direction = Dir_Right};
+    g.player.positions[4] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player.positions[3] = (Pos){.x = g.w.width / 2 - 1, g.w.height / 2};
+    g.player.positions[2] = (Pos){.x = g.w.width / 2 - 2, g.w.height / 2};
+    g.player.positions[1] = (Pos){.x = g.w.width / 2 - 3, g.w.height / 2};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2 - 4, g.w.height / 2};
 
     g.boxes[0] = (Box){.p = {1, 1}, .w_h = {1, 1}};
     g.boxes[1] = (Box){.p = {10, 5}, .w_h = {1, 1}};
 
     g.time_for_move = 1.0;
 
-    return g;
+    *new_g = g;
+}
+
+typedef struct
+{
+    World_State0 w;
+    Player player;
+    Int player_points;
+    Food food;
+    double time_for_move;
+} Game_State3;
+
+static void game_state3_init0(Game_State3 *new_g)
+{
+    Game_State3 g;
+    g.w = world_state0_init(24);
+    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player_points = 0;
+    food_init_position(&g.food, &g.player, &g.w);
+    g.time_for_move = 1.0;
+
+    *new_g = g;
+}
+
+#define GAME_STATE4_BOXES 20
+typedef struct
+{
+    World_State0 w;
+    Player player;
+	Food food;
+    Box boxes[GAME_STATE4_BOXES];
+    double time_for_move;
+} Game_State4;
+
+static void game_state4_init(Game_State4 *new_g)
+{
+    Game_State4 g;
+    g.w = world_state0_init(64);
+    g.player = (Player){.length = 5, .idx_pos = 4, .current_direction = Dir_Right, .next_direction = Dir_Right};
+    g.player.positions[4] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player.positions[3] = (Pos){.x = g.w.width / 2 - 1, g.w.height / 2};
+    g.player.positions[2] = (Pos){.x = g.w.width / 2 - 2, g.w.height / 2};
+    g.player.positions[1] = (Pos){.x = g.w.width / 2 - 3, g.w.height / 2};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2 - 4, g.w.height / 2};
+
+	food_init_position(&g.food, &g.player, &g.w);
+
+    g.boxes[0] = (Box){.p = {1, 1}, .w_h = {1, 1}};
+    g.boxes[1] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+
+    g.time_for_move = 1.0;
+
+    *new_g = g;
 }
 
 static void draw_fps(void)
@@ -426,7 +521,8 @@ static bool time_move_logic(double *time_for_move)
     return false;
 }
 
-static Int game_state0_frame0(Game_State0 *g)
+// normal snake
+static Level_Return game_state0_frame0(Game_State0 *g)
 {
     World_State0 *w = &g->w;
     // logic
@@ -439,16 +535,15 @@ static Int game_state0_frame0(Game_State0 *g)
             // player died
             TraceLog(LOG_INFO, "%s", "YOU DIED!");
 
-            *g = game_state0_init();
-            return 0;
+            return Level_Return_Reset_Level;
         }
         food_player_collision_logic(&g->player, &g->food, w);
     }
 
-    Int food_left_to_win = (DEV ? 2 : 6) - g->player.length;
+    Level_Return food_left_to_win = (DEV ? 2 : 6) - g->player.length;
 
     if (food_left_to_win <= 0)
-        return 1;
+        return Level_Return_Next_Level;
 
     // drawing
     BeginDrawing();
@@ -456,14 +551,15 @@ static Int game_state0_frame0(Game_State0 *g)
 
     draw_food_left(food_left_to_win);
     player_draw(&g->player, w);
-    draw_food(&g->food, w);
+    food_draw(&g->food, w);
 
     draw_fps();
     EndDrawing();
-    return 0;
+    return Level_Return_Continue;
 }
 
-static Int game_state0_frame1(Game_State0 *g)
+// flashier snake
+static Level_Return game_state0_frame1(Game_State0 *g)
 {
     World_State0 *w = &g->w;
     // logic
@@ -473,15 +569,14 @@ static Int game_state0_frame1(Game_State0 *g)
     {
         if (player_move(&g->player, w))
         {
-            *g = game_state0_init();
-            return 0;
+            return Level_Return_Reset_Level;
         }
         food_player_collision_logic(&g->player, &g->food, w);
     }
 
     Int food_left_to_win = (DEV ? 2 : 12) - g->player.length;
     if (food_left_to_win <= 0)
-        return 1;
+        return Level_Return_Next_Level;
 
     // drawing
     BeginDrawing();
@@ -490,11 +585,56 @@ static Int game_state0_frame1(Game_State0 *g)
     draw_food_left(food_left_to_win);
 
     player_draw_extra(&g->player, w);
-    draw_food(&g->food, w);
+    food_draw(&g->food, w);
 
     draw_fps();
     EndDrawing();
-    return 0;
+    return Level_Return_Continue;
+}
+
+// ever expanding snake
+static Level_Return game_state3_frame0(Game_State3 *g)
+{
+    World_State0 *w = &g->w;
+    // logic
+    player_set_direction(&g->player);
+
+    if (time_move_logic(&g->time_for_move))
+    {
+        Int player_len = g->player.length;
+
+        g->player.length++;
+        if (player_move(&g->player, w))
+        {
+            return Level_Return_Reset_Level;
+        }
+        g->player.length--;
+        if (pos_equal(player_nth_position(&g->player, 0), g->food.pos))
+        {
+            food_init_position(&g->food, &g->player, w);
+			g->player_points++;
+        }
+        g->player.length = player_len + 1;
+
+        // printf("player len: %d\n", g->player.length);
+    }
+
+    Int points_left = (DEV ? 6 : 6) - g->player_points;
+    if (points_left == 0)
+        return Level_Return_Next_Level;
+
+    // drawing
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    draw_food_left(points_left);
+
+    player_draw_extra(&g->player, w);
+    food_draw(&g->food, w);
+
+    draw_fps();
+    EndDrawing();
+    return Level_Return_Continue;
 }
 
 typedef struct Game_Cutscene0
@@ -503,19 +643,19 @@ typedef struct Game_Cutscene0
 
 } Game_Cutscene0;
 
-static Game_Cutscene0 game_cutscene0_init(void)
+static void game_cutscene0_init(Game_Cutscene0 *new_g)
 {
     Game_Cutscene0 g;
     g.start_time = GetTime();
-    return g;
+    *new_g = g;
 }
 
-static Int game_cutscene0_frame0(Game_Cutscene0 *g)
+static Level_Return game_cutscene0_frame0(Game_Cutscene0 *g)
 {
     double time_passed = GetTime() - g->start_time;
 
     if (time_passed > 2.f)
-        return 1;
+        return Level_Return_Next_Level;
 
     BeginDrawing();
     ClearBackground(RAYWHITE);
@@ -525,15 +665,15 @@ static Int game_cutscene0_frame0(Game_Cutscene0 *g)
     }
     EndDrawing();
 
-    return 0;
+    return Level_Return_Continue;
 }
 
-static Int game_cutscene0_frame1(Game_Cutscene0 *g)
+static Level_Return game_cutscene0_frame1(Game_Cutscene0 *g)
 {
     double time_passed = GetTime() - g->start_time;
 
     if (time_passed > 2.f)
-        return 1;
+        return Level_Return_Next_Level;
 
     BeginDrawing();
     ClearBackground(RAYWHITE);
@@ -543,10 +683,10 @@ static Int game_cutscene0_frame1(Game_Cutscene0 *g)
     }
     EndDrawing();
 
-    return 0;
+    return Level_Return_Continue;
 }
 
-static Int game_state1_frame0(Game_State1 *g)
+static Level_Return game_state1_frame0(Game_State1 *g)
 {
     World_State0 *w = &g->w;
     // logic
@@ -564,14 +704,12 @@ static Int game_state1_frame0(Game_State1 *g)
             // player died
             TraceLog(LOG_INFO, "%s", "YOU DIED!");
 
-            *g = game_state1_init();
-            return 0;
+            return Level_Return_Reset_Level;
         }
 
         if (evil_snakes_player_collision_logic(g->evil_snakes, g->evil_snake_index, &g->player))
         {
-            *g = game_state1_init();
-            return 0;
+            return Level_Return_Reset_Level;
         }
 
         for (Int i = 0; i < g->evil_snake_index; ++i)
@@ -628,7 +766,7 @@ static Int game_state1_frame0(Game_State1 *g)
     Int food_left_to_win = (DEV ? 8 : 8) - g->player.length;
 
     if (food_left_to_win <= 0)
-        return 1;
+        return Level_Return_Next_Level;
 
     // drawing
     BeginDrawing();
@@ -638,14 +776,14 @@ static Int game_state1_frame0(Game_State1 *g)
 
     player_draw(&g->player, w);
     evil_snakes_draw(g->evil_snakes, g->evil_snake_index, w);
-    draw_food(&g->food, w);
+    food_draw(&g->food, w);
 
     draw_fps();
     EndDrawing();
     return 0;
 }
 
-static Int game_state2_frame0(Game_State2 *g)
+static Level_Return game_state2_frame0(Game_State2 *g)
 {
     // logic
     player_set_direction(&g->player);
@@ -657,26 +795,39 @@ static Int game_state2_frame0(Game_State2 *g)
             // player died
             TraceLog(LOG_INFO, "%s", "YOU DIED!");
 
-            *g = game_state2_init();
-            return 0;
+            return Level_Return_Reset_Level;
         }
 
-        for (Int i = 0; i < GAME_STATE2_BOXES; ++i)
+        boxes_player_collision_logic(g->boxes, GAME_STATE2_BOXES, player_nth_position(&g->player, 0),
+                                     g->player.current_direction, (Pos){1, 1}, -1, &g->w);
+    }
+
+    Pos pos1 = {20, 15};
+    Pos pos2 = {5, 5};
+
+    Int points = 0;
+
+    for (Int i = 0; i < GAME_STATE2_BOXES; ++i)
+    {
+        if (pos_equal(pos1, g->boxes[i].p) || pos_equal(pos2, g->boxes[i].p))
         {
-            box_player_collision_logic(&g->boxes[i], &g->player);
+            ++points;
         }
     }
 
-    Int food_left_to_win = (DEV ? 6 : 6) - g->player.length;
+    if (points == 2)
+    {
+        return Level_Return_Next_Level;
+    }
 
-    if (food_left_to_win <= 0)
-        return 1;
     // drawing
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    draw_food_left(food_left_to_win);
-    player_draw(&g->player, &g->w);
+    draw_food_left(2 - points);
+    player_draw_extra(&g->player, &g->w);
+    draw_block_at(pos1, GREEN, &g->w);
+    draw_block_at(pos2, GREEN, &g->w);
     for (Int i = 0; i < GAME_STATE2_BOXES; i++)
     {
         box_draw(&g->boxes[i], &g->w);
@@ -684,14 +835,62 @@ static Int game_state2_frame0(Game_State2 *g)
 
     draw_fps();
     EndDrawing();
-    return 0;
+    return Level_Return_Continue;
 }
 
-typedef Int (*Meta_Game_Frame_Code)(void *);
+// Boxes hiding food
+static Level_Return game_state4_frame0(Game_State4 *g)
+{
+    // logic
+    player_set_direction(&g->player);
+
+    if (time_move_logic(&g->time_for_move))
+    {
+        if (player_move(&g->player, &g->w))
+        {
+            // player died
+            TraceLog(LOG_INFO, "%s", "YOU DIED!");
+
+            return Level_Return_Reset_Level;
+        }
+
+        boxes_player_collision_logic(g->boxes, GAME_STATE2_BOXES, player_nth_position(&g->player, 0),
+                                     g->player.current_direction, (Pos){1, 1}, -1, &g->w);
+
+		food_player_collision_logic(&g->player, &g->food, &g->w);
+    }
+    Int food_left_to_win = (DEV ? 8 : 8) - g->player.length;
+
+    if (food_left_to_win <= 0)
+        return Level_Return_Next_Level;
+
+    // drawing
+
+    // drawing
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    draw_food_left(food_left_to_win);
+    player_draw_extra(&g->player, &g->w);
+	food_draw(&g->food, &g->w);
+    for (Int i = 0; i < GAME_STATE2_BOXES; i++)
+    {
+        box_draw(&g->boxes[i], &g->w);
+    }
+
+    draw_fps();
+    EndDrawing();
+    return Level_Return_Continue;
+}
+
+typedef Level_Return (*Meta_Game_Frame_Code)(void *);
+typedef void (*Meta_Game_Init_Code)(void *);
 
 typedef struct Meta_Game
 {
     Meta_Game_Frame_Code frame_code;
+    Meta_Game_Init_Code init_code;
+
     void *data;
     Int frame;
 } Meta_Game;
@@ -702,8 +901,9 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        if (frame < 5)
-            frame = 6;
+        Int skip = 10;
+        if (frame < skip)
+            frame = skip;
     }
     mg.frame = frame;
 
@@ -711,65 +911,100 @@ static Meta_Game meta_game_init(Int frame)
     {
     case 0: {
         mg.frame_code = (Meta_Game_Frame_Code)game_state0_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_state0_init0;
         mg.data = malloc(sizeof(Game_State0));
-        *((Game_State0 *)mg.data) = game_state0_init();
     }
     break;
     case 1: {
         mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
         mg.data = malloc(sizeof(Game_Cutscene0));
-        *(Game_Cutscene0 *)mg.data = game_cutscene0_init();
     }
     break;
     case 2: {
         mg.frame_code = (Meta_Game_Frame_Code)game_state1_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_state1_init;
         mg.data = malloc(sizeof(Game_State1));
-        *((Game_State1 *)mg.data) = game_state1_init();
     }
     break;
     case 3: {
         mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame1;
+        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
         mg.data = malloc(sizeof(Game_Cutscene0));
-        *(Game_Cutscene0 *)mg.data = game_cutscene0_init();
     }
     break;
     case 4: {
         mg.frame_code = (Meta_Game_Frame_Code)game_state0_frame1;
+        mg.init_code = (Meta_Game_Init_Code)game_state0_init0;
         mg.data = malloc(sizeof(Game_State0));
-        *((Game_State0 *)mg.data) = game_state0_init();
     }
     break;
     case 5: {
         mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
         mg.data = malloc(sizeof(Game_Cutscene0));
-        *(Game_Cutscene0 *)mg.data = game_cutscene0_init();
     }
     break;
     case 6: { // boxes
         mg.frame_code = (Meta_Game_Frame_Code)game_state2_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_state2_init;
         mg.data = malloc(sizeof(Game_State2));
-        *((Game_State2 *)mg.data) = game_state2_init();
     }
     break;
     case 7: {
-        printf("VERY BAD DEATH!!!!!!!!! AHHHHHHHH LEVEL NOT EXIST");
+        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
+        mg.data = malloc(sizeof(Game_Cutscene0));
+    }
+    break;
+    case 8: { // ever growing
+        mg.frame_code = (Meta_Game_Frame_Code)game_state3_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_state3_init0;
+        mg.data = malloc(sizeof(Game_State3));
+    }
+    break;
+    case 9: {
+        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
+        mg.data = malloc(sizeof(Game_Cutscene0));
+    }
+    break;
+    case 10: { // ever growing
+        mg.frame_code = (Meta_Game_Frame_Code)game_state4_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_state4_init;
+        mg.data = malloc(sizeof(Game_State4));
+    }
+    break;
+    default: {
+        printf("VERY BAD DEATH!!!!!!!!! AHHHHHHHH LEVEL NOT EXIST\n");
     }
     break;
     }
+    mg.init_code(mg.data);
 
     return mg;
 }
 
 static void meta_game_frame(Meta_Game *mg)
 {
-    if (mg->frame_code(mg->data))
+    switch (mg->frame_code(mg->data))
     {
+    case Level_Return_Continue: {
+    }
+    break;
+    case Level_Return_Next_Level: {
+        TraceLog(LOG_INFO, "%s", "THE FUNCTION RETURNED ONE ONE ONE \n");
         free(mg->data);
         *mg = meta_game_init(mg->frame + 1);
     }
+    break;
+    case Level_Return_Reset_Level: {
+        mg->init_code(mg->data);
+    }
+    break;
+    }
 }
 
-// ALLOCATES!
 static void game_loop(void)
 {
     Meta_Game mg = meta_game_init(0);
