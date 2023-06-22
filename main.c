@@ -101,10 +101,33 @@ static void draw_block_at(Pos pos, Color color, const World_State0 *w)
     DrawRectangle(pos.x * w->block_pixel_len, pos.y * w->block_pixel_len, w->block_pixel_len, w->block_pixel_len,
                   color);
 }
+
+// will not warp
 static void draw_blocks_at(Pos pos, Pos w_h, Color color, const World_State0 *w)
 {
     DrawRectangle(pos.x * w->block_pixel_len, pos.y * w->block_pixel_len, w->block_pixel_len * w_h.x,
                   w->block_pixel_len * w_h.y, color);
+}
+
+// draw warping, assuming it can not have negative position(ex: boxes) and will only overflow at width and height of
+// world
+static void draw_blocks_warp(Pos pos, Pos w_h, Color color, const World_State0 *w)
+{
+    draw_blocks_at(pos, w_h, color, w);
+    Coord x_over = pos.x + w_h.x - w->width;
+    Coord y_over = pos.y + w_h.y - w->height;
+    if (x_over > 0)
+    {
+        draw_blocks_at((Pos){0, pos.y}, (Pos){x_over, w_h.y}, color, w);
+    }
+    if (y_over > 0)
+    {
+        draw_blocks_at((Pos){pos.x, 0}, (Pos){w_h.x, y_over}, color, w);
+    }
+    if (x_over > 0 && y_over > 0) // special case for when at width and height
+    {
+        draw_blocks_at((Pos){0, 0}, (Pos){x_over, y_over}, color, w);
+    }
 }
 
 World_State0 world_state0_init(Int width)
@@ -386,18 +409,32 @@ typedef struct
 
 static void box_draw(Box *b, World_State0 *w)
 {
-    draw_blocks_at(b->p, b->w_h, PINK, w);
+    draw_blocks_warp(b->p, b->w_h, PINK, w);
 }
 
 static bool rect_intersection(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2)
 {
     return r1.x < r2.x + w_h2.x && r1.x + w_h1.x > r2.x && r1.y < r2.y + w_h2.y && r1.y + w_h1.y > r2.y;
 }
+static bool rect_intersection_wrap(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2, const World_State0 *w)
+{
+    const Pos c1_x = {0, r1.y}, c1_x_wh = {r1.x + w_h1.x - w->width, w_h1.y};
+    const Pos c1_y = {r1.x, 0}, c1_y_wh = {w_h1.x, r1.y + w_h1.y - w->height};
+    const Pos c2_x = {0, r2.y}, c2_x_wh = {r2.x + w_h2.x - w->width, w_h2.y};
+    const Pos c2_y = {r2.x, 0}, c2_y_wh = {w_h2.x, r2.y + w_h2.y - w->height};
+    const Pos c1_xy = {0, 0}, c1_xy_wh = {r1.x + w_h1.x - w->width, r1.y + w_h1.y - w->height};
+    const Pos c2_xy = {0, 0}, c2_xy_wh = {r2.x + w_h2.x - w->width, r2.y + w_h2.y - w->height};
+    return rect_intersection(r1, w_h1, r2, w_h2) || // handle all cases, YES THIS IS NECESSARY
+           rect_intersection(c1_y, c1_y_wh, r2, w_h2) || rect_intersection(c2_y, c2_y_wh, r1, w_h1) ||
+           rect_intersection(c1_x, c1_x_wh, r2, w_h2) || rect_intersection(c2_x, c2_x_wh, r1, w_h1) ||
+           rect_intersection(c1_xy, c1_xy_wh, r2, w_h2) || rect_intersection(c2_xy, c2_xy_wh, r1, w_h1) ||
+		   rect_intersection(c1_x, c1_x_wh, c2_y, c2_y_wh) || rect_intersection(c2_x, c2_x_wh, c1_y, c1_y_wh);
+}
 
 // For boxes, and their number, we have a position and a direction toghether with a width and height, that will move the
 // boxes, excluding one index of boxes. Also world
-static void boxes_player_collision_logic(Box boxes[], const Int nr_boxes, Pos pos, Dir dir, Pos w_h, Int exclude_idx,
-                                         const World_State0 *w)
+static void boxes_player_collision_logic(Box boxes[], const Int nr_boxes, const Pos pos, const Dir dir, const Pos w_h,
+                                         const Int exclude_idx, const World_State0 *w)
 {
     for (Int box_idx = 0; box_idx < nr_boxes; ++box_idx)
     {
@@ -406,7 +443,7 @@ static void boxes_player_collision_logic(Box boxes[], const Int nr_boxes, Pos po
 
         Box *box = &boxes[box_idx];
 
-        if (rect_intersection(box->p, box->w_h, pos, w_h))
+        if (rect_intersection_wrap(box->p, box->w_h, pos, w_h, w))
         {
             box->p = move_inside_grid(box->p, dir, w);
             boxes_player_collision_logic(boxes, nr_boxes, box->p, dir, box->w_h, box_idx, w);
@@ -469,7 +506,7 @@ typedef struct
 {
     World_State0 w;
     Player player;
-	Food food;
+    Food food;
     Box boxes[GAME_STATE4_BOXES];
     double time_for_move;
 } Game_State4;
@@ -477,7 +514,7 @@ typedef struct
 static void game_state4_init(Game_State4 *new_g)
 {
     Game_State4 g;
-    g.w = world_state0_init(64);
+    g.w = world_state0_init(60);
     g.player = (Player){.length = 5, .idx_pos = 4, .current_direction = Dir_Right, .next_direction = Dir_Right};
     g.player.positions[4] = (Pos){.x = g.w.width / 2, g.w.height / 2};
     g.player.positions[3] = (Pos){.x = g.w.width / 2 - 1, g.w.height / 2};
@@ -485,10 +522,28 @@ static void game_state4_init(Game_State4 *new_g)
     g.player.positions[1] = (Pos){.x = g.w.width / 2 - 3, g.w.height / 2};
     g.player.positions[0] = (Pos){.x = g.w.width / 2 - 4, g.w.height / 2};
 
-	food_init_position(&g.food, &g.player, &g.w);
+    food_init_position(&g.food, &g.player, &g.w);
 
-    g.boxes[0] = (Box){.p = {1, 1}, .w_h = {1, 1}};
+    g.boxes[0] = (Box){.p = {1, 1}, .w_h = {4, 4}};
     g.boxes[1] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[2] = (Box){.p = {40, 5}, .w_h = {12, 11}};
+    g.boxes[3] = (Box){.p = {44, 19}, .w_h = {7, 6}};
+    g.boxes[4] = (Box){.p = {36, 26}, .w_h = {6, 7}};
+    g.boxes[5] = (Box){.p = {42, 35}, .w_h = {5, 9}};
+    g.boxes[6] = (Box){.p = {50, 36}, .w_h = {6, 4}};
+    g.boxes[7] = (Box){.p = {22, 30}, .w_h = {10, 10}};
+    g.boxes[8] = (Box){.p = {18, 10}, .w_h = {14, 8}};
+    g.boxes[9] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[10] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[11] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[12] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[13] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[14] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[15] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[16] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[17] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[18] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[19] = (Box){.p = {10, 5}, .w_h = {1, 1}};
 
     g.time_for_move = 1.0;
 
@@ -612,7 +667,7 @@ static Level_Return game_state3_frame0(Game_State3 *g)
         if (pos_equal(player_nth_position(&g->player, 0), g->food.pos))
         {
             food_init_position(&g->food, &g->player, w);
-			g->player_points++;
+            g->player_points++;
         }
         g->player.length = player_len + 1;
 
@@ -854,10 +909,10 @@ static Level_Return game_state4_frame0(Game_State4 *g)
             return Level_Return_Reset_Level;
         }
 
-        boxes_player_collision_logic(g->boxes, GAME_STATE2_BOXES, player_nth_position(&g->player, 0),
+        boxes_player_collision_logic(g->boxes, GAME_STATE4_BOXES, player_nth_position(&g->player, 0),
                                      g->player.current_direction, (Pos){1, 1}, -1, &g->w);
 
-		food_player_collision_logic(&g->player, &g->food, &g->w);
+        food_player_collision_logic(&g->player, &g->food, &g->w);
     }
     Int food_left_to_win = (DEV ? 8 : 8) - g->player.length;
 
@@ -872,8 +927,8 @@ static Level_Return game_state4_frame0(Game_State4 *g)
 
     draw_food_left(food_left_to_win);
     player_draw_extra(&g->player, &g->w);
-	food_draw(&g->food, &g->w);
-    for (Int i = 0; i < GAME_STATE2_BOXES; i++)
+    food_draw(&g->food, &g->w);
+    for (Int i = 0; i < GAME_STATE4_BOXES; i++)
     {
         box_draw(&g->boxes[i], &g->w);
     }
