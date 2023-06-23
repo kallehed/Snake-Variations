@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <time.h>
 
 // #define PLATFORM_WEB
@@ -36,10 +37,10 @@ typedef struct Pos
 
 typedef enum Dir
 {
-    Dir_Right = 0,
-    Dir_Left,
-    Dir_Up,
-    Dir_Down,
+    Dir_Right = 0, // obligatory numbers for first 4, as YouFood level generates random dir
+    Dir_Left = 1,
+    Dir_Up = 2,
+    Dir_Down = 3,
     Dir_Nothing,
 } Dir;
 
@@ -181,28 +182,61 @@ static void player_draw_extra(const Player *player, const World_State0 *w)
     }
 }
 
-static void player_set_direction(Player *player)
+// NOT PURE
+static Dir get_dir_from_input()
 {
     if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_L))
     {
-        if (player->current_direction != Dir_Left)
-            player->next_direction = Dir_Right;
+        return Dir_Right;
     }
     if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_H))
     {
-        if (player->current_direction != Dir_Right)
-            player->next_direction = Dir_Left;
+        return Dir_Left;
     }
     if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_K))
     {
-        if (player->current_direction != Dir_Down)
-            player->next_direction = Dir_Up;
+        return Dir_Up;
     }
     if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_J))
     {
+        return Dir_Down;
+    }
+    return Dir_Nothing;
+}
+
+// do not turn in a way that instantly kills youself, handles next and current direction
+static void player_set_direction_correctly(Player *player, Dir dir)
+{
+    switch (dir)
+    {
+    case Dir_Right: {
+        if (player->current_direction != Dir_Left)
+            player->next_direction = Dir_Right;
+    }
+    break;
+    case Dir_Left: {
+        if (player->current_direction != Dir_Right)
+            player->next_direction = Dir_Left;
+    }
+    break;
+    case Dir_Up: {
+        if (player->current_direction != Dir_Down)
+            player->next_direction = Dir_Up;
+    }
+    break;
+    case Dir_Down: {
         if (player->current_direction != Dir_Up)
             player->next_direction = Dir_Down;
     }
+    case Dir_Nothing: {
+    }
+    break;
+    }
+}
+
+static void player_set_direction_from_input(Player *player)
+{
+    player_set_direction_correctly(player, get_dir_from_input());
 }
 
 static Pos move_inside_grid(Pos pos, const Dir dir, const World_State0 *w)
@@ -349,6 +383,37 @@ static bool evil_snakes_player_collision_logic(const Evil_Snake snakes[], const 
     return false;
 }
 
+static void draw_fps(void)
+{
+    char myText[100];
+    int fps = GetFPS();
+    snprintf(myText, sizeof(myText), "FPS: %d", fps);
+    DrawText(myText, 10, 10, 20, LIGHTGRAY);
+}
+
+static void draw_food_left(Int food_left_to_win)
+{
+    char buffer[100];
+    snprintf(buffer, sizeof(buffer), "%d", food_left_to_win);
+    DrawText(buffer, 200, -40, 800, (Color){0, 0, 0, 40});
+}
+
+static bool time_move_logic_general(double *time_for_move, const double wait_time)
+{
+    double time = GetTime();
+    if (time >= *time_for_move)
+    {
+        *time_for_move = time + wait_time;
+        return true;
+    }
+    return false;
+}
+
+static bool time_move_logic(double *time_for_move)
+{
+    return time_move_logic_general(time_for_move, 0.1);
+}
+
 typedef enum Level_Return
 {
     Level_Return_Continue = 0,
@@ -368,6 +433,19 @@ static void game_state0_init0(Game_State0 *new_g)
 {
     Game_State0 g;
     g.w = world_state0_init(12);
+    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    food_init_position(&g.food, &g.player, &g.w);
+    g.time_for_move = 1.0;
+
+    *new_g = g;
+}
+
+// Gigantic free fast
+static void game_state0_init1(Game_State0 *new_g)
+{
+    Game_State0 g;
+    g.w = world_state0_init(120);
     g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
     g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
     food_init_position(&g.food, &g.player, &g.w);
@@ -402,6 +480,231 @@ static void game_state1_init(Game_State1 *new_g)
 
 typedef struct
 {
+    World_State0 w;
+    Player player;
+    Food food;
+    Dir food_dir;
+    double time_for_move;
+} Game_State_YouFood;
+
+static void game_state_YouFood_init(Game_State_YouFood *new_g)
+{
+    Game_State_YouFood g;
+    g.w = world_state0_init(24);
+    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    food_init_position(&g.food, &g.player, &g.w);
+    g.food_dir = Dir_Nothing;
+    g.time_for_move = 1.0;
+
+    *new_g = g;
+}
+
+static Level_Return game_state_YouFood_frame(Game_State_YouFood *g)
+{
+    World_State0 *w = &g->w;
+    // logic
+
+    {
+        Dir new_dir = get_dir_from_input();
+        if (new_dir != Dir_Nothing)
+            g->food_dir = new_dir;
+    }
+
+    if (time_move_logic_general(&g->time_for_move, 0.135))
+    {
+        if (GetRandomValue(1, 3) == 1)
+            player_set_direction_correctly(&g->player, GetRandomValue(0, 3));
+        if (player_move(&g->player, w))
+        {
+            // player died
+            TraceLog(LOG_INFO, "%s", "YOU DIED!");
+
+            // return Level_Return_Reset_Level;
+        }
+        g->food.pos = move_inside_grid(g->food.pos, g->food_dir, w);
+        g->food_dir = Dir_Nothing;
+        food_player_collision_logic(&g->player, &g->food, w);
+    }
+
+    Level_Return food_left_to_win = (DEV ? 7 : 7) - g->player.length;
+
+    if (food_left_to_win <= 0)
+        return Level_Return_Next_Level;
+
+    // drawing
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    draw_food_left(food_left_to_win);
+    player_draw(&g->player, w);
+    food_draw(&g->food, w);
+
+    draw_fps();
+    EndDrawing();
+    return Level_Return_Continue;
+}
+
+typedef enum
+{
+    Maze_Cell_Empty = 0,
+    Maze_Cell_Wall,
+} Maze_Cell;
+
+static void maze_draw(const Maze_Cell maze[], const Int maze_width, const Int maze_height, const World_State0 *w)
+{
+    for (Int i = 0; i < maze_height; ++i)
+    {
+        for (Int j = 0; j < maze_width; ++j)
+        {
+            Maze_Cell cell = maze[i * maze_width + j];
+            Color col;
+            switch (cell)
+            {
+            case Maze_Cell_Empty: {
+                continue;
+            }
+            break;
+            case Maze_Cell_Wall: {
+                col = BLACK;
+            }
+            break;
+            }
+            draw_block_at((Pos){j, i}, col, w);
+        }
+    }
+}
+
+#define GAME_STATE_MAZE_FOODS 4
+#define GAME_STATE_MAZE_WIDTH 40 // you CANT change these, hardcoded
+#define GAME_STATE_MAZE_HEIGHT 30
+typedef struct
+{
+    World_State0 w;
+    Player player;
+    double time_for_move;
+    Food foods[GAME_STATE_MAZE_FOODS];
+    Maze_Cell maze[GAME_STATE_MAZE_HEIGHT][GAME_STATE_MAZE_WIDTH];
+} Game_State_Maze;
+
+static void game_state_Maze_init(Game_State_Maze *new_g)
+{
+    Game_State_Maze g;
+    g.w = world_state0_init(GAME_STATE_MAZE_WIDTH);
+    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    // food_init_position(&g.food, &g.player, &g.w);
+    // printf("Size of Maze_Cell type: %lu\n", sizeof(Maze_Cell)); // this is SO stupid, why is the enum 4 bytes??!?!?!
+    // printf("Size of matrix: %lu\n", sizeof(g.maze));
+    const char *const maze_str = "|------------------------|---|---|------"
+                                 "----------------------------------------"
+                                 "-|||||||------------------||||||||||||--"
+                                 "-|-----|------------------|----------|--"
+                                 "-|-----|------------------|----------|--"
+                                 "-|--F--|------------------|--------F-|--"
+                                 "-|-----|------------------|----------|--"
+                                 "-|-----|------------------|----------|--"
+                                 "-|||--||----------|||||||||----------|--"
+                                 "---|--|----||||||||------------------|--"
+                                 "---|--|----|----------------||||||||||--"
+                                 "---|--|----|-||||||-||||||--|--------|--"
+                                 "---|--||||||-|-----------|-||--------|--"
+                                 "---|---------|-----------|-|-----F---|--"
+                                 "---|||||||||-|-----------|-|---------|--"
+                                 "-----------|-|-----------|-|---------|--"
+                                 "-----------|-|||||||||||||-|--||||||||--"
+                                 "-----------|---------------|-|-------|--"
+                                 "---------|||||||||||-|||||||-|--|-|--|--"
+                                 "--||||||-|---|||||||-|-------|--|-||-|--"
+                                 "--|----|-|-|-|||||||-|----|||||||-|--|--"
+                                 "--|-F--|-|-|-|---|||-|------------|-||--"
+                                 "--|----|-|-|-|-|-|||-|----||||-||||--|--"
+                                 "--|----|-|-|-|-|-|||-|---|---|-|---|-|--"
+                                 "--|----|-|-|-|-|-|||-|--||---|||-----|--"
+                                 "--|----|||-|-|-|-|||-|-|||---|-------|--"
+                                 "--|--------|---|---------------------|--"
+                                 "--||||||||||||||||||||||||||||||||||||--"
+                                 "----------------------------------------"
+                                 "----------------------------------------";
+
+    Int food_idx = 0;
+    for (Int i = 0; i < GAME_STATE_MAZE_HEIGHT; ++i)
+    {
+        for (Int j = 0; j < GAME_STATE_MAZE_WIDTH; ++j)
+        {
+            Int idx = i * GAME_STATE_MAZE_WIDTH + j;
+            Maze_Cell cell = Maze_Cell_Empty;
+            switch (maze_str[idx])
+            {
+            case '|': {
+                cell = Maze_Cell_Wall;
+            }
+            break;
+            case 'F': {
+                g.foods[food_idx++] = (Food){.pos = {.x = j, .y = i}};
+            }
+            break;
+            default: {
+                cell = Maze_Cell_Empty;
+            }
+            break;
+            }
+            g.maze[i][j] = cell;
+        }
+    }
+    g.time_for_move = 1.0;
+
+    *new_g = g;
+}
+
+static Level_Return game_state_Maze_frame(Game_State_Maze *g)
+{
+    World_State0 *w = &g->w;
+    // logic
+
+    player_set_direction_from_input(&g->player);
+
+    if (time_move_logic_general(&g->time_for_move, 0.123))
+    {
+        if (player_move(&g->player, w))
+        {
+            // player died
+            TraceLog(LOG_INFO, "%s", "YOU DIED!");
+
+            return Level_Return_Reset_Level;
+        }
+		for (Int i = 0; i < GAME_STATE_MAZE_FOODS; ++i) {
+			if (pos_equal(player_nth_position(&g->player, 0), g->foods[i].pos))
+			{
+				++g->player.length;
+				g->foods[i].pos = (Pos){.x = -1, .y = -1};
+			}
+		}
+    }
+
+    Level_Return food_left_to_win = (DEV ? 5 : 5) - g->player.length;
+
+    if (food_left_to_win <= 0)
+        return Level_Return_Next_Level;
+
+    // drawing
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    draw_food_left(food_left_to_win);
+    maze_draw((Maze_Cell *)g->maze, GAME_STATE_MAZE_WIDTH, GAME_STATE_MAZE_HEIGHT, w);
+    player_draw_extra(&g->player, w);
+	for (Int i = 0; i < GAME_STATE_MAZE_FOODS; ++i) {
+		food_draw(&g->foods[i], w);
+	}
+
+    draw_fps();
+    EndDrawing();
+    return Level_Return_Continue;
+}
+
+typedef struct
+{
     Pos p;
     // width and height
     Pos w_h;
@@ -428,7 +731,7 @@ static bool rect_intersection_wrap(const Pos r1, const Pos w_h1, const Pos r2, c
            rect_intersection(c1_y, c1_y_wh, r2, w_h2) || rect_intersection(c2_y, c2_y_wh, r1, w_h1) ||
            rect_intersection(c1_x, c1_x_wh, r2, w_h2) || rect_intersection(c2_x, c2_x_wh, r1, w_h1) ||
            rect_intersection(c1_xy, c1_xy_wh, r2, w_h2) || rect_intersection(c2_xy, c2_xy_wh, r1, w_h1) ||
-		   rect_intersection(c1_x, c1_x_wh, c2_y, c2_y_wh) || rect_intersection(c2_x, c2_x_wh, c1_y, c1_y_wh);
+           rect_intersection(c1_x, c1_x_wh, c2_y, c2_y_wh) || rect_intersection(c2_x, c2_x_wh, c1_y, c1_y_wh);
 }
 
 // For boxes, and their number, we have a position and a direction toghether with a width and height, that will move the
@@ -533,47 +836,21 @@ static void game_state4_init(Game_State4 *new_g)
     g.boxes[6] = (Box){.p = {50, 36}, .w_h = {6, 4}};
     g.boxes[7] = (Box){.p = {22, 30}, .w_h = {10, 10}};
     g.boxes[8] = (Box){.p = {18, 10}, .w_h = {14, 8}};
-    g.boxes[9] = (Box){.p = {10, 5}, .w_h = {1, 1}};
-    g.boxes[10] = (Box){.p = {10, 5}, .w_h = {1, 1}};
-    g.boxes[11] = (Box){.p = {10, 5}, .w_h = {1, 1}};
-    g.boxes[12] = (Box){.p = {10, 5}, .w_h = {1, 1}};
-    g.boxes[13] = (Box){.p = {10, 5}, .w_h = {1, 1}};
-    g.boxes[14] = (Box){.p = {10, 5}, .w_h = {1, 1}};
-    g.boxes[15] = (Box){.p = {10, 5}, .w_h = {1, 1}};
-    g.boxes[16] = (Box){.p = {10, 5}, .w_h = {1, 1}};
-    g.boxes[17] = (Box){.p = {10, 5}, .w_h = {1, 1}};
-    g.boxes[18] = (Box){.p = {10, 5}, .w_h = {1, 1}};
-    g.boxes[19] = (Box){.p = {10, 5}, .w_h = {1, 1}};
+    g.boxes[9] = (Box){.p = {1, 10}, .w_h = {8, 14}};
+    g.boxes[10] = (Box){.p = {10, 26}, .w_h = {6, 7}};
+    g.boxes[11] = (Box){.p = {3, 30}, .w_h = {4, 3}};
+    g.boxes[12] = (Box){.p = {2, 35}, .w_h = {3, 4}};
+    g.boxes[13] = (Box){.p = {3, 41}, .w_h = {10, 2}};
+    g.boxes[14] = (Box){.p = {15, 5}, .w_h = {10, 3}};
+    g.boxes[15] = (Box){.p = {35, 5}, .w_h = {2, 10}};
+    g.boxes[16] = (Box){.p = {55, 5}, .w_h = {4, 15}};
+    g.boxes[17] = (Box){.p = {35, 20}, .w_h = {3, 3}};
+    g.boxes[18] = (Box){.p = {14, 20}, .w_h = {6, 4}};
+    g.boxes[19] = (Box){.p = {7, 3}, .w_h = {1, 2}};
 
     g.time_for_move = 1.0;
 
     *new_g = g;
-}
-
-static void draw_fps(void)
-{
-    char myText[100];
-    int fps = GetFPS();
-    snprintf(myText, sizeof(myText), "FPS: %d", fps);
-    DrawText(myText, 10, 10, 20, LIGHTGRAY);
-}
-
-static void draw_food_left(Int food_left_to_win)
-{
-    char buffer[100];
-    snprintf(buffer, sizeof(buffer), "%d", food_left_to_win);
-    DrawText(buffer, 200, -40, 800, (Color){0, 0, 0, 40});
-}
-
-static bool time_move_logic(double *time_for_move)
-{
-    double time = GetTime();
-    if (time >= *time_for_move)
-    {
-        *time_for_move = time + 0.1;
-        return true;
-    }
-    return false;
 }
 
 // normal snake
@@ -581,7 +858,7 @@ static Level_Return game_state0_frame0(Game_State0 *g)
 {
     World_State0 *w = &g->w;
     // logic
-    player_set_direction(&g->player);
+    player_set_direction_from_input(&g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
@@ -618,7 +895,7 @@ static Level_Return game_state0_frame1(Game_State0 *g)
 {
     World_State0 *w = &g->w;
     // logic
-    player_set_direction(&g->player);
+    player_set_direction_from_input(&g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
@@ -647,12 +924,45 @@ static Level_Return game_state0_frame1(Game_State0 *g)
     return Level_Return_Continue;
 }
 
+// gigantic free fast
+static Level_Return game_state0_frame2(Game_State0 *g)
+{
+    World_State0 *w = &g->w;
+    // logic
+    player_set_direction_from_input(&g->player);
+
+    if (time_move_logic_general(&g->time_for_move, 0.02))
+    {
+        if (player_move(&g->player, w))
+        {
+            return Level_Return_Reset_Level;
+        }
+        food_player_collision_logic(&g->player, &g->food, w);
+    }
+
+    Int food_left_to_win = (DEV ? 8 : 8) - g->player.length;
+    if (food_left_to_win <= 0)
+        return Level_Return_Next_Level;
+
+    // drawing
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    draw_food_left(food_left_to_win);
+
+    player_draw_extra(&g->player, w);
+    food_draw(&g->food, w);
+
+    draw_fps();
+    EndDrawing();
+    return Level_Return_Continue;
+}
 // ever expanding snake
 static Level_Return game_state3_frame0(Game_State3 *g)
 {
     World_State0 *w = &g->w;
     // logic
-    player_set_direction(&g->player);
+    player_set_direction_from_input(&g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
@@ -750,7 +1060,7 @@ static Level_Return game_state1_frame0(Game_State1 *g)
         TraceLog(LOG_INFO, "%s", "also this works!");
     }
 
-    player_set_direction(&g->player);
+    player_set_direction_from_input(&g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
@@ -841,7 +1151,7 @@ static Level_Return game_state1_frame0(Game_State1 *g)
 static Level_Return game_state2_frame0(Game_State2 *g)
 {
     // logic
-    player_set_direction(&g->player);
+    player_set_direction_from_input(&g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
@@ -897,9 +1207,9 @@ static Level_Return game_state2_frame0(Game_State2 *g)
 static Level_Return game_state4_frame0(Game_State4 *g)
 {
     // logic
-    player_set_direction(&g->player);
+    player_set_direction_from_input(&g->player);
 
-    if (time_move_logic(&g->time_for_move))
+    if (time_move_logic_general(&g->time_for_move, 0.08))
     {
         if (player_move(&g->player, &g->w))
         {
@@ -914,7 +1224,7 @@ static Level_Return game_state4_frame0(Game_State4 *g)
 
         food_player_collision_logic(&g->player, &g->food, &g->w);
     }
-    Int food_left_to_win = (DEV ? 8 : 8) - g->player.length;
+    Int food_left_to_win = (DEV ? 16 : 16) - g->player.length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -956,7 +1266,7 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 10;
+        Int skip = 16;
         if (frame < skip)
             frame = skip;
     }
@@ -1024,10 +1334,52 @@ static Meta_Game meta_game_init(Int frame)
         mg.data = malloc(sizeof(Game_Cutscene0));
     }
     break;
-    case 10: { // ever growing
+    case 10: { // gigantic free fast
+        mg.frame_code = (Meta_Game_Frame_Code)game_state0_frame2;
+        mg.init_code = (Meta_Game_Init_Code)game_state0_init1;
+        mg.data = malloc(sizeof(Game_State0));
+    }
+    break;
+    case 11: {
+        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
+        mg.data = malloc(sizeof(Game_Cutscene0));
+    }
+    break;
+    case 12: { // ever growing
         mg.frame_code = (Meta_Game_Frame_Code)game_state4_frame0;
         mg.init_code = (Meta_Game_Init_Code)game_state4_init;
         mg.data = malloc(sizeof(Game_State4));
+    }
+    break;
+    case 13: {
+        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
+        mg.data = malloc(sizeof(Game_Cutscene0));
+    }
+    break;
+    case 14: { // You are food
+        mg.frame_code = (Meta_Game_Frame_Code)game_state_YouFood_frame;
+        mg.init_code = (Meta_Game_Init_Code)game_state_YouFood_init;
+        mg.data = malloc(sizeof(Game_State_YouFood));
+    }
+    break;
+    case 15: {
+        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
+        mg.data = malloc(sizeof(Game_Cutscene0));
+    }
+    break;
+    case 16: { // You are food
+        mg.frame_code = (Meta_Game_Frame_Code)game_state_Maze_frame;
+        mg.init_code = (Meta_Game_Init_Code)game_state_Maze_init;
+        mg.data = malloc(sizeof(Game_State_Maze));
+    }
+    break;
+    case 17: {
+        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
+        mg.data = malloc(sizeof(Game_Cutscene0));
     }
     break;
     default: {
