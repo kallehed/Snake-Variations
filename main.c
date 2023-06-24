@@ -19,7 +19,7 @@
 #define WINDOW_WIDTH 840
 #define WINDOW_HEIGHT (630)
 
-// #define HEIGHT 25
+// #define HEIGHT 27
 // #define WIDTH 30
 // #define BLOCK_PIXEL_LEN 25
 
@@ -446,6 +446,21 @@ static void game_state0_init1(Game_State0 *new_g)
     *new_g = g;
 }
 
+static void game_state0_init_GetSmall(Game_State0 *new_g)
+{
+    Game_State0 g;
+    g.w = world_state0_init(12);
+    g.player = (Player){.length = 12, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+	for (Int i = 1; i < PLAYER_MAX_POSITIONS; ++i) {
+		g.player.positions[i] = (Pos){.x = -1, .y = -1};
+	}
+    food_init_position(&g.food, &g.player, &g.w);
+    g.time_for_move = 1.0;
+
+    *new_g = g;
+}
+
 #define GAME_STATE1_TOTAL_EVIL_SNAKES 10
 typedef struct Game_State1
 {
@@ -593,14 +608,14 @@ static void snake_pather_draw(Snake_Pather *snake_pather, World_State0 *w)
 {
     for (Int i = 0; i < snake_pather->len; ++i)
     {
-        draw_block_at(snake_pather->positions[i], BLUE, w);
+        draw_block_at(snake_pather->positions[i], (i == 0) ? SKYBLUE : BLUE, w);
     }
 }
 
 static void snake_pather_move(Snake_Pather *snake_pather, World_State0 *w)
 {
     // get new way
-    printf("path move counter: %d\n", snake_pather->walk_this_way_counter);
+    // printf("path move counter: %d\n", snake_pather->walk_this_way_counter);
     if (0 >= snake_pather->walk_this_way_counter)
     {
         snake_pather->way_idx++;
@@ -628,12 +643,13 @@ static bool snake_pather_player_intersection(Snake_Pather *snake_pather, Player 
     {
         for (Int j = 0; j < snake_pather->len; ++j)
         {
-            if (pos_equal(snake_pather->positions[j], player_nth_position(player, i))) {
-				return true;
-			}
+            if (pos_equal(snake_pather->positions[j], player_nth_position(player, i)))
+            {
+                return true;
+            }
         }
     }
-	return false;
+    return false;
 }
 
 #define GAME_STATE_MAZE_FOODS 4
@@ -762,7 +778,7 @@ static Level_Return game_state_Maze_frame(Game_State_Maze *g)
 
         for (Int i = 0; i < GAME_STATE_MAZE_TOTAL_EVIL_SNAKE_PATHS; ++i)
             if (snake_pather_player_intersection(&g->evil_snake_paths[i], &g->player))
-				return Level_Return_Reset_Level;
+                return Level_Return_Reset_Level;
 
         for (Int i = 0; i < GAME_STATE_MAZE_FOODS; ++i)
         {
@@ -1021,6 +1037,42 @@ static Level_Return game_state0_frame1(Game_State0 *g)
     return Level_Return_Continue;
 }
 
+static Level_Return game_state0_frameGetSmall(Game_State0 *g)
+{
+    World_State0 *w = &g->w;
+    // logic
+    player_set_direction_from_input(&g->player);
+
+    if (time_move_logic(&g->time_for_move))
+    {
+        if (player_move(&g->player, w))
+        {
+            return Level_Return_Reset_Level;
+        }
+		if (pos_equal(player_nth_position(&g->player, 0), g->food.pos))
+		{
+			--g->player.length;
+			food_init_position(&g->food, &g->player, w);
+		}
+    }
+
+    Int food_left_to_win = g->player.length;
+    if (food_left_to_win <= 0)
+        return Level_Return_Next_Level;
+
+    // drawing
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    draw_food_left(food_left_to_win);
+
+    player_draw_extra(&g->player, w);
+    food_draw(&g->food, w);
+
+    draw_fps();
+    EndDrawing();
+    return Level_Return_Continue;
+}
 // gigantic free fast
 static Level_Return game_state0_frame2(Game_State0 *g)
 {
@@ -1116,12 +1168,12 @@ static Level_Return game_cutscene0_frame0(Game_Cutscene0 *g)
 {
     double time_passed = GetTime() - g->start_time;
 
-    if (time_passed > 2.f)
+    if (time_passed > 2.5f)
         return Level_Return_Next_Level;
 
     BeginDrawing();
     ClearBackground(RAYWHITE);
-    DrawRectangle(time_passed * 500, 0, 20, 1000, LIME);
+    DrawRectangle(time_passed * 360, 0, 20, 1000, LIME);
     {
         DrawText("0", 200, -40, 800, (Color){0, 0, 0, 60});
     }
@@ -1363,12 +1415,18 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 16;
+        Int skip = 18;
         if (frame < skip)
             frame = skip;
     }
     mg.frame = frame;
 
+    if (frame % 2 == 1)
+    {
+        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
+        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
+        mg.data = malloc(sizeof(Game_Cutscene0));
+    }
     switch (frame)
     {
     case 0: {
@@ -1377,22 +1435,10 @@ static Meta_Game meta_game_init(Int frame)
         mg.data = malloc(sizeof(Game_State0));
     }
     break;
-    case 1: {
-        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
-        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
-        mg.data = malloc(sizeof(Game_Cutscene0));
-    }
-    break;
     case 2: {
         mg.frame_code = (Meta_Game_Frame_Code)game_state1_frame0;
         mg.init_code = (Meta_Game_Init_Code)game_state1_init;
         mg.data = malloc(sizeof(Game_State1));
-    }
-    break;
-    case 3: {
-        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame1;
-        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
-        mg.data = malloc(sizeof(Game_Cutscene0));
     }
     break;
     case 4: {
@@ -1401,22 +1447,10 @@ static Meta_Game meta_game_init(Int frame)
         mg.data = malloc(sizeof(Game_State0));
     }
     break;
-    case 5: {
-        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
-        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
-        mg.data = malloc(sizeof(Game_Cutscene0));
-    }
-    break;
     case 6: { // boxes
         mg.frame_code = (Meta_Game_Frame_Code)game_state2_frame0;
         mg.init_code = (Meta_Game_Init_Code)game_state2_init;
         mg.data = malloc(sizeof(Game_State2));
-    }
-    break;
-    case 7: {
-        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
-        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
-        mg.data = malloc(sizeof(Game_Cutscene0));
     }
     break;
     case 8: { // ever growing
@@ -1425,22 +1459,10 @@ static Meta_Game meta_game_init(Int frame)
         mg.data = malloc(sizeof(Game_State3));
     }
     break;
-    case 9: {
-        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
-        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
-        mg.data = malloc(sizeof(Game_Cutscene0));
-    }
-    break;
     case 10: { // gigantic free fast
         mg.frame_code = (Meta_Game_Frame_Code)game_state0_frame2;
         mg.init_code = (Meta_Game_Init_Code)game_state0_init1;
         mg.data = malloc(sizeof(Game_State0));
-    }
-    break;
-    case 11: {
-        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
-        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
-        mg.data = malloc(sizeof(Game_Cutscene0));
     }
     break;
     case 12: { // ever growing
@@ -1449,22 +1471,10 @@ static Meta_Game meta_game_init(Int frame)
         mg.data = malloc(sizeof(Game_State4));
     }
     break;
-    case 13: {
-        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
-        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
-        mg.data = malloc(sizeof(Game_Cutscene0));
-    }
-    break;
     case 14: { // You are food
         mg.frame_code = (Meta_Game_Frame_Code)game_state_YouFood_frame;
         mg.init_code = (Meta_Game_Init_Code)game_state_YouFood_init;
         mg.data = malloc(sizeof(Game_State_YouFood));
-    }
-    break;
-    case 15: {
-        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
-        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
-        mg.data = malloc(sizeof(Game_Cutscene0));
     }
     break;
     case 16: { // You are food
@@ -1473,10 +1483,10 @@ static Meta_Game meta_game_init(Int frame)
         mg.data = malloc(sizeof(Game_State_Maze));
     }
     break;
-    case 17: {
-        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
-        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
-        mg.data = malloc(sizeof(Game_Cutscene0));
+    case 18: { // GetSmall
+        mg.frame_code = (Meta_Game_Frame_Code)game_state0_frameGetSmall;
+        mg.init_code = (Meta_Game_Init_Code)game_state0_init_GetSmall;
+        mg.data = malloc(sizeof(Game_State0));
     }
     break;
     default: {
@@ -1484,6 +1494,7 @@ static Meta_Game meta_game_init(Int frame)
     }
     break;
     }
+    // INIT
     mg.init_code(mg.data);
 
     return mg;
