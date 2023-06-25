@@ -78,6 +78,17 @@ void player_set_direction_from_input(Player *player)
     player_set_direction_correctly(player, get_dir_from_input());
 }
 
+bool player_position_in_player(const Player *player, const Pos pos)
+{
+    for (Int i = 0; i < player->length; ++i)
+    {
+        if (pos_equal(player_nth_position(player, i), pos))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 // returns true if player dies
 bool player_move(Player *player, World_State0 *w)
