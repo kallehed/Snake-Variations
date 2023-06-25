@@ -1,0 +1,59 @@
+#include "game_state3.h"
+// EverGrowing
+void game_state3_init0(Game_State3 *new_g)
+{
+    Game_State3 g;
+    g.w = world_state0_init(24);
+    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player_points = 0;
+    food_init_position(&g.food, &g.player, &g.w);
+    g.time_for_move = 1.0;
+
+    *new_g = g;
+}
+
+// ever expanding snake
+Level_Return game_state3_frame0(Game_State3 *g)
+{
+    World_State0 *w = &g->w;
+    // logic
+    player_set_direction_from_input(&g->player);
+
+    if (time_move_logic(&g->time_for_move))
+    {
+        Int player_len = g->player.length;
+
+        g->player.length++;
+        if (player_move(&g->player, w))
+        {
+            return Level_Return_Reset_Level;
+        }
+        g->player.length--;
+        if (pos_equal(player_nth_position(&g->player, 0), g->food.pos))
+        {
+            food_init_position(&g->food, &g->player, w);
+            g->player_points++;
+        }
+        g->player.length = player_len + 1;
+
+        // printf("player len: %d\n", g->player.length);
+    }
+
+    Int points_left = (DEV ? 6 : 6) - g->player_points;
+    if (points_left == 0)
+        return Level_Return_Next_Level;
+
+    // drawing
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    draw_food_left(points_left);
+
+    player_draw_extra(&g->player, w);
+    food_draw(&g->food, w);
+
+    draw_fps();
+    EndDrawing();
+    return Level_Return_Continue;
+}

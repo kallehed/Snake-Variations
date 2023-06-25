@@ -12,7 +12,7 @@ if (EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".html") # This line is used to set your executable to build with the emscripten html template so that you can directly open it.
 endif ()
 
-add_executable(${PROJECT_NAME} main.c)
+add_executable(${PROJECT_NAME} main.c box_general.h box_general.c game_cutscenes.h game_cutscenes.c game_state0.h game_state0.c game_state1.h game_state1.c game_state2.h game_state2.c game_state3.h game_state3.c game_state4.h game_state4.c game_state_maze.h game_state_maze.c game_state_YouFood.h game_state_YouFood.c player_related.h player_related.c very_general.h very_general.c game_state_StaticPlatformer.h game_state_StaticPlatformer.c)
 
 if(MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
