@@ -3,16 +3,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "very_general.h"
+#include "game_cutscenes.h"
 #include "game_state0.h"
 #include "game_state1.h"
 #include "game_state2.h"
 #include "game_state3.h"
 #include "game_state4.h"
+#include "game_state_Seeker.h"
+#include "game_state_StaticPlatformer.h"
 #include "game_state_YouFood.h"
 #include "game_state_maze.h"
-#include "game_cutscenes.h"
-#include "game_state_StaticPlatformer.h"
+#include "very_general.h"
 
 // #define PLATFORM_WEB
 
@@ -114,10 +115,16 @@ static Meta_Game meta_game_init(Int frame)
             mg.data = malloc(sizeof(Game_State0));
         }
         break;
-        case 10: {
+        case 10: { // static platformer
             mg.frame_code = (Meta_Game_Frame_Code)game_state_frame_StaticPlatformer;
             mg.init_code = (Meta_Game_Init_Code)game_state_init_StaticPlatformer;
             mg.data = malloc(sizeof(Game_State_StaticPlatformer));
+        }
+        break;
+        case 11: {
+            mg.frame_code = (Meta_Game_Frame_Code)game_state_frame_Seeker;
+            mg.init_code = (Meta_Game_Init_Code)game_state_init_Seeker;
+            mg.data = malloc(sizeof(Game_State_Seeker));
         }
         break;
         default: {
@@ -137,9 +144,10 @@ static void meta_game_frame(Meta_Game *mg)
     switch (mg->frame_code(mg->data))
     {
     case Level_Return_Continue: {
-			if (IsKeyPressed(KEY_R)) {
-				goto GOTO_RESET_LEVEL;
-			}
+        if (IsKeyPressed(KEY_R))
+        {
+            goto GOTO_RESET_LEVEL;
+        }
     }
     break;
     case Level_Return_Next_Level: {
@@ -149,7 +157,7 @@ static void meta_game_frame(Meta_Game *mg)
     }
     break;
     case Level_Return_Reset_Level: {
-		GOTO_RESET_LEVEL:
+    GOTO_RESET_LEVEL:
         mg->init_code(mg->data);
     }
     break;
