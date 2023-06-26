@@ -4,3 +4,4 @@ webbuild
 relbuild
 .cache
 ninjabuild
+.vscode
