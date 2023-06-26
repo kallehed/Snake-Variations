@@ -4,7 +4,7 @@
 
 #define SPLATFORMER_MAP_WIDTH 30
 #define SPLATFORMER_MAP_HEIGHT 22
-#define SPLATFORMER_MAX_FOODS 5
+#define SPLATFORMER_MAX_FOODS 13
 
 typedef int8_t SPlatformer_Block;
 #define SPlatformer_Block_Air 0

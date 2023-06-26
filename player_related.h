@@ -31,3 +31,4 @@ void food_set_random_position(Food *food, const World_State0 *w);
 void food_init_position(Food *food, const Player *player, const World_State0 *w);
 
 void food_player_collision_logic(Player *player, Food *food, const World_State0 *w);
+void food_player_collision_logic_food_disappear(Player *player, Food *food);

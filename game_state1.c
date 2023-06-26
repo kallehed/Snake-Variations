@@ -68,8 +68,12 @@ Level_Return game_state1_frame0(Game_State1 *g)
         }
 
         for (Int i = 0; i < g->evil_snake_index; ++i)
-            if (evil_snake_player_collision_logic(g->evil_snakes, &g->player))
+        {
+            if (evil_snake_player_collision_logic(&g->evil_snakes[i], &g->player))
+            {
                 return Level_Return_Reset_Level;
+            }
+        }
 
         for (Int i = 0; i < g->evil_snake_index; ++i)
             evil_snake_move(&g->evil_snakes[i], w);

@@ -38,7 +38,7 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 20;
+        Int skip = 22;
         if (frame < skip)
             frame = skip;
     }
@@ -137,6 +137,9 @@ static void meta_game_frame(Meta_Game *mg)
     switch (mg->frame_code(mg->data))
     {
     case Level_Return_Continue: {
+			if (IsKeyPressed(KEY_R)) {
+				goto GOTO_RESET_LEVEL;
+			}
     }
     break;
     case Level_Return_Next_Level: {
@@ -146,6 +149,7 @@ static void meta_game_frame(Meta_Game *mg)
     }
     break;
     case Level_Return_Reset_Level: {
+		GOTO_RESET_LEVEL:
         mg->init_code(mg->data);
     }
     break;

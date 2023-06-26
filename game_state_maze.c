@@ -117,11 +117,7 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
 
         for (Int i = 0; i < GAME_STATE_MAZE_FOODS; ++i)
         {
-            if (pos_equal(player_nth_position(&g->player, 0), g->foods[i].pos))
-            {
-                ++g->player.length;
-                g->foods[i].pos = (Pos){.x = -1, .y = -1};
-            }
+			food_player_collision_logic_food_disappear(&g->player,&g->foods[i]);
         }
     }
 

@@ -11,30 +11,30 @@ void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g)
                         .length = 2,
                         .next_direction = Dir_Right,
                         .current_direction = Dir_Nothing,
-                        .positions = {{.x = 3, .y = 3}, {.x = 2, .y = 20}}};
+                        .positions = {{.x = 1, .y = 20}, {.x = 2, .y = 20}}};
     g.time_for_move = 1.0;
     g.turn = false;
 
-    const char *const map = "------------------------------"
-                            "------------------------------"
-                            "------------------------------"
-                            "------------------------------"
-                            "------------------------------"
-                            "------------------------------"
-                            "------------------------------"
-                            "------------------------------"
-                            "------------------------------"
-                            "------------------------------"
-                            "------------------------------"
-                            "-------------xxxxxx-----------"
-                            "--------x-x-x-----------------"
-                            "------------------------------"
-                            "------------------------------"
-                            "------xx----------------------"
-                            "F----xxxxx--------------------"
-                            "-----xxxxxxx------------------"
-                            "-------------------------F----"
-                            "------------------------------"
+    const char *const map = "-----------------F-----------x"
+                            "----------------FF-----------x"
+                            "---------------F-F-----------x"
+                            "--------------F--F-----------x"
+                            "-------------F---F-----------x"
+                            "-----------------x-----------x"
+                            "-----------------------------x"
+                            "-----------------------------x"
+                            "F----------------------------x"
+                            "------------------x----------x"
+                            "-----------------xx----------x"
+                            "--------------xxxxxxx--------x"
+                            "--------x----x---------------x"
+                            "---------------------------F-x"
+                            "-----------------------------x"
+                            "------xx--------------------xx"
+                            "F----xxxxx-------------------x"
+                            "-----xxxxxxx---------------x-x"
+                            "-------------------------F---x"
+                            "-------------------x--------xx"
                             "------------xxxxxxxxxxxxxxxxxx"
                             "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
@@ -107,11 +107,27 @@ Level_Return game_state_frame_StaticPlatformer(Game_State_StaticPlatformer *g)
 
         if (g->turn)
         {
-            // fall down one step
             g->player.next_direction = Dir_Down;
         }
         else
         {
+            // Make sure you can only go up if all your parts are bound to something beneath them
+            if (g->player.next_direction == Dir_Up)
+            {
+                for (Int i = 0; i + 1 < g->player.length; ++i)
+                {
+                    Pos pos = player_nth_position(&g->player, i);
+                    Pos under_pos = move_inside_grid(pos, Dir_Down, w);
+                    if (g->map[under_pos.y][under_pos.x] == SPlatformer_Block_Solid)
+                    // !player_position_in_player(&g->player, under_pos))
+                    {
+                        // fall down one step
+                        goto GOTO_ALLOWED;
+                    }
+                }
+                g->player.next_direction = Dir_Nothing;
+            GOTO_ALLOWED:;
+            }
         }
         Pos head = player_nth_position(&g->player, 0);
         Pos next_pos = move_inside_grid(head, g->player.next_direction, w);
@@ -119,29 +135,22 @@ Level_Return game_state_frame_StaticPlatformer(Game_State_StaticPlatformer *g)
         bool next_is_snake = player_position_in_player(&g->player, next_pos);
         if (!next_is_solid && !next_is_snake)
         {
-            // g->player.next_direction = Dir_Down;
             player_move(&g->player, w);
-            // g->player.current_direction = Dir_Up;
         }
 
         if (g->turn)
         {
-
             g->player.next_direction = saved_dir;
         }
 
         // g->player.positions[g->player.idx_pos].y++;
         for (Int i = 0; i < SPLATFORMER_MAX_FOODS; ++i)
         {
-            if (pos_equal(player_nth_position(&g->player, 0), g->foods[i].pos))
-            {
-                ++g->player.length;
-                g->foods[i].pos = (Pos){.x = -1, .y = -1};
-            }
+			food_player_collision_logic_food_disappear(&g->player,&g->foods[i]);
         }
     }
 
-    Int food_left_to_win = (DEV ? 13 : 13) - g->player.length;
+    Int food_left_to_win = SPLATFORMER_MAX_FOODS + 2 - g->player.length;
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
 
@@ -157,6 +166,10 @@ Level_Return game_state_frame_StaticPlatformer(Game_State_StaticPlatformer *g)
         food_draw(&g->foods[i], w);
 
     draw_fps();
+    {
+        const char* myText = "press R to reset :)";
+        DrawText(myText, 150, 10, 20, PINK);
+    }
     EndDrawing();
     return Level_Return_Continue;
 }

@@ -160,3 +160,12 @@ void food_player_collision_logic(Player *player, Food *food, const World_State0 
         food_init_position(food, player, w);
     }
 }
+
+void food_player_collision_logic_food_disappear(Player *player, Food *food)
+{
+    if (pos_equal(player_nth_position(player, 0), food->pos))
+    {
+        ++player->length;
+        food->pos = (Pos){.x = -1, .y = -1};
+    }
+}
