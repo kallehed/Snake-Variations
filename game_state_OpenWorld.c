@@ -1,6 +1,7 @@
 #include "game_state_OpenWorld.h"
 #include "player_related.h"
 #include "raylib.h"
+#include "very_general.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -43,7 +44,7 @@ Level_Return game_state_frame_OpenWorld(Game_State_OpenWorld *g)
 
     // drawing
     BeginDrawing();
-    { 
+    {
         Pos p_pos = player_nth_position(&g->player, 0);
         const float max_x = (float)w->block_pixel_len * (float)w->width - (float)WINDOW_WIDTH;
         const float max_y = (float)w->block_pixel_len * (float)w->height - (float)WINDOW_HEIGHT;
@@ -57,13 +58,7 @@ Level_Return game_state_frame_OpenWorld(Game_State_OpenWorld *g)
     }
 
     ClearBackground(RAYWHITE);
-    for (Int i = 0; i < 10; ++i)// TODO: Make this a general function that takes in the true boundary of the world
-    {
-        for (Int j = 0; j < 10; ++j)
-        {
-            draw_food_left_general(food_left_to_win, 200 + j * WINDOW_WIDTH, -40 + i * WINDOW_HEIGHT);
-        }
-    }
+    draw_food_left_in_2D_space(food_left_to_win, w->width * w->block_pixel_len, w->height * w->block_pixel_len);
 
     player_draw(&g->player, w);
     food_draw(&g->food, w);
@@ -71,5 +66,6 @@ Level_Return game_state_frame_OpenWorld(Game_State_OpenWorld *g)
     EndMode2D();
     draw_fps();
     EndDrawing();
+
     return Level_Return_Continue;
 }

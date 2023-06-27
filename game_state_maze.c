@@ -112,12 +112,16 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
             snake_pather_move(&g->evil_snake_paths[i], w);
 
         for (Int i = 0; i < GAME_STATE_MAZE_TOTAL_EVIL_SNAKE_PATHS; ++i)
+        {
             if (snake_pather_player_intersection(&g->evil_snake_paths[i], &g->player))
+            {
                 return Level_Return_Reset_Level;
+            }
+        }
 
         for (Int i = 0; i < GAME_STATE_MAZE_FOODS; ++i)
         {
-			food_player_collision_logic_food_disappear(&g->player,&g->foods[i]);
+            food_player_collision_logic_food_disappear(&g->player, &g->foods[i]);
         }
     }
 
@@ -147,7 +151,6 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
     return Level_Return_Continue;
 }
 
-
 void maze_draw(const Maze_Cell maze[], const Int maze_width, const Int maze_height, const World_State0 *w)
 {
     for (Int i = 0; i < maze_height; ++i)
@@ -172,13 +175,9 @@ void maze_draw(const Maze_Cell maze[], const Int maze_width, const Int maze_heig
     }
 }
 
-
 void snake_pather_draw(Snake_Pather *snake_pather, World_State0 *w)
 {
-    for (Int i = 0; i < snake_pather->len; ++i)
-    {
-        draw_block_at(snake_pather->positions[i], (i == 0) ? SKYBLUE : BLUE, w);
-    }
+    draw_snakelike(snake_pather->positions, snake_pather->len, SKYBLUE, BLUE, w);
 }
 
 void snake_pather_move(Snake_Pather *snake_pather, World_State0 *w)
@@ -208,15 +207,5 @@ void snake_pather_move(Snake_Pather *snake_pather, World_State0 *w)
 
 bool snake_pather_player_intersection(Snake_Pather *snake_pather, Player *player)
 {
-    for (Int i = 0; i < player->length; ++i)
-    {
-        for (Int j = 0; j < snake_pather->len; ++j)
-        {
-            if (pos_equal(snake_pather->positions[j], player_nth_position(player, i)))
-            {
-                return true;
-            }
-        }
-    }
-    return false;
+    return player_intersection_points(player, snake_pather->positions, snake_pather->len);
 }

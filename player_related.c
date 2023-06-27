@@ -80,24 +80,20 @@ void player_set_direction_from_input(Player *player)
 
 void player_set_direction_from_input_spinny(Player *player)
 {
-	switch (get_dir_from_input()) {
-		case Dir_Right:
-			{
-				player_set_direction_correctly(player, dir_turn_clockwise(player->current_direction));
-
-		}
-		break;
-		case Dir_Left:
-			{
-				player_set_direction_correctly(player, dir_turn_counter_clockwise(player->current_direction));
-
-		}
-		break;
-		default: {
-
-		}
-		break;
-	}
+    switch (get_dir_from_input())
+    {
+    case Dir_Right: {
+        player_set_direction_correctly(player, dir_turn_clockwise(player->current_direction));
+    }
+    break;
+    case Dir_Left: {
+        player_set_direction_correctly(player, dir_turn_counter_clockwise(player->current_direction));
+    }
+    break;
+    default: {
+    }
+    break;
+    }
 }
 
 bool player_position_in_player(const Player *player, const Pos pos)
@@ -145,12 +141,23 @@ bool player_move(Player *player, World_State0 *w)
     return false;
 }
 
+
 bool player_intersection_point(const Player *player, const Pos point)
 {
     for (Int i = 0; i < player->length; ++i)
     {
         Pos p_pos = player_nth_position(player, i);
         if (pos_equal(p_pos, point))
+            return true;
+    }
+    return false;
+}
+
+bool player_intersection_points(const Player *player, const Pos *positions, const Int length)
+{
+    for (Int i = 0; i < length; ++i)
+    {
+        if (player_intersection_point(player, positions[i]))
             return true;
     }
     return false;

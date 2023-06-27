@@ -40,7 +40,7 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 28;
+        Int skip = 16;
         if (frame < skip)
             frame = skip;
     }

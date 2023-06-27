@@ -55,13 +55,17 @@ void draw_blocks_at(Pos pos, Pos w_h, Color color, const World_State0 *w);
 // draw warping, assuming it can not have negative position(ex: boxes) and will only overflow at width and height of
 // world
 void draw_blocks_warp(Pos pos, Pos w_h, Color color, const World_State0 *w);
+void draw_snakelike(Pos positions[], Int length, Color head, Color body, const World_State0 *w);
 
 World_State0 world_state0_init(Int width);
 // For when you want a scrollable world
 World_State0 world_state0_init_general(Int width, Int height, Int block_pixel_len);
 
+// In pixels
+void draw_food_left_in_2D_space(Int food_left_to_win, Int width, Int height);
 void draw_food_left_general(Int food_left_to_win, int x, int y);
 void draw_food_left(Int food_left_to_win);
+
 
 void draw_fps(void);
 bool time_move_logic_general(double *time_for_move, const double wait_time);

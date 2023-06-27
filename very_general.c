@@ -141,6 +141,14 @@ void draw_blocks_warp(Pos pos, Pos w_h, Color color, const World_State0 *w)
     }
 }
 
+void draw_snakelike(Pos positions[], Int length, Color head, Color body, const World_State0 *w)
+{
+    for (Int i = 0; i < length; ++i)
+    {
+        draw_block_at(positions[i], (i == 0) ? head : body, w);
+    }
+}
+
 World_State0 world_state0_init(Int width)
 {
     World_State0 w = {.width = width};
@@ -155,12 +163,28 @@ World_State0 world_state0_init_general(Int width, Int height, Int block_pixel_le
     World_State0 w = {.width = width, .height = height, .block_pixel_len = block_pixel_len};
     return w;
 }
+
+// In pixels
+void draw_food_left_in_2D_space(Int food_left_to_win, Int width, Int height)
+{
+    char buffer[100];
+    snprintf(buffer, sizeof(buffer), "%d", food_left_to_win);
+    for (Int i = 0; i < height; i += WINDOW_HEIGHT * 1.25)
+    {
+        for (Int j = 0; j < width; j += WINDOW_WIDTH)
+        {
+            DrawText(buffer, 200 + j, -40 + i, 800, (Color){0, 0, 0, 40});
+        }
+    }
+}
+
 void draw_food_left_general(Int food_left_to_win, int x, int y)
 {
     char buffer[100];
     snprintf(buffer, sizeof(buffer), "%d", food_left_to_win);
     DrawText(buffer, x, y, 800, (Color){0, 0, 0, 40});
 }
+
 void draw_food_left(Int food_left_to_win)
 {
     draw_food_left_general(food_left_to_win, 200, -40);
