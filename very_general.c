@@ -1,6 +1,6 @@
 #include "very_general.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 bool rect_intersection(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2)
 {
@@ -37,6 +37,40 @@ Pos dir_to_pos(Dir d)
         return (Pos){0, 0};
     }
     abort();
+}
+
+Dir dir_turn_clockwise(Dir d)
+{
+    switch (d)
+    {
+    case Dir_Right:
+        return Dir_Down;
+    case Dir_Down:
+        return Dir_Left;
+    case Dir_Left:
+        return Dir_Up;
+    case Dir_Up:
+        return Dir_Right;
+    case Dir_Nothing:
+        return Dir_Nothing;
+    }
+}
+
+Dir dir_turn_counter_clockwise(Dir d)
+{
+    switch (d)
+    {
+    case Dir_Right:
+        return Dir_Up;
+    case Dir_Down:
+        return Dir_Right;
+    case Dir_Left:
+        return Dir_Down;
+    case Dir_Up:
+        return Dir_Left;
+    case Dir_Nothing:
+        return Dir_Nothing;
+    }
 }
 
 bool pos_equal(Pos p, Pos q)
@@ -114,11 +148,22 @@ World_State0 world_state0_init(Int width)
     w.height = WINDOW_HEIGHT / w.block_pixel_len;
     return w;
 }
-void draw_food_left(Int food_left_to_win)
+
+// For when you want a scrollable world
+World_State0 world_state0_init_general(Int width, Int height, Int block_pixel_len)
+{
+    World_State0 w = {.width = width, .height = height, .block_pixel_len = block_pixel_len};
+    return w;
+}
+void draw_food_left_general(Int food_left_to_win, int x, int y)
 {
     char buffer[100];
     snprintf(buffer, sizeof(buffer), "%d", food_left_to_win);
-    DrawText(buffer, 200, -40, 800, (Color){0, 0, 0, 40});
+    DrawText(buffer, x, y, 800, (Color){0, 0, 0, 40});
+}
+void draw_food_left(Int food_left_to_win)
+{
+    draw_food_left_general(food_left_to_win, 200, -40);
 }
 void draw_fps(void)
 {

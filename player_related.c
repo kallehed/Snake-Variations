@@ -78,6 +78,28 @@ void player_set_direction_from_input(Player *player)
     player_set_direction_correctly(player, get_dir_from_input());
 }
 
+void player_set_direction_from_input_spinny(Player *player)
+{
+	switch (get_dir_from_input()) {
+		case Dir_Right:
+			{
+				player_set_direction_correctly(player, dir_turn_clockwise(player->current_direction));
+
+		}
+		break;
+		case Dir_Left:
+			{
+				player_set_direction_correctly(player, dir_turn_counter_clockwise(player->current_direction));
+
+		}
+		break;
+		default: {
+
+		}
+		break;
+	}
+}
+
 bool player_position_in_player(const Player *player, const Pos pos)
 {
     for (Int i = 0; i < player->length; ++i)

@@ -180,3 +180,36 @@ Level_Return game_state0_frame2(Game_State0 *g)
     EndDrawing();
     return Level_Return_Continue;
 }
+// Spinny
+Level_Return game_state0_frame_Spinny(Game_State0 *g)
+{
+    World_State0 *w = &g->w;
+    // logic
+    player_set_direction_from_input_spinny(&g->player);
+
+    if (time_move_logic(&g->time_for_move))
+    {
+        if (player_move(&g->player, w))
+        {
+            return Level_Return_Reset_Level;
+        }
+        food_player_collision_logic(&g->player, &g->food, w);
+    }
+
+    Int food_left_to_win = (DEV ? 10 : 10) - g->player.length;
+    if (food_left_to_win <= 0)
+        return Level_Return_Next_Level;
+
+    // drawing
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    draw_food_left(food_left_to_win);
+
+    player_draw_extra(&g->player, w);
+    food_draw(&g->food, w);
+
+    draw_fps();
+    EndDrawing();
+    return Level_Return_Continue;
+}

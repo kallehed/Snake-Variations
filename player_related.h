@@ -22,6 +22,8 @@ void player_draw(const Player *player, const World_State0 *w);
 void player_draw_extra(const Player *player, const World_State0 *w);
 void player_set_direction_correctly(Player *player, Dir dir);
 void player_set_direction_from_input(Player *player);
+// turns relative to previous direction
+void player_set_direction_from_input_spinny(Player *player);
 bool player_position_in_player(const Player *player, const Pos pos);
 bool player_move(Player *player, World_State0 *w);
 bool player_intersection_point(const Player *player, const Pos point);

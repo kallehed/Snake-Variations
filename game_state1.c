@@ -1,17 +1,5 @@
 #include "game_state1.h"
-
-void game_state1_init(Game_State1 *new_g)
-{
-    Game_State1 g;
-    g.w = world_state0_init(28);
-    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
-    food_init_position(&g.food, &g.player, &g.w);
-    g.time_for_move = 1.0;
-    g.evil_snake_index = 0;
-
-    *new_g = g;
-}
+#include "very_general.h"
 
 void evil_snake_move(Evil_Snake *snake, World_State0 *w)
 {
@@ -44,6 +32,35 @@ bool evil_snake_player_collision_logic(const Evil_Snake *snake, const Player *pl
         }
     }
     return false;
+}
+
+void game_state1_init(Game_State1 *new_g)
+{
+    Game_State1 g;
+    g.w = world_state0_init(28);
+    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    food_init_position(&g.food, &g.player, &g.w);
+    g.time_for_move = 1.0;
+    g.evil_snake_index = 0;
+
+    *new_g = g;
+}
+
+void game_state1_init_UnSync(Game_State1_UnSync *new_g)
+{
+    Game_State1_UnSync gu;
+    Game_State1 g;
+    g.w = world_state0_init(28);
+    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    food_init_position(&g.food, &g.player, &g.w);
+    g.time_for_move = 1.0;
+    g.evil_snake_index = 0;
+
+    gu.g1 = g;
+
+    *new_g = gu;
 }
 
 Level_Return game_state1_frame0(Game_State1 *g)
@@ -88,6 +105,118 @@ Level_Return game_state1_frame0(Game_State1 *g)
                 // spawn
                 g->evil_snakes[g->evil_snake_index] = (Evil_Snake){.length = 2, Dir_Right, {{0, 5}, {1, 5}}};
                 Evil_Snake *snake = &g->evil_snakes[g->evil_snake_index];
+
+                Pos start;
+                Pos tail_dir;
+                Dir dir;
+
+                switch (GetRandomValue(1, 4))
+                {
+                case 1: // from left
+                    start = (Pos){.x = -1, .y = GetRandomValue(0, w->height - 1)};
+                    tail_dir = (Pos){-1, 0};
+                    dir = Dir_Right;
+                    break;
+                case 2: // from right
+                    start = (Pos){.x = w->width, .y = GetRandomValue(0, w->height - 1)};
+                    tail_dir = (Pos){1, 0};
+                    dir = Dir_Left;
+                    break;
+                case 3: // from top
+                    start = (Pos){.x = GetRandomValue(0, w->width - 1), .y = -1};
+                    tail_dir = (Pos){0, -1};
+                    dir = Dir_Down;
+                    break;
+                case 4: // from bottom
+                    start = (Pos){.x = GetRandomValue(0, w->width - 1), .y = w->height};
+                    tail_dir = (Pos){0, 1};
+                    dir = Dir_Up;
+                    break;
+                }
+                snake->length = GetRandomValue(2, EVIL_SNAKE_MAX_LENGTH);
+                for (Int i = 0; i < snake->length; ++i)
+                {
+                    snake->positions[i] = (Pos){start.x + tail_dir.x * i, start.y + tail_dir.y * i};
+                }
+                snake->direction = dir;
+                ++g->evil_snake_index;
+            }
+        }
+    }
+    Int food_left_to_win = (DEV ? 8 : 8) - g->player.length;
+
+    if (food_left_to_win <= 0)
+        return Level_Return_Next_Level;
+
+    // drawing
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+
+    draw_food_left(food_left_to_win);
+
+    player_draw(&g->player, w);
+    for (Int i = 0; i < g->evil_snake_index; ++i)
+        evil_snake_draw(&g->evil_snakes[i], w);
+    food_draw(&g->food, w);
+
+    draw_fps();
+    EndDrawing();
+    return 0;
+}
+
+Level_Return game_state1_frame_UnSync(Game_State1_UnSync *gu)
+{
+    Game_State1 *g = &gu->g1;
+    World_State0 *w = &g->w;
+    // logic
+    if (IsKeyPressed(KEY_A))
+    {
+        TraceLog(LOG_INFO, "%s", "also this works!");
+    }
+
+    player_set_direction_from_input(&g->player);
+
+    for (Int i = 0; i < g->evil_snake_index; ++i)
+    {
+        if (time_move_logic_general(&gu->evil_snake_time_for_moves[i], gu->evil_snake_intervals[i]))
+        {
+            if (evil_snake_player_collision_logic(&g->evil_snakes[i], &g->player))
+            {
+                return Level_Return_Reset_Level;
+            }
+            evil_snake_move(&g->evil_snakes[i], w);
+        }
+    }
+
+    if (time_move_logic(&g->time_for_move))
+    {
+        if (player_move(&g->player, w))
+        {
+            // player died
+            TraceLog(LOG_INFO, "%s", "YOU DIED!");
+
+            return Level_Return_Reset_Level;
+        }
+
+        // for (Int i = 0; i < g->evil_snake_index; ++i)
+        // {
+        // }
+
+        // for (Int i = 0; i < g->evil_snake_index; ++i)
+            // evil_snake_move(&g->evil_snakes[i], w);
+
+        food_player_collision_logic(&g->player, &g->food, w);
+
+        // spawn evil snakes
+        if (g->evil_snake_index < g->player.length - 1)
+        {
+            if (g->evil_snake_index < GAME_STATE1_TOTAL_EVIL_SNAKES)
+            {
+                // spawn
+                g->evil_snakes[g->evil_snake_index] = (Evil_Snake){.length = 2, Dir_Right, {{0, 5}, {1, 5}}};
+                Evil_Snake *snake = &g->evil_snakes[g->evil_snake_index];
+                gu->evil_snake_intervals[g->evil_snake_index] = GetRandomValue(5, 20) / 100.0;
+                gu->evil_snake_time_for_moves[g->evil_snake_index] = 0.0;
 
                 Pos start;
                 Pos tail_dir;
