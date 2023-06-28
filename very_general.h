@@ -41,6 +41,21 @@ typedef enum Level_Return
     Level_Return_Reset_Level,
 } Level_Return;
 
+typedef Level_Return (*Meta_Game_Frame_Code)(void *);
+typedef void (*Meta_Game_Init_Code)(void *);
+
+typedef struct 
+{
+    Meta_Game_Frame_Code frame_code;
+    Meta_Game_Init_Code init_code;
+
+    void *data;
+    Int frame;
+} Meta_Game;
+
+// for setting function pointers to init code, frame code, and mallocing the data
+typedef void (*Meta_Game_Set_Level_Code)(Meta_Game *);
+
 bool rect_intersection(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2);
 bool rect_intersection_wrap(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2, const World_State0 *w);
 Pos dir_to_pos(Dir d);
@@ -65,7 +80,6 @@ World_State0 world_state0_init_general(Int width, Int height, Int block_pixel_le
 void draw_food_left_in_2D_space(Int food_left_to_win, Int width, Int height);
 void draw_food_left_general(Int food_left_to_win, int x, int y);
 void draw_food_left(Int food_left_to_win);
-
 
 void draw_fps(void);
 bool time_move_logic_general(double *time_for_move, const double wait_time);

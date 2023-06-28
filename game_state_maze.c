@@ -1,12 +1,21 @@
 #include "game_state_maze.h"
 #include <stdio.h>
+#include <stdlib.h>
+
+void metagame_set_level_Maze(Meta_Game *mg)
+{
+    mg->frame_code = (Meta_Game_Frame_Code)game_state_Maze_frame;
+    mg->init_code = (Meta_Game_Init_Code)game_state_Maze_init;
+    mg->data = malloc(sizeof(Game_State_Maze));
+}
 
 void game_state_Maze_init(Game_State_Maze *new_g)
 {
     Game_State_Maze g;
     g.w = world_state0_init(GAME_STATE_MAZE_WIDTH);
-    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player = (Player){.length = 2, .idx_pos = 1, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
+    g.player.positions[1] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player.positions[0] = (Pos){.x = g.w.width / 2 - 1, g.w.height / 2};
 
     g.evil_snake_paths[0] = (Snake_Pather){
         .len = 4,
@@ -125,7 +134,7 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
         }
     }
 
-    Level_Return food_left_to_win = (DEV ? 5 : 5) - g->player.length;
+    Level_Return food_left_to_win = (DEV ? 6 : 6) - g->player.length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;

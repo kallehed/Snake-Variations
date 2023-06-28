@@ -1,5 +1,20 @@
 #include "game_state1.h"
 #include "very_general.h"
+#include <stdlib.h>
+
+void metagame_set_level_BlueSnakes(Meta_Game *mg)
+{
+    mg->frame_code = (Meta_Game_Frame_Code)game_state1_frame0;
+    mg->init_code = (Meta_Game_Init_Code)game_state1_init;
+    mg->data = malloc(sizeof(Game_State1));
+}
+
+void metagame_set_level_UnSync(Meta_Game *mg)
+{
+    mg->frame_code = (Meta_Game_Frame_Code)game_state1_frame_UnSync;
+    mg->init_code = (Meta_Game_Init_Code)game_state1_init_UnSync;
+    mg->data = malloc(sizeof(Game_State1_UnSync));
+}
 
 void evil_snake_move(Evil_Snake *snake, World_State0 *w)
 {
@@ -203,7 +218,7 @@ Level_Return game_state1_frame_UnSync(Game_State1_UnSync *gu)
         // }
 
         // for (Int i = 0; i < g->evil_snake_index; ++i)
-            // evil_snake_move(&g->evil_snakes[i], w);
+        // evil_snake_move(&g->evil_snakes[i], w);
 
         food_player_collision_logic(&g->player, &g->food, w);
 

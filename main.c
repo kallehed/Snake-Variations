@@ -3,18 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "game_cutscenes.h"
-#include "game_state0.h"
-#include "game_state1.h"
-#include "game_state2.h"
-#include "game_state3.h"
-#include "game_state4.h"
-#include "game_state_OpenWorld.h"
-#include "game_state_Seeker.h"
-#include "game_state_StaticPlatformer.h"
-#include "game_state_YouFood.h"
-#include "game_state_maze.h"
-#include "very_general.h"
+#include "level_declarations.h"
 
 // #define PLATFORM_WEB
 
@@ -22,17 +11,12 @@
 #include <emscripten/emscripten.h>
 #endif
 
-typedef Level_Return (*Meta_Game_Frame_Code)(void *);
-typedef void (*Meta_Game_Init_Code)(void *);
-
-typedef struct Meta_Game
-{
-    Meta_Game_Frame_Code frame_code;
-    Meta_Game_Init_Code init_code;
-
-    void *data;
-    Int frame;
-} Meta_Game;
+static const Meta_Game_Set_Level_Code set_level_funcs[] = {
+    metagame_set_level_First,       metagame_set_level_BlueSnakes,       metagame_set_level_Skin,
+    metagame_set_level_Boxes,       metagame_set_level_EverGrowing,      metagame_set_level_GigFreeFast,
+    metagame_set_level_HidingBoxes, metagame_set_level_YouFood,          metagame_set_level_Maze,
+    metagame_set_level_GetSmall,    metagame_set_level_StaticPlatformer, metagame_set_level_Seeker,
+    metagame_set_level_UnSync,      metagame_set_level_Spinny,           metagame_set_level_OpenWorld};
 
 static Meta_Game meta_game_init(Int frame)
 {
@@ -40,7 +24,7 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 16;
+        Int skip = 28;
         if (frame < skip)
             frame = skip;
     }
@@ -48,109 +32,19 @@ static Meta_Game meta_game_init(Int frame)
 
     if (frame % 2 == 1)
     {
-        mg.frame_code = (Meta_Game_Frame_Code)game_cutscene0_frame0;
-        mg.init_code = (Meta_Game_Init_Code)game_cutscene0_init;
-        mg.data = malloc(sizeof(Game_Cutscene0));
+        metagame_set_level_Cutscene0(&mg);
     }
     else
     {
-        switch (frame / 2)
+        unsigned int at = frame / 2;
+        if (at >= (sizeof(set_level_funcs) / sizeof(Meta_Game_Set_Level_Code)))
         {
-        case 0: {
-            mg.frame_code = (Meta_Game_Frame_Code)game_state0_frame0;
-            mg.init_code = (Meta_Game_Init_Code)game_state0_init0;
-            mg.data = malloc(sizeof(Game_State0));
-        }
-        break;
-        case 1: {
-            mg.frame_code = (Meta_Game_Frame_Code)game_state1_frame0;
-            mg.init_code = (Meta_Game_Init_Code)game_state1_init;
-            mg.data = malloc(sizeof(Game_State1));
-        }
-        break;
-        case 2: {
-            mg.frame_code = (Meta_Game_Frame_Code)game_state0_frame1;
-            mg.init_code = (Meta_Game_Init_Code)game_state0_init0;
-            mg.data = malloc(sizeof(Game_State0));
-        }
-        break;
-        case 3: { // boxes
-            mg.frame_code = (Meta_Game_Frame_Code)game_state2_frame0;
-            mg.init_code = (Meta_Game_Init_Code)game_state2_init;
-            mg.data = malloc(sizeof(Game_State2));
-        }
-        break;
-        case 4: { // ever growing
-            mg.frame_code = (Meta_Game_Frame_Code)game_state3_frame0;
-            mg.init_code = (Meta_Game_Init_Code)game_state3_init0;
-            mg.data = malloc(sizeof(Game_State3));
-        }
-        break;
-        case 5: { // gigantic free fast
-            mg.frame_code = (Meta_Game_Frame_Code)game_state0_frame2;
-            mg.init_code = (Meta_Game_Init_Code)game_state0_init1;
-            mg.data = malloc(sizeof(Game_State0));
-        }
-        break;
-        case 6: { // ever growing
-            mg.frame_code = (Meta_Game_Frame_Code)game_state4_frame0;
-            mg.init_code = (Meta_Game_Init_Code)game_state4_init;
-            mg.data = malloc(sizeof(Game_State4));
-        }
-        break;
-        case 7: { // You are food
-            mg.frame_code = (Meta_Game_Frame_Code)game_state_YouFood_frame;
-            mg.init_code = (Meta_Game_Init_Code)game_state_YouFood_init;
-            mg.data = malloc(sizeof(Game_State_YouFood));
-        }
-        break;
-        case 8: { // You are food
-            mg.frame_code = (Meta_Game_Frame_Code)game_state_Maze_frame;
-            mg.init_code = (Meta_Game_Init_Code)game_state_Maze_init;
-            mg.data = malloc(sizeof(Game_State_Maze));
-        }
-        break;
-        case 9: { // GetSmall
-            mg.frame_code = (Meta_Game_Frame_Code)game_state0_frameGetSmall;
-            mg.init_code = (Meta_Game_Init_Code)game_state0_init_GetSmall;
-            mg.data = malloc(sizeof(Game_State0));
-        }
-        break;
-        case 10: { // static platformer
-            mg.frame_code = (Meta_Game_Frame_Code)game_state_frame_StaticPlatformer;
-            mg.init_code = (Meta_Game_Init_Code)game_state_init_StaticPlatformer;
-            mg.data = malloc(sizeof(Game_State_StaticPlatformer));
-        }
-        break;
-        case 11: {
-            mg.frame_code = (Meta_Game_Frame_Code)game_state_frame_Seeker;
-            mg.init_code = (Meta_Game_Init_Code)game_state_init_Seeker;
-            mg.data = malloc(sizeof(Game_State_Seeker));
-        }
-        break;
-        case 12: { // UnSync
-            mg.frame_code = (Meta_Game_Frame_Code)game_state1_frame_UnSync;
-            mg.init_code = (Meta_Game_Init_Code)game_state1_init_UnSync;
-            mg.data = malloc(sizeof(Game_State1_UnSync));
-        }
-        break;
-        case 13: { // UnSync
-            mg.frame_code = (Meta_Game_Frame_Code)game_state0_frame_Spinny;
-            mg.init_code = (Meta_Game_Init_Code)game_state0_init0;
-            mg.data = malloc(sizeof(Game_State1_UnSync));
-        }
-        break;
-        case 14: { // OpenWorld
-            mg.frame_code = (Meta_Game_Frame_Code)game_state_frame_OpenWorld;
-            mg.init_code = (Meta_Game_Init_Code)game_state_init_OpenWorld;
-            mg.data = malloc(sizeof(Game_State_OpenWorld));
-        }
-        break;
-        default: {
+			printf("--------\n");
             printf("VERY BAD DEATH!!!!!!!!! AHHHHHHHH LEVEL NOT EXIST\n");
+			printf("--------\n");
+            // at = 0;
         }
-        break;
-        }
+        set_level_funcs[at](&mg);
     }
     // INIT
     mg.init_code(mg.data);

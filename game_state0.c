@@ -1,4 +1,38 @@
 #include "game_state0.h"
+#include <stdlib.h>
+
+void metagame_set_level_First(Meta_Game *mg)
+{
+    mg->frame_code = (Meta_Game_Frame_Code)game_state0_frame0;
+    mg->init_code = (Meta_Game_Init_Code)game_state0_init0;
+    mg->data = malloc(sizeof(Game_State0));
+}
+
+void metagame_set_level_Skin(Meta_Game *mg)
+{
+    mg->frame_code = (Meta_Game_Frame_Code)game_state0_frame1;
+    mg->init_code = (Meta_Game_Init_Code)game_state0_init0;
+    mg->data = malloc(sizeof(Game_State0));
+}
+
+void metagame_set_level_GigFreeFast(Meta_Game *mg)
+{
+    mg->frame_code = (Meta_Game_Frame_Code)game_state0_frame2;
+    mg->init_code = (Meta_Game_Init_Code)game_state0_init1;
+    mg->data = malloc(sizeof(Game_State0));
+}
+void metagame_set_level_GetSmall(Meta_Game *mg)
+{
+    mg->frame_code = (Meta_Game_Frame_Code)game_state0_frameGetSmall;
+    mg->init_code = (Meta_Game_Init_Code)game_state0_init_GetSmall;
+    mg->data = malloc(sizeof(Game_State0));
+}
+void metagame_set_level_Spinny(Meta_Game *mg)
+{
+    mg->frame_code = (Meta_Game_Frame_Code)game_state0_frame_Spinny;
+    mg->init_code = (Meta_Game_Init_Code)game_state0_init0;
+    mg->data = malloc(sizeof(Game_State0));
+}
 
 void game_state0_init0(Game_State0 *new_g)
 {

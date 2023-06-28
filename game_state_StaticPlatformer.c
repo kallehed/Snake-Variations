@@ -1,6 +1,14 @@
 #include "game_state_StaticPlatformer.h"
 #include "player_related.h"
 #include "very_general.h"
+#include <stdlib.h>
+
+void metagame_set_level_StaticPlatformer(Meta_Game *mg)
+{
+    mg->frame_code = (Meta_Game_Frame_Code)game_state_frame_StaticPlatformer;
+    mg->init_code = (Meta_Game_Init_Code)game_state_init_StaticPlatformer;
+    mg->data = malloc(sizeof(Game_State_StaticPlatformer));
+}
 
 void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g)
 {
@@ -99,7 +107,7 @@ Level_Return game_state_frame_StaticPlatformer(Game_State_StaticPlatformer *g)
     // logic
     player_set_direction_from_input(&g->player);
 
-    if (time_move_logic_general(&g->time_for_move, 0.2))
+    if (time_move_logic_general(&g->time_for_move, 0.175))
     {
         g->turn = !g->turn;
 
@@ -146,7 +154,7 @@ Level_Return game_state_frame_StaticPlatformer(Game_State_StaticPlatformer *g)
         // g->player.positions[g->player.idx_pos].y++;
         for (Int i = 0; i < SPLATFORMER_MAX_FOODS; ++i)
         {
-			food_player_collision_logic_food_disappear(&g->player,&g->foods[i]);
+            food_player_collision_logic_food_disappear(&g->player, &g->foods[i]);
         }
     }
 
@@ -167,7 +175,7 @@ Level_Return game_state_frame_StaticPlatformer(Game_State_StaticPlatformer *g)
 
     draw_fps();
     {
-        const char* myText = "press R to reset :)";
+        const char *myText = "press R to reset :)";
         DrawText(myText, 150, 10, 20, PINK);
     }
     EndDrawing();
