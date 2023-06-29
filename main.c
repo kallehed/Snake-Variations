@@ -11,20 +11,45 @@
 #include <emscripten/emscripten.h>
 #endif
 
-static const Meta_Game_Set_Level_Code set_level_funcs[] = {
+static const Meta_Game_Set_Level_Code SET_LEVEL_FUNCS[] = {
     metagame_set_level_First,       metagame_set_level_BlueSnakes,       metagame_set_level_Skin,
     metagame_set_level_Boxes,       metagame_set_level_EverGrowing,      metagame_set_level_GigFreeFast,
     metagame_set_level_HidingBoxes, metagame_set_level_YouFood,          metagame_set_level_Maze,
     metagame_set_level_GetSmall,    metagame_set_level_StaticPlatformer, metagame_set_level_Seeker,
     metagame_set_level_UnSync,      metagame_set_level_Spinny,           metagame_set_level_OpenWorld};
 
+static Meta_Game meta_game_init(Int frame);
+
+static void test_all_levels(void)
+{
+    SetTargetFPS(800);
+    for (int frame = 0;; frame += 2)
+    {
+        Meta_Game mg = meta_game_init(frame);
+
+        if (-1 == mg.frame)
+        {
+            break;
+        }
+
+        mg.init_code(mg.data);
+
+        for (int runs = 0; runs < 60; ++runs)
+        {
+            mg.frame_code(mg.data);
+        }
+        free(mg.data);
+    }
+}
+
+// sets frame to -1 if the frame doesn't have a valid level
 static Meta_Game meta_game_init(Int frame)
 {
     Meta_Game mg;
 
     if (DEV)
     {
-        Int skip = 28;
+        Int skip = 16; // 28
         if (frame < skip)
             frame = skip;
     }
@@ -37,14 +62,19 @@ static Meta_Game meta_game_init(Int frame)
     else
     {
         unsigned int at = frame / 2;
-        if (at >= (sizeof(set_level_funcs) / sizeof(Meta_Game_Set_Level_Code)))
+        if (at >= (sizeof(SET_LEVEL_FUNCS) / sizeof(Meta_Game_Set_Level_Code)))
         {
-			printf("--------\n");
+            printf("--------\n");
             printf("VERY BAD DEATH!!!!!!!!! AHHHHHHHH LEVEL NOT EXIST\n");
-			printf("--------\n");
+            printf("--------\n");
             // at = 0;
+            mg.data = NULL;
+            mg.frame_code = NULL;
+            mg.init_code = NULL;
+            mg.frame = -1;
+            return mg;
         }
-        set_level_funcs[at](&mg);
+        SET_LEVEL_FUNCS[at](&mg);
     }
     // INIT
     mg.init_code(mg.data);
@@ -82,10 +112,9 @@ static void game_loop(void)
     Meta_Game mg = meta_game_init(0);
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop_arg((void (*)(void *))meta_game_frame, &mg, 0, 1);
-
 #else
+
     SetTargetFPS(GAME_FPS); // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
 
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -99,8 +128,9 @@ int main(void)
 {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "CSnake");
 
-    SetTargetFPS(GAME_FPS);
-
+#ifdef TEST_ALL_LEVELS
+    test_all_levels();
+#endif
     game_loop();
 
     CloseWindow();

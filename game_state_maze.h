@@ -2,12 +2,7 @@
 
 #include "very_general.h"
 #include "player_related.h"
-
-typedef enum
-{
-    Maze_Cell_Empty = 0,
-    Maze_Cell_Wall,
-} Maze_Cell;
+#include "maze_stuff.h"
 
 typedef struct
 {
@@ -42,13 +37,12 @@ typedef struct
     double time_for_move;
     Food foods[GAME_STATE_MAZE_FOODS];
     Snake_Pather evil_snake_paths[GAME_STATE_MAZE_TOTAL_EVIL_SNAKE_PATHS];
-    Maze_Cell maze[GAME_STATE_MAZE_HEIGHT][GAME_STATE_MAZE_WIDTH];
+    Maze0_Cell maze[GAME_STATE_MAZE_HEIGHT][GAME_STATE_MAZE_WIDTH];
 } Game_State_Maze;
 
 void game_state_Maze_init(Game_State_Maze *new_g);
 Level_Return game_state_Maze_frame(Game_State_Maze *g);
 
-void maze_draw(const Maze_Cell maze[], const Int maze_width, const Int maze_height, const World_State0 *w);
 void snake_pather_draw(Snake_Pather *snake_pather, World_State0 *w);
 void snake_pather_move(Snake_Pather *snake_pather, World_State0 *w);
 bool snake_pather_player_intersection(Snake_Pather *snake_pather, Player *player);

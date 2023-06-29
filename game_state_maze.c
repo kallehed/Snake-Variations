@@ -1,4 +1,5 @@
 #include "game_state_maze.h"
+#include "maze_stuff.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -34,64 +35,42 @@ void game_state_Maze_init(Game_State_Maze *new_g)
         .walk_this_way_counter = 0,
     };
 
-    printf("Size of Maze_Cell type: %lu\n", sizeof(Maze_Cell)); // this is SO stupid, why is the enum 4 bytes??!?!?!
+    printf("Size of Maze_Cell type: %lu\n", sizeof(Maze0_Cell)); // this is SO stupid, why is the enum 4 bytes??!?!?!
     printf("Size of matrix: %lu\n", sizeof(g.maze));
-    const char *const maze_str = "----------------------------------------" // S does not do anything, just marker
-                                 "----------------------------------------"
-                                 "-|||||||------------------||||||||||||--"
-                                 "-|-----|------------------|--S-------|--"
-                                 "-|-----|------------------|----------|--"
-                                 "-|--F--|------------------|--------F-|--"
-                                 "-|-----|------------------|----------|--"
-                                 "-|-----|------------------|----------|--"
-                                 "-|||--||----------|||||||||----------|--"
-                                 "---|--|----||||||||------------------|--"
-                                 "---|--|----|S---------------||||||||||--"
-                                 "---|--|----|-||||||-||||||--|--------|--"
-                                 "---|--||||||-|-----------|-||--------|--"
-                                 "---|---------|-----------|-|-----F---|--"
-                                 "---|||||||||-|-----------|-|---------|--"
-                                 "-----------|-|-----------|-|---------|--"
-                                 "-----------|-|||||||||||||-|--||||||||--"
-                                 "-----------|---------------|-|-------|--"
-                                 "---------|||||||||||-|||||||-|--|-|--|--"
-                                 "--||||||-|---|||||||-|-------|--|-||-|--"
-                                 "--|----|-|-|-|||||||-|----|||||||-|--|--"
-                                 "--|-F--|-|-|-|---|||-|------------|-||--"
-                                 "--|----|-|-|-|-|-|||-|----||||-||||--|--"
-                                 "--|----|-|-|-|-|-|||-|---|---|-|---|-|--"
-                                 "--|----|-|-|-|-|-|||-|--||---|||-----|--"
-                                 "--|----|||-|-|-|-|||-|-|||---|-------|--"
-                                 "--|--------|---|---------------------|--"
-                                 "--||||||||||||||||||||||||||||||||||||--"
-                                 "----------------------------------------"
-                                 "----------------------------------------";
-
-    Int food_idx = 0;
-    for (Int i = 0; i < GAME_STATE_MAZE_HEIGHT; ++i)
-    {
-        for (Int j = 0; j < GAME_STATE_MAZE_WIDTH; ++j)
-        {
-            Int idx = i * GAME_STATE_MAZE_WIDTH + j;
-            Maze_Cell cell = Maze_Cell_Empty;
-            switch (maze_str[idx])
-            {
-            case '|': {
-                cell = Maze_Cell_Wall;
-            }
-            break;
-            case 'F': {
-                g.foods[food_idx++] = (Food){.pos = {.x = j, .y = i}};
-            }
-            break;
-            default: {
-                cell = Maze_Cell_Empty;
-            }
-            break;
-            }
-            g.maze[i][j] = cell;
-        }
-    }
+    // S does not do anything, just marker
+    // clang-format off
+    const char * maze_str[] = { "----------------------------------------" ,
+                                "----------------------------------------",
+                                "-|||||||------------------||||||||||||--",
+                                "-|-----|------------------|--S-------|--",
+                                "-|-----|------------------|----------|--",
+                                "-|--F--|------------------|--------F-|--",
+                                "-|-----|------------------|----------|--",
+                                "-|-----|------------------|----------|--",
+                                "-|||--||----------|||||||||----------|--",
+                                "---|--|----||||||||------------------|--",
+                                "---|--|----|S---------------||||||||||--",
+                                "---|--|----|-||||||-||||||--|--------|--",
+                                "---|--||||||-|-----------|-||--------|--",
+                                "---|---------|-----------|-|-----F---|--",
+                                "---|||||||||-|-----------|-|---------|--",
+                                "-----------|-|-----------|-|---------|--",
+                                "-----------|-|||||||||||||-|--||||||||--",
+                                "-----------|---------------|-|-------|--",
+                                "---------|||||||||||-|||||||-|--|-|--|--",
+                                "--||||||-|---|||||||-|-------|--|-||-|--",
+                                "--|----|-|-|-|||||||-|----|||||||-|--|--",
+                                "--|-F--|-|-|-|---|||-|------------|-||--",
+                                "--|----|-|-|-|-|-|||-|----||||-||||--|--",
+                                "--|----|-|-|-|-|-|||-|---|---|-|---|-|--",
+                                "--|----|-|-|-|-|-|||-|--||---|||-----|--",
+                                "--|----|||-|-|-|-|||-|-|||---|-------|--",
+                                "--|--------|---|---------------------|--",
+                                "--||||||||||||||||||||||||||||||||||||--",
+                                "----------------------------------------",
+                                "----------------------------------------", };
+	//clang-format on
+    maze0_init_from_string(maze_str, GAME_STATE_MAZE_WIDTH, GAME_STATE_MAZE_HEIGHT, g.foods, (Maze0_Cell *)g.maze);
     g.time_for_move = 1.0;
 
     *new_g = g;
@@ -107,7 +86,7 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
     if (time_move_logic_general(&g->time_for_move, 0.123))
     {
         Pos next_pos = move_inside_grid(player_nth_position(&g->player, 0), g->player.next_direction, w);
-        if (g->maze[next_pos.y][next_pos.x] != Maze_Cell_Wall) // check that the next position is not in a wall
+        if (g->maze[next_pos.y][next_pos.x] != Maze0_Cell_Wall) // check that the next position is not in a wall
         {
             if (player_move(&g->player, w))
             {
@@ -144,7 +123,7 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
     ClearBackground(RAYWHITE);
 
     draw_food_left(food_left_to_win);
-    maze_draw((Maze_Cell *)g->maze, GAME_STATE_MAZE_WIDTH, GAME_STATE_MAZE_HEIGHT, w);
+    maze0_draw((Maze0_Cell *)g->maze, GAME_STATE_MAZE_WIDTH, GAME_STATE_MAZE_HEIGHT, w);
     player_draw_extra(&g->player, w);
     for (Int i = 0; i < GAME_STATE_MAZE_FOODS; ++i)
     {
@@ -158,30 +137,6 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
     draw_fps();
     EndDrawing();
     return Level_Return_Continue;
-}
-
-void maze_draw(const Maze_Cell maze[], const Int maze_width, const Int maze_height, const World_State0 *w)
-{
-    for (Int i = 0; i < maze_height; ++i)
-    {
-        for (Int j = 0; j < maze_width; ++j)
-        {
-            Maze_Cell cell = maze[i * maze_width + j];
-            Color col;
-            switch (cell)
-            {
-            case Maze_Cell_Empty: {
-                continue;
-            }
-            break;
-            case Maze_Cell_Wall: {
-                col = (Color){0, 0, 0, 200};
-            }
-            break;
-            }
-            draw_block_at((Pos){j, i}, col, w);
-        }
-    }
 }
 
 void snake_pather_draw(Snake_Pather *snake_pather, World_State0 *w)
