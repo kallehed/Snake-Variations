@@ -3,28 +3,7 @@
 #include "very_general.h"
 #include "player_related.h"
 #include "maze_stuff.h"
-
-typedef struct
-{
-    Dir dir;
-    Coord len;
-} Snake_Pather_Way;
-
-#define SNAKE_PATHER_MAX_WAYS 20
-#define SNAKE_PATHER_MAX_LEN 10
-typedef struct
-{
-    Pos positions[SNAKE_PATHER_MAX_LEN];
-    Coord len;
-    // ways to go in path
-    Snake_Pather_Way ways[SNAKE_PATHER_MAX_WAYS];
-    // CONST. how many actual ways you have
-    Int ways_len;
-    // what way are we currently on ^
-    Int way_idx;
-    // Starts high, goes to zero, depending on Way::len
-    Int walk_this_way_counter;
-} Snake_Pather;
+#include "snake_pather.h"
 
 #define GAME_STATE_MAZE_FOODS 4
 #define GAME_STATE_MAZE_WIDTH 40 // you CANT change these, hardcoded
@@ -43,6 +22,3 @@ typedef struct
 void game_state_Maze_init(Game_State_Maze *new_g);
 Level_Return game_state_Maze_frame(Game_State_Maze *g);
 
-void snake_pather_draw(Snake_Pather *snake_pather, World_State0 *w);
-void snake_pather_move(Snake_Pather *snake_pather, World_State0 *w);
-bool snake_pather_player_intersection(Snake_Pather *snake_pather, Player *player);

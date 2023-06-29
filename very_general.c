@@ -170,9 +170,10 @@ void draw_food_left_in_2D_space(Int food_left_to_win, Int width, Int height)
 {
     char buffer[100];
     snprintf(buffer, sizeof(buffer), "%d", food_left_to_win);
+	const Int x_inc = WINDOW_WIDTH * ((food_left_to_win >= 10) ? 1.4 : 1);
     for (Int i = 0; i < height; i += WINDOW_HEIGHT * 1.25)
     {
-        for (Int j = 0; j < width; j += WINDOW_WIDTH)
+        for (Int j = 0; j < width; j += x_inc)
         {
             DrawText(buffer, 200 + j, -40 + i, 800, (Color){0, 0, 0, 40});
         }

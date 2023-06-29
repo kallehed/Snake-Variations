@@ -18,57 +18,48 @@ void game_state_Maze_init(Game_State_Maze *new_g)
     g.player.positions[1] = (Pos){.x = g.w.width / 2, g.w.height / 2};
     g.player.positions[0] = (Pos){.x = g.w.width / 2 - 1, g.w.height / 2};
 
-    g.evil_snake_paths[0] = (Snake_Pather){
-        .len = 4,
-        .positions = {{29, 3}, {29, 4}, {29, 5}, {29, 6}},
-        .ways = {{Dir_Right, 2}, {Dir_Down, 6}, {Dir_Left, 2}, {Dir_Up, 6}},
-        .ways_len = 4,
-        .way_idx = 4, // be at end
-        .walk_this_way_counter = 0,
-    };
-    g.evil_snake_paths[1] = (Snake_Pather){
-        .len = 4,
-        .positions = {{12, 10}, {12, 11}, {12, 12}, {12, 13}},
-        .ways = {{Dir_Right, 14}, {Dir_Down, 7}, {Dir_Left, 14}, {Dir_Up, 7}},
-        .ways_len = 4,
-        .way_idx = 4, // be at end
-        .walk_this_way_counter = 0,
-    };
+    Pos poses0[] = {{29, 3}, {29, 4}, {29, 5}, {29, 6}};
+    Snake_Pather_Way ways0[] = {{Dir_Right, 2}, {Dir_Down, 6}, {Dir_Left, 2}, {Dir_Up, 6}};
+    g.evil_snake_paths[0] = snake_pather_init(poses0, 4, ways0, 4);
 
-    printf("Size of Maze_Cell type: %lu\n", sizeof(Maze0_Cell)); // this is SO stupid, why is the enum 4 bytes??!?!?!
+    Pos poses1[] = {{12, 10}, {12, 11}, {12, 12}, {12, 13}};
+    Snake_Pather_Way ways1[] = {{Dir_Right, 14}, {Dir_Down, 7}, {Dir_Left, 14}, {Dir_Up, 7}};
+    g.evil_snake_paths[1] = snake_pather_init(poses1, 4, ways1, 4);
+
+    printf("Size of Maze_Cell type: %lu\n",
+           sizeof(Maze0_Cell)); // this WAS SO stupid, why are enums minimum 4 bytes??!?!?!
     printf("Size of matrix: %lu\n", sizeof(g.maze));
-    // S does not do anything, just marker
     // clang-format off
-    const char * maze_str[] = { "----------------------------------------" ,
-                                "----------------------------------------",
-                                "-|||||||------------------||||||||||||--",
-                                "-|-----|------------------|--S-------|--",
-                                "-|-----|------------------|----------|--",
-                                "-|--F--|------------------|--------F-|--",
-                                "-|-----|------------------|----------|--",
-                                "-|-----|------------------|----------|--",
-                                "-|||--||----------|||||||||----------|--",
-                                "---|--|----||||||||------------------|--",
-                                "---|--|----|S---------------||||||||||--",
-                                "---|--|----|-||||||-||||||--|--------|--",
-                                "---|--||||||-|-----------|-||--------|--",
-                                "---|---------|-----------|-|-----F---|--",
-                                "---|||||||||-|-----------|-|---------|--",
-                                "-----------|-|-----------|-|---------|--",
-                                "-----------|-|||||||||||||-|--||||||||--",
-                                "-----------|---------------|-|-------|--",
-                                "---------|||||||||||-|||||||-|--|-|--|--",
-                                "--||||||-|---|||||||-|-------|--|-||-|--",
-                                "--|----|-|-|-|||||||-|----|||||||-|--|--",
-                                "--|-F--|-|-|-|---|||-|------------|-||--",
-                                "--|----|-|-|-|-|-|||-|----||||-||||--|--",
-                                "--|----|-|-|-|-|-|||-|---|---|-|---|-|--",
-                                "--|----|-|-|-|-|-|||-|--||---|||-----|--",
-                                "--|----|||-|-|-|-|||-|-|||---|-------|--",
-                                "--|--------|---|---------------------|--",
-                                "--||||||||||||||||||||||||||||||||||||--",
-                                "----------------------------------------",
-                                "----------------------------------------", };
+    const char *maze_str[] = { "----------------------------------------" ,
+                               "----------------------------------------",
+                               "-|||||||------------------||||||||||||--",
+                               "-|-----|------------------|--S-------|--",
+                               "-|-----|------------------|----------|--",
+                               "-|--F--|------------------|--------F-|--",
+                               "-|-----|------------------|----------|--",
+                               "-|-----|------------------|----------|--",
+                               "-|||--||----------|||||||||----------|--",
+                               "---|--|----||||||||------------------|--",
+                               "---|--|----|S---------------||||||||||--",
+                               "---|--|----|-||||||-||||||--|--------|--",
+                               "---|--||||||-|-----------|-||--------|--",
+                               "---|---------|-----------|-|-----F---|--",
+                               "---|||||||||-|-----------|-|---------|--",
+                               "-----------|-|-----------|-|---------|--",
+                               "-----------|-|||||||||||||-|--||||||||--",
+                               "-----------|---------------|-|-------|--",
+                               "---------|||||||||||-|||||||-|--|-|--|--",
+                               "--||||||-|---|||||||-|-------|--|-||-|--",
+                               "--|----|-|-|-|||||||-|----|||||||-|--|--",
+                               "--|-F--|-|-|-|---|||-|------------|-||--",
+                               "--|----|-|-|-|-|-|||-|----||||-||||--|--",
+                               "--|----|-|-|-|-|-|||-|---|---|-|---|-|--",
+                               "--|----|-|-|-|-|-|||-|--||---|||-----|--",
+                               "--|----|||-|-|-|-|||-|-|||---|-------|--",
+                               "--|--------|---|---------------------|--",
+                               "--||||||||||||||||||||||||||||||||||||--",
+                               "----------------------------------------",
+                               "----------------------------------------", };
 	//clang-format on
     maze0_init_from_string(maze_str, GAME_STATE_MAZE_WIDTH, GAME_STATE_MAZE_HEIGHT, g.foods, (Maze0_Cell *)g.maze);
     g.time_for_move = 1.0;
@@ -85,17 +76,8 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
 
     if (time_move_logic_general(&g->time_for_move, 0.123))
     {
-        Pos next_pos = move_inside_grid(player_nth_position(&g->player, 0), g->player.next_direction, w);
-        if (g->maze[next_pos.y][next_pos.x] != Maze0_Cell_Wall) // check that the next position is not in a wall
-        {
-            if (player_move(&g->player, w))
-            {
-                // player died
-                TraceLog(LOG_INFO, "%s", "YOU DIED!");
+		maze0_player_move((Maze0_Cell *)g->maze, GAME_STATE_MAZE_WIDTH, &g->player, w);
 
-                return Level_Return_Reset_Level;
-            }
-        }
         for (Int i = 0; i < GAME_STATE_MAZE_TOTAL_EVIL_SNAKE_PATHS; ++i)
             snake_pather_move(&g->evil_snake_paths[i], w);
 
@@ -113,7 +95,7 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
         }
     }
 
-    Level_Return food_left_to_win = (DEV ? 6 : 6) - g->player.length;
+    Int food_left_to_win = (DEV ? 6 : 6) - g->player.length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -137,39 +119,4 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
     draw_fps();
     EndDrawing();
     return Level_Return_Continue;
-}
-
-void snake_pather_draw(Snake_Pather *snake_pather, World_State0 *w)
-{
-    draw_snakelike(snake_pather->positions, snake_pather->len, SKYBLUE, BLUE, w);
-}
-
-void snake_pather_move(Snake_Pather *snake_pather, World_State0 *w)
-{
-    // get new way
-    // printf("path move counter: %d\n", snake_pather->walk_this_way_counter);
-    if (0 >= snake_pather->walk_this_way_counter)
-    {
-        snake_pather->way_idx++;
-        // we have gone all the ways, return to first again
-        if (snake_pather->way_idx >= snake_pather->ways_len)
-        {
-            snake_pather->way_idx = 0;
-        }
-        snake_pather->walk_this_way_counter = snake_pather->ways[snake_pather->way_idx].len;
-    }
-
-    // evil_snake_move(&snake_path->snake, w);
-    Dir dir = snake_pather->ways[snake_pather->way_idx].dir;
-    for (Int i = snake_pather->len - 1; i >= 1; --i)
-    {
-        snake_pather->positions[i] = snake_pather->positions[i - 1];
-    }
-    snake_pather->positions[0] = move_inside_grid(snake_pather->positions[0], dir, w);
-    --snake_pather->walk_this_way_counter;
-}
-
-bool snake_pather_player_intersection(Snake_Pather *snake_pather, Player *player)
-{
-    return player_intersection_points(player, snake_pather->positions, snake_pather->len);
 }
