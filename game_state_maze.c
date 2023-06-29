@@ -1,5 +1,6 @@
 #include "game_state_maze.h"
 #include "maze_stuff.h"
+#include "snake_pather.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -18,13 +19,11 @@ void game_state_Maze_init(Game_State_Maze *new_g)
     g.player.positions[1] = (Pos){.x = g.w.width / 2, g.w.height / 2};
     g.player.positions[0] = (Pos){.x = g.w.width / 2 - 1, g.w.height / 2};
 
-    Pos poses0[] = {{29, 3}, {29, 4}, {29, 5}, {29, 6}};
     Snake_Pather_Way ways0[] = {{Dir_Right, 2}, {Dir_Down, 6}, {Dir_Left, 2}, {Dir_Up, 6}};
-    g.evil_snake_paths[0] = snake_pather_init(poses0, 4, ways0, 4);
+    g.evil_snake_paths[0] = snake_pather_init_except_position(ways0, 4);
 
-    Pos poses1[] = {{12, 10}, {12, 11}, {12, 12}, {12, 13}};
     Snake_Pather_Way ways1[] = {{Dir_Right, 14}, {Dir_Down, 7}, {Dir_Left, 14}, {Dir_Up, 7}};
-    g.evil_snake_paths[1] = snake_pather_init(poses1, 4, ways1, 4);
+    g.evil_snake_paths[1] = snake_pather_init_except_position(ways1, 4);
 
     printf("Size of Maze_Cell type: %lu\n",
            sizeof(Maze0_Cell)); // this WAS SO stupid, why are enums minimum 4 bytes??!?!?!
@@ -61,7 +60,9 @@ void game_state_Maze_init(Game_State_Maze *new_g)
                                "----------------------------------------",
                                "----------------------------------------", };
 	//clang-format on
-    maze0_init_from_string(maze_str, GAME_STATE_MAZE_WIDTH, GAME_STATE_MAZE_HEIGHT, g.foods, (Maze0_Cell *)g.maze);
+	Int lengths[] = {4, 4};
+	Dir dirs[] = {Dir_Down, Dir_Down};
+    maze0_init_from_string(maze_str, GAME_STATE_MAZE_WIDTH, GAME_STATE_MAZE_HEIGHT, g.foods, (Maze0_Cell *)g.maze, g.evil_snake_paths, lengths, dirs, &g.w);
     g.time_for_move = 1.0;
 
     *new_g = g;

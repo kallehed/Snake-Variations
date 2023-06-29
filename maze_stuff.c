@@ -1,9 +1,14 @@
 #include "maze_stuff.h"
+#include "snake_pather.h"
 #include "very_general.h"
+#include <assert.h>
 
-void maze0_init_from_string(const char **const map, const Int width, const Int height, Food foods[], Maze0_Cell maze[])
+void maze0_init_from_string(const char *const *const map, const Int width, const Int height, Food foods[],
+                            Maze0_Cell maze[], Snake_Pather pathers[], const Int pather_lengths[],
+                            const Dir pather_dirs[], const World_State0 *w)
 {
     Int food_idx = 0;
+    Int pather_idx = 0;
     for (Int i = 0; i < height; ++i)
     {
         for (Int j = 0; j < width; ++j)
@@ -17,6 +22,24 @@ void maze0_init_from_string(const char **const map, const Int width, const Int h
             break;
             case 'F': {
                 foods[food_idx++] = (Food){.pos = {.x = j, .y = i}};
+            }
+            break;
+            case 'S': {
+                Snake_Pather *pather = &pathers[pather_idx];
+                const Int pather_length = pather_lengths[pather_idx];
+                const Dir pather_dir = pather_dirs[pather_idx];
+
+				assert(pather_length <= SNAKE_PATHER_MAX_LEN);
+				pather->len = pather_length;
+
+                Pos pather_pos = (Pos){j, i};
+                for (Int k = 0; k < pather_length; ++k)
+                {
+                    pather->positions[k] = pather_pos;
+                    pather_pos = move_inside_grid(pather_pos, pather_dir, w);
+                }
+
+                pather_idx++;
             }
             break;
             default: {

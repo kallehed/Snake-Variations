@@ -1,18 +1,16 @@
 #include "snake_pather.h"
+#include <assert.h>
 
-// Inits a snake_pather correctly, MAKE SURE LENGTH AND WAY LENGTH ARE UNDER THE MAXIMUM
-Snake_Pather snake_pather_init(Pos positions[], Int length, Snake_Pather_Way ways[], Int nr_ways)
+// Inits a snake_pather correctly, MAKE SURE WAY LENGTH ARE UNDER THE MAXIMUM
+// DOES NOT INIT POSITION
+Snake_Pather snake_pather_init_except_position(Snake_Pather_Way ways[], Int nr_ways)
 {
+	assert(nr_ways <= SNAKE_PATHER_MAX_WAYS);
     Snake_Pather pather = (Snake_Pather){
-        .len = length,
         .ways_len = nr_ways,
         .way_idx = nr_ways,
         .walk_this_way_counter = 0,
     };
-    for (Int i = 0; i < length; ++i)
-    {
-        pather.positions[i] = positions[i];
-    }
     for (Int i = 0; i < nr_ways; ++i)
     {
         pather.ways[i] = ways[i];
