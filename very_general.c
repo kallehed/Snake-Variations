@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 bool rect_intersection(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2)
 {
     return r1.x < r2.x + w_h2.x && r1.x + w_h1.x > r2.x && r1.y < r2.y + w_h2.y && r1.y + w_h1.y > r2.y;
@@ -22,6 +21,24 @@ bool rect_intersection_wrap(const Pos r1, const Pos w_h1, const Pos r2, const Po
            rect_intersection(c1_xy, c1_xy_wh, r2, w_h2) || rect_intersection(c2_xy, c2_xy_wh, r1, w_h1) ||
            rect_intersection(c1_x, c1_x_wh, c2_y, c2_y_wh) || rect_intersection(c2_x, c2_x_wh, c1_y, c1_y_wh);
 }
+
+// assumes length >= 1
+Int smallest_index_of_numbers(const Int numbers[], const Int length)
+{
+    Int smallest = numbers[0];
+    Int smallest_idx = 0;
+
+    for (Int i = 1; i < length; ++i)
+    {
+        if (numbers[i] < smallest)
+        {
+            smallest_idx = i;
+            smallest = numbers[i];
+        }
+    }
+    return smallest_idx;
+}
+
 Pos dir_to_pos(Dir d)
 {
     switch (d)
@@ -52,7 +69,7 @@ Dir dir_turn_clockwise(Dir d)
         return Dir_Up;
     case Dir_Up:
         return Dir_Right;
-    case Dir_Nothing:
+    default:
         return Dir_Nothing;
     }
 }
@@ -69,7 +86,24 @@ Dir dir_turn_counter_clockwise(Dir d)
         return Dir_Down;
     case Dir_Up:
         return Dir_Left;
-    case Dir_Nothing:
+    default:
+        return Dir_Nothing;
+    }
+}
+
+Dir dir_opposite(const Dir d)
+{
+    switch (d)
+    {
+    case Dir_Right:
+        return Dir_Left;
+    case Dir_Down:
+        return Dir_Up;
+    case Dir_Left:
+        return Dir_Right;
+    case Dir_Up:
+        return Dir_Down;
+    default:
         return Dir_Nothing;
     }
 }
@@ -77,6 +111,29 @@ Dir dir_turn_counter_clockwise(Dir d)
 bool pos_equal(Pos p, Pos q)
 {
     return p.x == q.x && p.y == q.y;
+}
+
+// simply moves a position without any care for warping
+Pos pos_move(Pos pos, const Dir dir)
+{
+    switch (dir)
+    {
+    case Dir_Right:
+        ++pos.x;
+        break;
+    case Dir_Left:
+        --pos.x;
+        break;
+    case Dir_Up:
+        --pos.y;
+        break;
+    case Dir_Down:
+        ++pos.y;
+        break;
+    case Dir_Nothing:
+        break;
+    }
+    return pos;
 }
 
 Pos move_inside_grid(Pos pos, const Dir dir, const World_State0 *w)
@@ -108,6 +165,46 @@ Pos move_inside_grid(Pos pos, const Dir dir, const World_State0 *w)
     }
     return pos;
 }
+
+// useful for setting a snakes positions from a start using a direction
+void set_positions_as_line_from(Pos positions[], const Int length, Pos start, const Dir dir, const World_State0 *w)
+{
+    for (Int i = 0; i < length; ++i)
+    {
+        positions[i] = start;
+        start = move_inside_grid(start, dir, w);
+    }
+}
+
+void set_positions_as_line_from_without_wrapping(Pos positions[], const Int length, Pos start, const Dir dir)
+{
+    for (Int i = 0; i < length; ++i)
+    {
+        positions[i] = start;
+        start = pos_move(start, dir);
+    }
+}
+
+// useful for spawning things outside the game
+Dir_And_Pos random_outside_edge_position_and_normal(const World_State0 *w)
+{
+    switch (GetRandomValue(1, 4))
+    {
+    case 1: // from left
+        return (Dir_And_Pos){.dir = Dir_Right, .pos = (Pos){.x = -1, .y = GetRandomValue(0, w->height - 1)}};
+        break;
+    case 2: // from right
+        return (Dir_And_Pos){.dir = Dir_Left, .pos = (Pos){.x = w->width, .y = GetRandomValue(0, w->height - 1)}};
+        break;
+    case 3: // from top
+        return (Dir_And_Pos){.dir = Dir_Down, .pos = (Pos){.x = GetRandomValue(0, w->width - 1), .y = -1}};
+        break;
+    default: // from bottom
+        return (Dir_And_Pos){.dir = Dir_Up, .pos = (Pos){.x = GetRandomValue(0, w->width - 1), .y = w->height}};
+        break;
+    }
+}
+
 void draw_block_at(Pos pos, Color color, const World_State0 *w)
 {
     DrawRectangle(pos.x * w->block_pixel_len, pos.y * w->block_pixel_len, w->block_pixel_len, w->block_pixel_len,
@@ -170,7 +267,7 @@ void draw_food_left_in_2D_space(Int food_left_to_win, Int width, Int height)
 {
     char buffer[100];
     snprintf(buffer, sizeof(buffer), "%d", food_left_to_win);
-	const Int x_inc = WINDOW_WIDTH * ((food_left_to_win >= 10) ? 1.4 : 1);
+    const Int x_inc = WINDOW_WIDTH * ((food_left_to_win >= 10) ? 1.4 : 1);
     for (Int i = 0; i < height; i += WINDOW_HEIGHT * 1.25)
     {
         for (Int j = 0; j < width; j += x_inc)

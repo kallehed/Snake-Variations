@@ -121,38 +121,13 @@ Level_Return game_state1_frame0(Game_State1 *g)
                 g->evil_snakes[g->evil_snake_index] = (Evil_Snake){.length = 2, Dir_Right, {{0, 5}, {1, 5}}};
                 Evil_Snake *snake = &g->evil_snakes[g->evil_snake_index];
 
-                Pos start;
-                Pos tail_dir;
-                Dir dir;
+				const Dir_And_Pos stuff = random_outside_edge_position_and_normal(w);
+				Pos start = stuff.pos;
+				Dir dir = stuff.dir;
+				Dir tail_dir = dir_opposite(dir);
 
-                switch (GetRandomValue(1, 4))
-                {
-                case 1: // from left
-                    start = (Pos){.x = -1, .y = GetRandomValue(0, w->height - 1)};
-                    tail_dir = (Pos){-1, 0};
-                    dir = Dir_Right;
-                    break;
-                case 2: // from right
-                    start = (Pos){.x = w->width, .y = GetRandomValue(0, w->height - 1)};
-                    tail_dir = (Pos){1, 0};
-                    dir = Dir_Left;
-                    break;
-                case 3: // from top
-                    start = (Pos){.x = GetRandomValue(0, w->width - 1), .y = -1};
-                    tail_dir = (Pos){0, -1};
-                    dir = Dir_Down;
-                    break;
-                case 4: // from bottom
-                    start = (Pos){.x = GetRandomValue(0, w->width - 1), .y = w->height};
-                    tail_dir = (Pos){0, 1};
-                    dir = Dir_Up;
-                    break;
-                }
                 snake->length = GetRandomValue(2, EVIL_SNAKE_MAX_LENGTH);
-                for (Int i = 0; i < snake->length; ++i)
-                {
-                    snake->positions[i] = (Pos){start.x + tail_dir.x * i, start.y + tail_dir.y * i};
-                }
+				set_positions_as_line_from_without_wrapping(snake->positions, snake->length, start, tail_dir);
                 snake->direction = dir;
                 ++g->evil_snake_index;
             }
@@ -233,9 +208,9 @@ Level_Return game_state1_frame_UnSync(Game_State1_UnSync *gu)
                 gu->evil_snake_intervals[g->evil_snake_index] = GetRandomValue(5, 20) / 100.0;
                 gu->evil_snake_time_for_moves[g->evil_snake_index] = 0.0;
 
-                Pos start;
-                Pos tail_dir;
-                Dir dir;
+                Pos start = {0};
+                Pos tail_dir = {0};
+                Dir dir = {0};
 
                 switch (GetRandomValue(1, 4))
                 {

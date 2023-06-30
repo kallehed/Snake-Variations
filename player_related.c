@@ -141,7 +141,6 @@ bool player_move(Player *player, World_State0 *w)
     return false;
 }
 
-
 bool player_intersection_point(const Player *player, const Pos point)
 {
     for (Int i = 0; i < player->length; ++i)

@@ -3,9 +3,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define DEV 0
+#define DEV 1
 // Whether to cycle through all levels quickly at beginning, to test their validity
-#define TEST_ALL_LEVELS  
+// #define TEST_ALL_LEVELS
 #define GAME_FPS 60
 
 #define WINDOW_WIDTH 840
@@ -29,6 +29,12 @@ typedef enum Dir
     Dir_Nothing,
 } Dir;
 
+typedef struct
+{
+    Dir dir;
+    Pos pos;
+} Dir_And_Pos;
+
 typedef struct World_State0
 {
     // Cells in current world
@@ -46,7 +52,7 @@ typedef enum Level_Return
 typedef Level_Return (*Meta_Game_Frame_Code)(void *);
 typedef void (*Meta_Game_Init_Code)(void *);
 
-typedef struct 
+typedef struct
 {
     Meta_Game_Frame_Code frame_code;
     Meta_Game_Init_Code init_code;
@@ -60,12 +66,24 @@ typedef void (*Meta_Game_Set_Level_Code)(Meta_Game *);
 
 bool rect_intersection(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2);
 bool rect_intersection_wrap(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2, const World_State0 *w);
+// assumes length >= 1
+Int smallest_index_of_numbers(const Int numbers[], const Int length);
+
 Pos dir_to_pos(Dir d);
 Dir dir_turn_clockwise(Dir d);
 Dir dir_turn_counter_clockwise(Dir d);
+Dir dir_opposite(const Dir d);
+
 bool pos_equal(Pos p, Pos q);
+// simply moves a position without any care for warping
+Pos pos_move(Pos pos, const Dir dir);
 
 Pos move_inside_grid(Pos pos, const Dir dir, const World_State0 *w);
+// useful for setting a snakes positions from a start using a direction
+void set_positions_as_line_from(Pos positions[], const Int length, Pos start, const Dir dir, const World_State0 *w);
+void set_positions_as_line_from_without_wrapping(Pos positions[], const Int length, Pos start, const Dir dir);
+// useful for spawning things outside the game
+Dir_And_Pos random_outside_edge_position_and_normal(const World_State0 *w);
 
 void draw_block_at(Pos pos, Color color, const World_State0 *w);
 void draw_blocks_at(Pos pos, Pos w_h, Color color, const World_State0 *w);
