@@ -104,7 +104,8 @@ Level_Return game_state_frame_Attack(Game_State_Attack *g)
 
     // drawing
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    Color clear_color = (GS_PLAYER_INV_TIME -  g->player_inv_timer < 0.2f) ? BLACK : RAYWHITE;
+    ClearBackground(clear_color);
 
     draw_food_left(food_left_to_win);
 
