@@ -8,14 +8,29 @@ Pos player_nth_position(const Player *player, Int idx)
     return player->positions[i];
 }
 
+Player player_init(Pos start_pos, const Int length, const Dir dir)
+{
+    Player p;
+    p.current_direction = dir;
+    p.next_direction = dir;
+
+    p.length = length;
+    p.idx_pos = p.length - 1;
+    for (Int i = p.idx_pos; i >= 0; --i) {
+        p.positions[i] = start_pos;
+        start_pos = pos_move(start_pos, dir_opposite(dir));
+    }
+    return p;
+}
+
 // Cycle through positions of player
-void player_draw(const Player *player, const World_State0 *w)
+void player_draw_general(const Player *player, const Color head, const Color body, const World_State0 *w)
 {
     Int drawn_cells = 0;
     for (Int i = player->idx_pos; drawn_cells < player->length; ++drawn_cells)
     {
         const Pos *pos = &player->positions[i];
-        draw_block_at(*pos, (drawn_cells == 0) ? RED : MAROON, w);
+        draw_block_at(*pos, (drawn_cells == 0) ? head : body, w);
 
         --i;
         if (i < 0)
@@ -23,6 +38,10 @@ void player_draw(const Player *player, const World_State0 *w)
             i = PLAYER_MAX_POSITIONS - 1;
         }
     }
+}
+void player_draw(const Player *player, const World_State0 *w)
+{
+    player_draw_general(player, RED, MAROON, w);
 }
 
 void player_draw_extra(const Player *player, const World_State0 *w)

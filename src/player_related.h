@@ -17,7 +17,9 @@ typedef struct Food
 } Food;
 
 Pos player_nth_position(const Player *player, Int idx);
+Player player_init(Pos start_pos, const Int length, const Dir dir);
 // Cycle through positions of player
+void player_draw_general(const Player *player, const Color head, const Color body, const World_State0 *w);
 void player_draw(const Player *player, const World_State0 *w);
 void player_draw_extra(const Player *player, const World_State0 *w);
 void player_draw_flashing(const Player *player, const World_State0 *w);

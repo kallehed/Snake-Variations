@@ -57,9 +57,10 @@ Level_Return game_state_frame_Attack(Game_State_Attack *g)
                 if (seeker_player_collision_logic(&g->snakes[i], &g->player))
                 {
                     g->player.length -= 1;
-					g->player_inv_timer = GS_PLAYER_INV_TIME;
-					set_positions_as_line_from_without_wrapping(g->snakes[i].positions,g->snakes[i].length,(Pos){.x=-1,.y=-1},Dir_Nothing);
-					g->snakes[i].direction = Dir_Nothing;
+                    g->player_inv_timer = GS_PLAYER_INV_TIME;
+                    set_positions_as_line_from_without_wrapping(g->snakes[i].positions, g->snakes[i].length,
+                                                                (Pos){.x = -1, .y = -1}, Dir_Nothing);
+                    g->snakes[i].direction = Dir_Nothing;
                     break;
                 }
             }
@@ -78,7 +79,7 @@ Level_Return game_state_frame_Attack(Game_State_Attack *g)
 
         if (GetRandomValue(1, 30 - g->frames_gone_without_spawn) == 1)
         {
-			g->frames_gone_without_spawn = 0;
+            g->frames_gone_without_spawn = 0;
             if (g->evil_snake_index < GS_MAX_SNAKES)
             {
                 // spawn
@@ -104,7 +105,7 @@ Level_Return game_state_frame_Attack(Game_State_Attack *g)
 
     // drawing
     BeginDrawing();
-    Color clear_color = (GS_PLAYER_INV_TIME -  g->player_inv_timer < 0.2f) ? BLACK : RAYWHITE;
+    Color clear_color = (GS_PLAYER_INV_TIME - g->player_inv_timer < 0.2f) ? BLACK : RAYWHITE;
     ClearBackground(clear_color);
 
     draw_food_left(food_left_to_win);

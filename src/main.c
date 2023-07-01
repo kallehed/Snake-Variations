@@ -17,7 +17,8 @@ static const Meta_Game_Set_Level_Code SET_LEVEL_FUNCS[] = {
     metagame_set_level_HidingBoxes, metagame_set_level_YouFood,          metagame_set_level_Maze,
     metagame_set_level_GetSmall,    metagame_set_level_StaticPlatformer, metagame_set_level_Seeker,
     metagame_set_level_UnSync,      metagame_set_level_Spinny,           metagame_set_level_OpenWorld,
-    metagame_set_level_Wait,        metagame_set_level_Suicide, metagame_set_level_Attack};
+    metagame_set_level_Wait,        metagame_set_level_Suicide,          metagame_set_level_Attack,
+    metagame_set_level_Accel, metagame_set_level_Zelda};
 
 static Meta_Game meta_game_init(Int frame);
 
@@ -52,7 +53,7 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 34; // 32 latest
+        Int skip = 38; // 38 latest
         if (frame < skip)
             frame = skip;
     }
@@ -71,7 +72,7 @@ static Meta_Game meta_game_init(Int frame)
             printf("VERY BAD DEATH!!!!!!!!! AHHHHHHHH LEVEL NOT EXIST\n");
             printf("--------\n");
             // at = 0;
-			mg.size = 0;
+            mg.size = 0;
             mg._data = NULL;
             mg.frame_code = NULL;
             mg.init_code = NULL;
@@ -81,8 +82,8 @@ static Meta_Game meta_game_init(Int frame)
         SET_LEVEL_FUNCS[at](&mg);
     }
     // INIT
-	printf("Mallocing size: %u\n", mg.size);
-	mg._data = malloc(mg.size);
+    printf("Mallocing size: %u\n", mg.size);
+    mg._data = malloc(mg.size);
     mg.init_code(mg._data);
 
     return mg;
