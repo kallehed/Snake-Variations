@@ -9,7 +9,7 @@ void metagame_set_level_Seeker(Meta_Game *mg)
 {
     mg->frame_code = (Meta_Game_Frame_Code)game_state_frame_Seeker;
     mg->init_code = (Meta_Game_Init_Code)game_state_init_Seeker;
-    mg->data = malloc(sizeof(Game_State_Seeker));
+    mg->size = (sizeof(Game_State_Seeker));
 }
 
 void game_state_init_Seeker(Game_State_Seeker *new_g)

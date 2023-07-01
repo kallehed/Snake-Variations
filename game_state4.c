@@ -5,7 +5,7 @@ void metagame_set_level_HidingBoxes(Meta_Game *mg)
 {
     mg->frame_code = (Meta_Game_Frame_Code)game_state4_frame0;
     mg->init_code = (Meta_Game_Init_Code)game_state4_init;
-    mg->data = malloc(sizeof(Game_State4));
+    mg->size = (sizeof(Game_State4));
 }
 
 void game_state4_init(Game_State4 *new_g)

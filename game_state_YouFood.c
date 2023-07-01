@@ -5,7 +5,7 @@ void metagame_set_level_YouFood(Meta_Game *mg)
 {
     mg->frame_code = (Meta_Game_Frame_Code)game_state_YouFood_frame;
     mg->init_code = (Meta_Game_Init_Code)game_state_YouFood_init;
-    mg->data = malloc(sizeof(Game_State_YouFood));
+    mg->size = (sizeof(Game_State_YouFood));
 }
 
 void game_state_YouFood_init(Game_State_YouFood *new_g)

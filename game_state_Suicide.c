@@ -6,7 +6,7 @@ void metagame_set_level_Suicide(Meta_Game *mg)
 {
     mg->frame_code = (Meta_Game_Frame_Code)game_state_frame_Suicide;
     mg->init_code = (Meta_Game_Init_Code)game_state_init_Suicide;
-    mg->data = malloc(sizeof(Game_State_Suicide));
+    mg->size = (sizeof(Game_State_Suicide));
 }
 
 void game_state_init_Suicide(Game_State_Suicide *new_g)

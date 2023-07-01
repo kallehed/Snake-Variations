@@ -6,14 +6,14 @@ void metagame_set_level_BlueSnakes(Meta_Game *mg)
 {
     mg->frame_code = (Meta_Game_Frame_Code)game_state1_frame0;
     mg->init_code = (Meta_Game_Init_Code)game_state1_init;
-    mg->data = malloc(sizeof(Game_State1));
+    mg->size = (sizeof(Game_State1));
 }
 
 void metagame_set_level_UnSync(Meta_Game *mg)
 {
     mg->frame_code = (Meta_Game_Frame_Code)game_state1_frame_UnSync;
     mg->init_code = (Meta_Game_Init_Code)game_state1_init_UnSync;
-    mg->data = malloc(sizeof(Game_State1_UnSync));
+    mg->size = (sizeof(Game_State1_UnSync));
 }
 
 void game_state1_init(Game_State1 *new_g)

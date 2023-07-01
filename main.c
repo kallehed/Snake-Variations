@@ -34,13 +34,13 @@ static void test_all_levels(void)
             break;
         }
 
-        mg.init_code(mg.data);
+        mg.init_code(mg._data);
 
         for (int runs = 0; runs < 240; ++runs)
         {
-            mg.frame_code(mg.data);
+            mg.frame_code(mg._data);
         }
-        free(mg.data);
+        free(mg._data);
     }
 }
 #endif
@@ -71,7 +71,8 @@ static Meta_Game meta_game_init(Int frame)
             printf("VERY BAD DEATH!!!!!!!!! AHHHHHHHH LEVEL NOT EXIST\n");
             printf("--------\n");
             // at = 0;
-            mg.data = NULL;
+			mg.size = 0;
+            mg._data = NULL;
             mg.frame_code = NULL;
             mg.init_code = NULL;
             mg.frame = -1;
@@ -80,14 +81,16 @@ static Meta_Game meta_game_init(Int frame)
         SET_LEVEL_FUNCS[at](&mg);
     }
     // INIT
-    mg.init_code(mg.data);
+	printf("Mallocing size: %u\n", mg.size);
+	mg._data = malloc(mg.size);
+    mg.init_code(mg._data);
 
     return mg;
 }
 
 static void meta_game_frame(Meta_Game *mg)
 {
-    switch (mg->frame_code(mg->data))
+    switch (mg->frame_code(mg->_data))
     {
     case Level_Return_Continue: {
         if (IsKeyPressed(KEY_R))
@@ -98,13 +101,13 @@ static void meta_game_frame(Meta_Game *mg)
     break;
     case Level_Return_Next_Level: {
         TraceLog(LOG_INFO, "%s", "THE FUNCTION RETURNED ONE ONE ONE \n");
-        free(mg->data);
+        free(mg->_data);
         *mg = meta_game_init(mg->frame + 1);
     }
     break;
     case Level_Return_Reset_Level: {
     GOTO_RESET_LEVEL:
-        mg->init_code(mg->data);
+        mg->init_code(mg->_data);
     }
     break;
     }

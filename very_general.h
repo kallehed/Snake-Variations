@@ -3,9 +3,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define DEV 1
+#define DEV 0
 // Whether to cycle through all levels quickly at beginning, to test their validity
-// #define TEST_ALL_LEVELS
+#define TEST_ALL_LEVELS
 #define GAME_FPS 60
 
 #define WINDOW_WIDTH 840
@@ -56,8 +56,9 @@ typedef struct
 {
     Meta_Game_Frame_Code frame_code;
     Meta_Game_Init_Code init_code;
+	uint32_t size;
 
-    void *data;
+    void *_data; // should not be touched by anything other than main.c
     Int frame;
 } Meta_Game;
 

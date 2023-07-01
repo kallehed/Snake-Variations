@@ -4,7 +4,7 @@ void metagame_set_level_Boxes(Meta_Game *mg)
 {
     mg->frame_code = (Meta_Game_Frame_Code)game_state2_frame0;
     mg->init_code = (Meta_Game_Init_Code)game_state2_init;
-    mg->data = malloc(sizeof(Game_State2));
+    mg->size = (sizeof(Game_State2));
 }
 void game_state2_init(Game_State2 *new_g)
 {

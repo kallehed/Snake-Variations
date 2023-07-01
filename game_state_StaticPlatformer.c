@@ -7,7 +7,7 @@ void metagame_set_level_StaticPlatformer(Meta_Game *mg)
 {
     mg->frame_code = (Meta_Game_Frame_Code)game_state_frame_StaticPlatformer;
     mg->init_code = (Meta_Game_Init_Code)game_state_init_StaticPlatformer;
-    mg->data = malloc(sizeof(Game_State_StaticPlatformer));
+    mg->size = (sizeof(Game_State_StaticPlatformer));
 }
 
 void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g)

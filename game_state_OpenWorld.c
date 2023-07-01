@@ -13,7 +13,7 @@ void metagame_set_level_OpenWorld(Meta_Game *mg)
 {
     mg->frame_code = (Meta_Game_Frame_Code)game_state_frame_OpenWorld;
     mg->init_code = (Meta_Game_Init_Code)game_state_init_OpenWorld;
-    mg->data = malloc(sizeof(Game_State_OpenWorld));
+    mg->size = (sizeof(Game_State_OpenWorld));
 }
 
 void game_state_init_OpenWorld(Game_State_OpenWorld *new_g)
