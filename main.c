@@ -17,14 +17,14 @@ static const Meta_Game_Set_Level_Code SET_LEVEL_FUNCS[] = {
     metagame_set_level_HidingBoxes, metagame_set_level_YouFood,          metagame_set_level_Maze,
     metagame_set_level_GetSmall,    metagame_set_level_StaticPlatformer, metagame_set_level_Seeker,
     metagame_set_level_UnSync,      metagame_set_level_Spinny,           metagame_set_level_OpenWorld,
-    metagame_set_level_Wait,        metagame_set_level_Suicide};
+    metagame_set_level_Wait,        metagame_set_level_Suicide, metagame_set_level_Attack};
 
 static Meta_Game meta_game_init(Int frame);
 
 #ifdef TEST_ALL_LEVELS
 static void test_all_levels(void)
 {
-    SetTargetFPS(800);
+    SetTargetFPS(60);
     for (int frame = 0;; frame += 2)
     {
         Meta_Game mg = meta_game_init(frame);
@@ -36,7 +36,7 @@ static void test_all_levels(void)
 
         mg.init_code(mg.data);
 
-        for (int runs = 0; runs < 60; ++runs)
+        for (int runs = 0; runs < 240; ++runs)
         {
             mg.frame_code(mg.data);
         }
@@ -52,7 +52,7 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 32; // 32 latest
+        Int skip = 34; // 32 latest
         if (frame < skip)
             frame = skip;
     }

@@ -286,7 +286,7 @@ void draw_food_left_general(Int food_left_to_win, int x, int y)
 
 void draw_food_left(Int food_left_to_win)
 {
-    draw_food_left_general(food_left_to_win, 200, -40);
+    draw_food_left_general(food_left_to_win, (food_left_to_win >= 20)? -10 : 200, -40);
 }
 void draw_fps(void)
 {

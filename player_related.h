@@ -20,6 +20,7 @@ Pos player_nth_position(const Player *player, Int idx);
 // Cycle through positions of player
 void player_draw(const Player *player, const World_State0 *w);
 void player_draw_extra(const Player *player, const World_State0 *w);
+void player_draw_flashing(const Player *player, const World_State0 *w);
 void player_set_direction_correctly(Player *player, Dir dir);
 void player_set_direction_from_input(Player *player);
 // turns relative to previous direction

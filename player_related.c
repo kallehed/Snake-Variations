@@ -43,6 +43,25 @@ void player_draw_extra(const Player *player, const World_State0 *w)
         draw_block_at(pos, color, w);
     }
 }
+
+void player_draw_flashing(const Player *player, const World_State0 *w)
+{
+    bool inv = (int)(GetTime() * 10.0) % 2 == 0;
+    for (Int i = 0; i < player->length; ++i)
+    {
+        const Pos pos = player_nth_position(player, i);
+
+        Color color = RED;
+        if (i != 0)
+        {
+            color = BLACK;
+        }
+        if (inv)
+            color.a = 100;
+        draw_block_at(pos, color, w);
+    }
+}
+
 // do not turn in a way that instantly kills youself, handles next and current direction
 void player_set_direction_correctly(Player *player, Dir dir)
 {

@@ -20,3 +20,4 @@ void metagame_set_level_Spinny(Meta_Game *mg);
 void metagame_set_level_OpenWorld(Meta_Game *mg);
 void metagame_set_level_Wait(Meta_Game *mg);
 void metagame_set_level_Suicide(Meta_Game *mg);
+void metagame_set_level_Attack(Meta_Game *mg);
