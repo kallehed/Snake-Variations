@@ -190,7 +190,7 @@ void game_state_init_OpenWorld(Game_State_OpenWorld *new_g)
     }
 
     maze0_init_from_string(map, GAME_STATE_OPENWORLD_WIDTH, GAME_STATE_OPENWORLD_HEIGHT, g.foods, (Maze0_Cell *)g.maze,
-                           g.pathers, tail_lengths, tail_dirs, &g.w);
+                           g.pathers, tail_lengths, tail_dirs, NULL, &g.w);
 
     *new_g = g;
 }

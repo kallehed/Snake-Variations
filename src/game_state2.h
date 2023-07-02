@@ -4,6 +4,7 @@
 #include "box_general.h"
 
 #define GAME_STATE2_BOXES 2
+#define GAME_STATE2_MAX_POS 3
 typedef struct
 {
     World_State0 w;

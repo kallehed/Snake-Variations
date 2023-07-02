@@ -147,7 +147,7 @@ bool player_position_in_player(const Player *player, const Pos pos)
 }
 
 // returns true if player dies
-bool player_move(Player *player, World_State0 *w)
+bool player_move(Player *player, const World_State0 *w)
 {
     Pos prev_pos = player->positions[player->idx_pos];
 

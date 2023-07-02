@@ -62,7 +62,7 @@ void game_state_Maze_init(Game_State_Maze *new_g)
 	//clang-format on
 	Int lengths[] = {4, 4};
 	Dir dirs[] = {Dir_Down, Dir_Down};
-    maze0_init_from_string(maze_str, GAME_STATE_MAZE_WIDTH, GAME_STATE_MAZE_HEIGHT, g.foods, (Maze0_Cell *)g.maze, g.evil_snake_paths, lengths, dirs, &g.w);
+    maze0_init_from_string(maze_str, GAME_STATE_MAZE_WIDTH, GAME_STATE_MAZE_HEIGHT, g.foods, (Maze0_Cell *)g.maze, g.evil_snake_paths, lengths, dirs, NULL, &g.w);
     g.time_for_move = 1.0;
 
     *new_g = g;

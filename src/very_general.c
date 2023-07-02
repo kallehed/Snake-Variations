@@ -262,19 +262,25 @@ World_State0 world_state0_init_general(Int width, Int height, Int block_pixel_le
     return w;
 }
 
-// In pixels
-void draw_food_left_in_2D_space(Int food_left_to_win, Int width, Int height)
-{
+void draw_food_left_in_2D_space_general(Int food_left_to_win, Int width, Int height, Int offset_x, Int offset_y) {
     char buffer[100];
+    if (food_left_to_win > 9) offset_x += 400;
     snprintf(buffer, sizeof(buffer), "%d", food_left_to_win);
     const Int x_inc = WINDOW_WIDTH * ((food_left_to_win >= 10) ? 1.4 : 1);
     for (Int i = 0; i < height; i += WINDOW_HEIGHT * 1.25)
     {
         for (Int j = 0; j < width; j += x_inc)
         {
-            DrawText(buffer, 200 + j, -40 + i, 800, (Color){0, 0, 0, 40});
+            DrawText(buffer, offset_x + j, offset_y + i, 800, (Color){0, 0, 0, 40});
         }
     }
+    
+}
+
+// In pixels
+void draw_food_left_in_2D_space(Int food_left_to_win, Int width, Int height)
+{
+    draw_food_left_in_2D_space_general(food_left_to_win, width, height, 200, -40);
 }
 
 void draw_food_left_general(Int food_left_to_win, int x, int y)

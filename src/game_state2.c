@@ -1,4 +1,5 @@
 #include "game_state2.h"
+#include "player_related.h"
 #include <stdlib.h>
 void metagame_set_level_Boxes(Meta_Game *mg)
 {
@@ -40,24 +41,31 @@ Level_Return game_state2_frame0(Game_State2 *g)
             return Level_Return_Reset_Level;
         }
 
-        boxes_player_collision_logic(g->boxes, GAME_STATE2_BOXES, player_nth_position(&g->player, 0),
+        boxes_collision_logic(g->boxes, GAME_STATE2_BOXES, player_nth_position(&g->player, 0),
                                      g->player.current_direction, (Pos){1, 1}, -1, &g->w);
     }
 
-    Pos pos1 = {20, 15};
-    Pos pos2 = {5, 5};
+    Pos pos[GAME_STATE2_MAX_POS] = {
+        {20, 15},
+        {5, 5},
+        {2, 13},
+    };
 
     Int points = 0;
 
     for (Int i = 0; i < GAME_STATE2_BOXES; ++i)
     {
-        if (pos_equal(pos1, g->boxes[i].p) || pos_equal(pos2, g->boxes[i].p))
+        for (Int pos_idx = 0; pos_idx < GAME_STATE2_MAX_POS; ++pos_idx)
         {
-            ++points;
+            if (pos_equal(pos[pos_idx], g->boxes[i].p))
+            {
+                ++points;
+            }
         }
     }
+    points += player_intersection_points(&g->player, pos, GAME_STATE2_MAX_POS);
 
-    if (points == 2)
+    if (points == GAME_STATE2_MAX_POS)
     {
         return Level_Return_Next_Level;
     }
@@ -66,10 +74,12 @@ Level_Return game_state2_frame0(Game_State2 *g)
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    draw_food_left(2 - points);
+    draw_food_left(3 - points);
+    for (Int i = 0; i < GAME_STATE2_MAX_POS; ++i)
+    {
+        draw_block_at(pos[i], GREEN, &g->w);
+    }
     player_draw_extra(&g->player, &g->w);
-    draw_block_at(pos1, GREEN, &g->w);
-    draw_block_at(pos2, GREEN, &g->w);
     for (Int i = 0; i < GAME_STATE2_BOXES; i++)
     {
         box_draw(&g->boxes[i], &g->w);

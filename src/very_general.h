@@ -98,6 +98,7 @@ World_State0 world_state0_init(Int width);
 World_State0 world_state0_init_general(Int width, Int height, Int block_pixel_len);
 
 // In pixels
+void draw_food_left_in_2D_space_general(Int food_left_to_win, Int width, Int height, Int offset_x, Int offset_y);
 void draw_food_left_in_2D_space(Int food_left_to_win, Int width, Int height);
 void draw_food_left_general(Int food_left_to_win, int x, int y);
 void draw_food_left(Int food_left_to_win);

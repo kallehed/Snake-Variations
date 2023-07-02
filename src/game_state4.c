@@ -63,7 +63,7 @@ Level_Return game_state4_frame0(Game_State4 *g)
             return Level_Return_Reset_Level;
         }
 
-        boxes_player_collision_logic(g->boxes, GAME_STATE4_BOXES, player_nth_position(&g->player, 0),
+        boxes_collision_logic(g->boxes, GAME_STATE4_BOXES, player_nth_position(&g->player, 0),
                                      g->player.current_direction, (Pos){1, 1}, -1, &g->w);
 
         food_player_collision_logic(&g->player, &g->food, &g->w);
