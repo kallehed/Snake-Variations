@@ -51,6 +51,10 @@ void maze0_init_from_string(const char *const *const map, const Int width, const
                 cell = Maze0_Cell_Button;
             }
             break;
+            case 'w': { 
+                cell = Maze0_Cell_Water;
+            }
+            break;
             default: {
                 cell = Maze0_Cell_Empty;
             }
@@ -84,6 +88,10 @@ void maze0_draw(const Maze0_Cell maze[], const Int maze_width, const Int maze_he
                 col = (Color){0, 235, 20, 255};
             }
             break;
+            case Maze0_Cell_Water: {
+                col = (Color){10, 30, 242, 255};
+            }
+            break;
             }
             draw_block_at((Pos){j, i}, col, w);
         }
@@ -115,7 +123,9 @@ bool rect_intersect_maze0_wall(const Int r_x, const Int r_y, const Int r_width, 
     {
         for (Int x = r_x; x < r_x + r_width; ++x)
         {
-            if (Maze0_Cell_Wall == maze[y * maze_width + x])
+            Int new_x = x;
+            if (new_x >= maze_width) new_x -= maze_width;
+            if (Maze0_Cell_Wall == maze[y * maze_width + new_x])
             {
                 return true;
             }

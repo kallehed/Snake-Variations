@@ -9,6 +9,7 @@
 #define Maze0_Cell_Empty 0
 #define Maze0_Cell_Wall 1
 #define Maze0_Cell_Button 2
+#define Maze0_Cell_Water 3
 
 typedef int8_t Maze0_Cell;
 
