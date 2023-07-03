@@ -21,7 +21,7 @@ aux_source_directory(${SOURCE_DIR} SOURCE_FILES)
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 if(MSVC)
-	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+	target_compile_options(${PROJECT_NAME} PRIVATE /W4) 
 else()
 	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif()

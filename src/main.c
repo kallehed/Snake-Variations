@@ -18,7 +18,7 @@ static const Meta_Game_Set_Level_Code SET_LEVEL_FUNCS[] = {
     metagame_set_level_GetSmall,    metagame_set_level_StaticPlatformer, metagame_set_level_Seeker,
     metagame_set_level_UnSync,      metagame_set_level_Spinny,           metagame_set_level_OpenWorld,
     metagame_set_level_Wait,        metagame_set_level_Suicide,          metagame_set_level_Attack,
-    metagame_set_level_Accel, metagame_set_level_Zelda, metagame_set_level_InZoom};
+    metagame_set_level_Accel, metagame_set_level_Zelda, metagame_set_level_InZoom, metagame_set_level_ObsCourse};
 
 static Meta_Game meta_game_init(Int frame);
 
@@ -53,7 +53,7 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 40; // 48 latest
+        Int skip = 42; // 42 latest
         if (frame < skip)
             frame = skip;
     }

@@ -73,7 +73,7 @@ void maze0_draw(const Maze0_Cell maze[], const Int maze_width, const Int maze_he
         for (Int j = 0; j < maze_width; ++j)
         {
             Maze0_Cell cell = maze[i * maze_width + j];
-            Color col;
+            Color col = {0,255,255,255};
             switch (cell)
             {
             case Maze0_Cell_Empty: {

@@ -5,3 +5,5 @@ relbuild
 .cache
 ninjabuild
 .vscode
+.vs
+CMakeSettings.json
