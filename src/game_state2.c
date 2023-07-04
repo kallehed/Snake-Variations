@@ -1,6 +1,7 @@
 #include "game_state2.h"
 #include "player_related.h"
 #include <stdlib.h>
+#include "level_declarations.h"
 void metagame_set_level_Boxes(Meta_Game *mg)
 {
     mg->frame_code = (Meta_Game_Frame_Code)game_state2_frame0;

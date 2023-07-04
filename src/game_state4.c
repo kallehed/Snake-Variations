@@ -1,5 +1,6 @@
 #include "game_state4.h"
 #include <stdlib.h>
+#include "level_declarations.h"
 
 void metagame_set_level_HidingBoxes(Meta_Game *mg)
 {

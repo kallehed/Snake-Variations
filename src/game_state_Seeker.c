@@ -4,6 +4,7 @@
 #include "very_general.h"
 #include <math.h>
 #include <stdlib.h>
+#include "level_declarations.h"
 
 void metagame_set_level_Seeker(Meta_Game *mg)
 {

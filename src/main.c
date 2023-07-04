@@ -53,7 +53,7 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 42; // 42 latest
+        Int skip = 43; // 42 latest
         if (frame < skip)
             frame = skip;
     }

@@ -1,5 +1,6 @@
 #include "game_state_YouFood.h"
 #include <stdlib.h>
+#include "level_declarations.h"
 
 void metagame_set_level_YouFood(Meta_Game *mg)
 {

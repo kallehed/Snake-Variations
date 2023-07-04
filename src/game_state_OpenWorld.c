@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include "snake_pather.h"
 #include "very_general.h"
+#include "level_declarations.h"
 
 #include <math.h>
 #include <stdio.h>

@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include "very_general.h"
 #include <stdlib.h>
+#include "level_declarations.h"
 
 void metagame_set_level_Attack(Meta_Game *mg)
 {

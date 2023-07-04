@@ -1,5 +1,6 @@
 #include "game_state_Accel.h"
 #include <math.h>
+#include "level_declarations.h"
 
 void metagame_set_level_Accel(Meta_Game *mg)
 {

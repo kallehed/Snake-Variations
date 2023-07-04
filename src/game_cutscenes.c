@@ -1,5 +1,6 @@
 #include "game_cutscenes.h"
 #include <stdlib.h>
+#include "level_declarations.h"
 
 void metagame_set_level_Cutscene0(Meta_Game *mg)
 {

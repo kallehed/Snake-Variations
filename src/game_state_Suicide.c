@@ -1,6 +1,7 @@
 #include "game_state_Suicide.h"
 #include <math.h>
 #include <stdlib.h>
+#include "level_declarations.h"
 
 void metagame_set_level_Suicide(Meta_Game *mg)
 {
@@ -78,10 +79,10 @@ Level_Return game_state_frame_Suicide(Game_State_Suicide *g)
                         down_dist += GAME_STATE_SUICIDE_HEIGHT;
 
                     const Int nums[] = {right_dist, left_dist, up_dist, down_dist};
-                    const Int i = smallest_index_of_numbers(nums, 4);
+                    const Int j = smallest_index_of_numbers(nums, 4);
                     // go in opposite direction to what dir is closest to player
                     const Dir dirs[] = {Dir_Left, Dir_Right, Dir_Down, Dir_Up};
-                    d = dirs[i];
+                    d = dirs[j];
                 }
 
                 Dir prev = g->seekers[i].direction;

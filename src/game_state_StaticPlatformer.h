@@ -23,4 +23,6 @@ typedef struct {
 
 void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g); 
 
+void map_draw(const SPlatformer_Block map[], const Int map_width, const Int map_height, const World_State0 *w);
+
 Level_Return game_state_frame_StaticPlatformer(Game_State_StaticPlatformer *g);

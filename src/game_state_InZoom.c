@@ -2,6 +2,7 @@
 #include "player_related.h"
 #include "very_general.h"
 #include <math.h>
+#include "level_declarations.h"
 
 void metagame_set_level_InZoom(Meta_Game *mg)
 {

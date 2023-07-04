@@ -1,5 +1,6 @@
 #include "game_state3.h"
 #include <stdlib.h>
+#include "level_declarations.h"
 // EverGrowing
 
 void metagame_set_level_EverGrowing(Meta_Game *mg)
