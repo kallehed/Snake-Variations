@@ -26,3 +26,4 @@ void metagame_set_level_Accel(Meta_Game *mg);
 void metagame_set_level_Zelda(Meta_Game *mg);
 void metagame_set_level_InZoom(Meta_Game *mg);
 void metagame_set_level_ObsCourse(Meta_Game *mg);
+void metagame_set_level_YouBlue(Meta_Game *mg);

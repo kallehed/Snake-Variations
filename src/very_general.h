@@ -5,7 +5,7 @@
 
 #define DEV 1
 // Whether to cycle through all levels quickly at beginning, to test their validity
-//#define TEST_ALL_LEVELS
+// #define TEST_ALL_LEVELS
 #define GAME_FPS 60
 
 #define WINDOW_WIDTH 840

@@ -11,16 +11,69 @@
 #include <emscripten/emscripten.h>
 #endif
 
-static const Meta_Game_Set_Level_Code SET_LEVEL_FUNCS[] = {
-    metagame_set_level_First,       metagame_set_level_BlueSnakes,       metagame_set_level_Skin,
-    metagame_set_level_Boxes,       metagame_set_level_EverGrowing,      metagame_set_level_GigFreeFast,
-    metagame_set_level_HidingBoxes, metagame_set_level_YouFood,          metagame_set_level_Maze,
-    metagame_set_level_GetSmall,    metagame_set_level_StaticPlatformer, metagame_set_level_Seeker,
-    metagame_set_level_UnSync,      metagame_set_level_Spinny,           metagame_set_level_OpenWorld,
-    metagame_set_level_Wait,        metagame_set_level_Suicide,          metagame_set_level_Attack,
-    metagame_set_level_Accel, metagame_set_level_Zelda, metagame_set_level_InZoom, metagame_set_level_ObsCourse};
+static const Meta_Game_Set_Level_Code SET_LEVEL_FUNCS[] = {metagame_set_level_First,
+                                                           metagame_set_level_BlueSnakes,
+                                                           metagame_set_level_Skin,
+                                                           metagame_set_level_Boxes,
+                                                           metagame_set_level_EverGrowing,
+                                                           metagame_set_level_GigFreeFast,
+                                                           metagame_set_level_HidingBoxes,
+                                                           metagame_set_level_YouFood,
+                                                           metagame_set_level_Maze,
+                                                           metagame_set_level_GetSmall,
+                                                           metagame_set_level_StaticPlatformer,
+                                                           metagame_set_level_Seeker,
+                                                           metagame_set_level_UnSync,
+                                                           metagame_set_level_Spinny,
+                                                           metagame_set_level_OpenWorld,
+                                                           metagame_set_level_Wait,
+                                                           metagame_set_level_Suicide,
+                                                           metagame_set_level_Attack,
+                                                           metagame_set_level_Accel,
+                                                           metagame_set_level_Zelda,
+                                                           metagame_set_level_InZoom,
+                                                           metagame_set_level_ObsCourse, 
+														   metagame_set_level_YouBlue,
+};
 
 static Meta_Game meta_game_init(Int frame);
+
+// handles just resetting and stuff, returns whether level was completed or not
+// DOES NOT FREE ANYTHING, just handles resets and the like
+static bool meta_game_run_level_correctly(Meta_Game *mg)
+{
+    switch (mg->frame_code(mg->_data))
+    {
+    case Level_Return_Continue: {
+        if (IsKeyPressed(KEY_R))
+        {
+            goto GOTO_RESET_LEVEL;
+        }
+    }
+    break;
+    case Level_Return_Next_Level: {
+        TraceLog(LOG_INFO, "%s", "THE FUNCTION RETURNED ONE ONE ONE \n");
+        return true;
+    }
+    break;
+    case Level_Return_Reset_Level: {
+    GOTO_RESET_LEVEL:
+        mg->init_code(mg->_data);
+    }
+    break;
+    }
+    return false;
+}
+
+static void meta_game_frame(Meta_Game *mg)
+{
+    if (meta_game_run_level_correctly(mg))
+    {
+        free(mg->_data);
+        mg->_data = NULL;
+        *mg = meta_game_init(mg->frame + 1);
+    }
+}
 
 #ifdef TEST_ALL_LEVELS
 static void test_all_levels(void)
@@ -39,9 +92,10 @@ static void test_all_levels(void)
 
         for (int runs = 0; runs < 240; ++runs)
         {
-            mg.frame_code(mg._data);
+            meta_game_run_level_correctly(&mg);
         }
         free(mg._data);
+        mg._data = NULL;
     }
 }
 #endif
@@ -53,7 +107,7 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 43; // 42 latest
+        Int skip = 44; // 42 latest
         if (frame < skip)
             frame = skip;
     }
@@ -89,31 +143,6 @@ static Meta_Game meta_game_init(Int frame)
     return mg;
 }
 
-static void meta_game_frame(Meta_Game *mg)
-{
-    switch (mg->frame_code(mg->_data))
-    {
-    case Level_Return_Continue: {
-        if (IsKeyPressed(KEY_R))
-        {
-            goto GOTO_RESET_LEVEL;
-        }
-    }
-    break;
-    case Level_Return_Next_Level: {
-        TraceLog(LOG_INFO, "%s", "THE FUNCTION RETURNED ONE ONE ONE \n");
-        free(mg->_data);
-        *mg = meta_game_init(mg->frame + 1);
-    }
-    break;
-    case Level_Return_Reset_Level: {
-    GOTO_RESET_LEVEL:
-        mg->init_code(mg->_data);
-    }
-    break;
-    }
-}
-
 static void game_loop(void)
 {
     Meta_Game mg = meta_game_init(0);
@@ -128,6 +157,8 @@ static void game_loop(void)
     {
         meta_game_frame(&mg);
     }
+    free(mg._data);
+	mg._data = NULL;
 #endif
 }
 
