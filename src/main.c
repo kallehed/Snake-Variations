@@ -11,29 +11,31 @@
 #include <emscripten/emscripten.h>
 #endif
 
-static const Meta_Game_Set_Level_Code SET_LEVEL_FUNCS[] = {metagame_set_level_First,
-                                                           metagame_set_level_BlueSnakes,
-                                                           metagame_set_level_Skin,
-                                                           metagame_set_level_Boxes,
-                                                           metagame_set_level_EverGrowing,
-                                                           metagame_set_level_GigFreeFast,
-                                                           metagame_set_level_HidingBoxes,
-                                                           metagame_set_level_YouFood,
-                                                           metagame_set_level_Maze,
-                                                           metagame_set_level_GetSmall,
-                                                           metagame_set_level_StaticPlatformer,
-                                                           metagame_set_level_Seeker,
-                                                           metagame_set_level_UnSync,
-                                                           metagame_set_level_Spinny,
-                                                           metagame_set_level_OpenWorld,
-                                                           metagame_set_level_Wait,
-                                                           metagame_set_level_Suicide,
-                                                           metagame_set_level_Attack,
-                                                           metagame_set_level_Accel,
-                                                           metagame_set_level_Zelda,
-                                                           metagame_set_level_InZoom,
-                                                           metagame_set_level_ObsCourse, 
-														   metagame_set_level_YouBlue,
+static const Meta_Game_Set_Level_Code SET_LEVEL_FUNCS[] = {
+    metagame_set_level_First,
+    metagame_set_level_BlueSnakes,
+    metagame_set_level_Skin,
+    metagame_set_level_Boxes,
+    metagame_set_level_EverGrowing,
+    metagame_set_level_GigFreeFast,
+    metagame_set_level_HidingBoxes,
+    metagame_set_level_YouFood,
+    metagame_set_level_Maze,
+    metagame_set_level_GetSmall,
+    metagame_set_level_StaticPlatformer,
+    metagame_set_level_Seeker,
+    metagame_set_level_UnSync,
+    metagame_set_level_Spinny,
+    metagame_set_level_OpenWorld,
+    metagame_set_level_Wait,
+    metagame_set_level_Suicide,
+    metagame_set_level_Attack,
+    metagame_set_level_Accel,
+    metagame_set_level_Zelda,
+    metagame_set_level_InZoom,
+    metagame_set_level_ObsCourse,
+    metagame_set_level_YouBlue,
+    metagame_set_level_FallFood,
 };
 
 static Meta_Game meta_game_init(Int frame);
@@ -49,6 +51,9 @@ static bool meta_game_run_level_correctly(Meta_Game *mg)
         {
             goto GOTO_RESET_LEVEL;
         }
+		if (IsKeyPressed(KEY_F)) {
+				ToggleFullscreen();
+			}
     }
     break;
     case Level_Return_Next_Level: {
@@ -107,7 +112,7 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 44; // 42 latest
+        Int skip = 0; // 46 latest
         if (frame < skip)
             frame = skip;
     }
@@ -158,7 +163,7 @@ static void game_loop(void)
         meta_game_frame(&mg);
     }
     free(mg._data);
-	mg._data = NULL;
+    mg._data = NULL;
 #endif
 }
 

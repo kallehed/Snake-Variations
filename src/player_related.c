@@ -1,6 +1,6 @@
 #include "player_related.h"
 
-Pos player_nth_position(const Player *player, Int idx)
+Pos player_nth_position(const Player *player, Int idx) // TODO MAKE THIS FASTER
 {
     Int i = player->idx_pos - idx;
     while (i < 0)

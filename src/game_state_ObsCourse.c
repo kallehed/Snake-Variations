@@ -18,7 +18,6 @@ void game_state_init_ObsCourse(Game_State_ObsCourse *new_g)
     g.w = world_state0_init(20);
     g.w = world_state0_init_general(GS_OBSCOURSE_WIDTH, GS_OBSCOURSE_HEIGHT, WINDOW_HEIGHT / GS_OBSCOURSE_HEIGHT);
     g.player = player_init((Pos){4, 5}, GS_OBSCOURSE_PLAYER_START_LENGTH, Dir_Right);
-    food_init_position((Food *)&g.foods, &g.player, &g.w);
     g.time_for_move = 1.0;
 
     g.cam_x = 0.f;
@@ -100,6 +99,8 @@ Level_Return game_state_frame_ObsCourse(Game_State_ObsCourse *g)
     // drawing
     BeginDrawing();
     ClearBackground(RAYWHITE);
+	DrawRectangle(0, 0, 10, WINDOW_HEIGHT, RED);
+	DrawRectangle(WINDOW_WIDTH - 10, 0, 10, WINDOW_HEIGHT, RED);
     draw_fps();
     {
         // TraceLog(LOG_INFO, "cam_x: %f", cam_x); // 2*width/(3)  width/ 2

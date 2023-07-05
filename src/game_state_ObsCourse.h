@@ -1,8 +1,8 @@
-
 #pragma once
+
+#include "maze_stuff.h"
 #include "player_related.h"
 #include "very_general.h"
-#include "maze_stuff.h"
 
 typedef struct
 {
