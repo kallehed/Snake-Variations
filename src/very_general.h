@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define DEV 1
+#define DEV 0
 // Whether to cycle through all levels quickly at beginning, to test their validity
 // #define TEST_ALL_LEVELS
 #define GAME_FPS 60
@@ -86,19 +86,22 @@ void set_positions_as_line_from_without_wrapping(Pos positions[], const Int leng
 // useful for spawning things outside the game
 Dir_And_Pos random_outside_edge_position_and_normal(const World_State0 *w);
 
+// Whether a manifold of points intersect one single point
+bool points_intersect_point(const Pos points[], Int length, Pos point);
+
 void draw_block_at(Pos pos, Color color, const World_State0 *w);
 void draw_blocks_at(Pos pos, Pos w_h, Color color, const World_State0 *w);
 // draw warping, assuming it can not have negative position(ex: boxes) and will only overflow at width and height of
 // world
-void draw_blocks_warp(Pos pos, Pos w_h, Color color, const World_State0 *w);
-void draw_snakelike(Pos positions[], Int length, Color head, Color body, const World_State0 *w);
+void draw_blocks_warp(const Pos pos, const Pos w_h, const Color color, const World_State0 *w);
+void draw_snakelike(const Pos positions[], const Int length, const Color head, const Color body, const World_State0 *w);
 
-World_State0 world_state0_init(Int width);
+World_State0 world_state0_init(const Int width);
 // For when you want a scrollable world
-World_State0 world_state0_init_general(Int width, Int height, Int block_pixel_len);
+World_State0 world_state0_init_general(const Int width, const Int height, const Int block_pixel_len);
 
 // In pixels
-void draw_food_left_in_2D_space_general(Int food_left_to_win, Int width, Int height, Int offset_x, Int offset_y);
+void draw_food_left_in_2D_space_general(const Int food_left_to_win,const  Int width,const  Int height, Int offset_x, Int offset_y);
 void draw_food_left_in_2D_space(Int food_left_to_win, Int width, Int height);
 void draw_food_left_general(Int food_left_to_win, int x, int y);
 void draw_food_left(Int food_left_to_win);

@@ -13,7 +13,7 @@
 
 typedef int8_t Maze0_Cell;
 
-// - is empty, | is wall, F is placing food, S is signifier but does not do anything
+// - is empty, | is wall, F is placing food, S for pather snake. P does not do anything. W is water.
 void maze0_init_from_string(const char *const *const map, const Int width, const Int height, Food foods[],
                             Maze0_Cell maze[], Snake_Pather pathers[], const Int pather_lengths[],
                             const Dir pather_dirs[], Box boxes[], const World_State0 *w);

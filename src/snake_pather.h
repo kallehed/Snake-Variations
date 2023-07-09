@@ -27,8 +27,9 @@ typedef struct
 
 // Inits a snake_pather correctly, MAKE SURE WAY LENGTH ARE UNDER THE MAXIMUM
 // DOES NOT INIT POSITION
-Snake_Pather snake_pather_init_except_position(Snake_Pather_Way ways[], Int nr_ways);
+Snake_Pather snake_pather_init_except_position(const Snake_Pather_Way ways[], const Int nr_ways);
 
-void snake_pather_draw(Snake_Pather *snake_pather, World_State0 *w);
+void snake_pather_draw(const Snake_Pather *snake_pather, const World_State0 *w);
 void snake_pather_move(Snake_Pather *snake_pather, World_State0 *w);
+bool snake_pather_intersect_point(const Snake_Pather *pather, Pos point);
 bool snake_pather_player_intersection(Snake_Pather *snake_pather, Player *player);

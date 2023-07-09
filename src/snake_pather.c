@@ -3,9 +3,9 @@
 
 // Inits a snake_pather correctly, MAKE SURE WAY LENGTH ARE UNDER THE MAXIMUM
 // DOES NOT INIT POSITION
-Snake_Pather snake_pather_init_except_position(Snake_Pather_Way ways[], Int nr_ways)
+Snake_Pather snake_pather_init_except_position(const Snake_Pather_Way ways[], const Int nr_ways)
 {
-	assert(nr_ways <= SNAKE_PATHER_MAX_WAYS);
+    assert(nr_ways <= SNAKE_PATHER_MAX_WAYS);
     Snake_Pather pather = (Snake_Pather){
         .ways_len = nr_ways,
         .way_idx = nr_ways,
@@ -15,10 +15,10 @@ Snake_Pather snake_pather_init_except_position(Snake_Pather_Way ways[], Int nr_w
     {
         pather.ways[i] = ways[i];
     }
-	return pather;
+    return pather;
 }
 
-void snake_pather_draw(Snake_Pather *snake_pather, World_State0 *w)
+void snake_pather_draw(const Snake_Pather *snake_pather, const World_State0 *w)
 {
     draw_snakelike(snake_pather->positions, snake_pather->len, SKYBLUE, BLUE, w);
 }
@@ -45,6 +45,11 @@ void snake_pather_move(Snake_Pather *snake_pather, World_State0 *w)
     }
     snake_pather->positions[0] = move_inside_grid(snake_pather->positions[0], dir, w);
     --snake_pather->walk_this_way_counter;
+}
+
+bool snake_pather_intersect_point(const Snake_Pather *pather, Pos point)
+{
+	return points_intersect_point(pather->positions, pather->len, point);
 }
 
 bool snake_pather_player_intersection(Snake_Pather *snake_pather, Player *player)

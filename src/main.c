@@ -36,6 +36,7 @@ static const Meta_Game_Set_Level_Code SET_LEVEL_FUNCS[] = {
     metagame_set_level_ObsCourse,
     metagame_set_level_YouBlue,
     metagame_set_level_FallFood,
+    metagame_set_level_OnceMaze,
 };
 
 static Meta_Game meta_game_init(Int frame);
@@ -51,13 +52,10 @@ static bool meta_game_run_level_correctly(Meta_Game *mg)
         {
             goto GOTO_RESET_LEVEL;
         }
-		if (IsKeyPressed(KEY_F)) {
-				ToggleFullscreen();
-			}
     }
     break;
     case Level_Return_Next_Level: {
-        TraceLog(LOG_INFO, "%s", "THE FUNCTION RETURNED ONE ONE ONE \n");
+        TraceLog(LOG_INFO, "%s", "Go To Next Level\n");
         return true;
     }
     break;
@@ -83,7 +81,7 @@ static void meta_game_frame(Meta_Game *mg)
 #ifdef TEST_ALL_LEVELS
 static void test_all_levels(void)
 {
-    SetTargetFPS(60);
+    SetTargetFPS(60); // DONT CHANGE, otherwise less will be seen
     for (int frame = 0;; frame += 2)
     {
         Meta_Game mg = meta_game_init(frame);
@@ -112,13 +110,13 @@ static Meta_Game meta_game_init(Int frame)
 
     if (DEV)
     {
-        Int skip = 0; // 46 latest
+        Int skip = 48; // 48 latest
         if (frame < skip)
             frame = skip;
     }
     mg.frame = frame;
 
-    if (frame % 2 == 1)
+    if (1 == frame % 2)
     {
         metagame_set_level_Cutscene0(&mg);
     }
@@ -151,6 +149,7 @@ static Meta_Game meta_game_init(Int frame)
 static void game_loop(void)
 {
     Meta_Game mg = meta_game_init(0);
+
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop_arg((void (*)(void *))meta_game_frame, &mg, 0, 1);
 #else
@@ -169,7 +168,7 @@ static void game_loop(void)
 
 int main(void)
 {
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "CSnake");
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Snake Variations");
 
 #ifdef TEST_ALL_LEVELS
     test_all_levels();

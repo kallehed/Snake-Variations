@@ -205,6 +205,19 @@ Dir_And_Pos random_outside_edge_position_and_normal(const World_State0 *w)
     }
 }
 
+// Whether a manifold of points intersect one single point
+bool points_intersect_point(const Pos points[], Int length, Pos point)
+{
+    for (Int i = 0; i < length; ++i)
+    {
+        if (pos_equal(points[i], point))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void draw_block_at(Pos pos, Color color, const World_State0 *w)
 {
     DrawRectangle(pos.x * w->block_pixel_len, pos.y * w->block_pixel_len, w->block_pixel_len, w->block_pixel_len,
@@ -220,7 +233,7 @@ void draw_blocks_at(Pos pos, Pos w_h, Color color, const World_State0 *w)
 
 // draw warping, assuming it can not have negative position(ex: boxes) and will only overflow at width and height of
 // world
-void draw_blocks_warp(Pos pos, Pos w_h, Color color, const World_State0 *w)
+void draw_blocks_warp(const Pos pos, const Pos w_h, const Color color, const World_State0 *w)
 {
     draw_blocks_at(pos, w_h, color, w);
     Coord x_over = pos.x + w_h.x - w->width;
@@ -239,7 +252,7 @@ void draw_blocks_warp(Pos pos, Pos w_h, Color color, const World_State0 *w)
     }
 }
 
-void draw_snakelike(Pos positions[], Int length, Color head, Color body, const World_State0 *w)
+void draw_snakelike(const Pos positions[], const Int length, const Color head, const Color body, const World_State0 *w)
 {
     for (Int i = 0; i < length; ++i)
     {
@@ -247,7 +260,7 @@ void draw_snakelike(Pos positions[], Int length, Color head, Color body, const W
     }
 }
 
-World_State0 world_state0_init(Int width)
+World_State0 world_state0_init(const Int width)
 {
     World_State0 w = {.width = width};
     w.block_pixel_len = WINDOW_WIDTH / w.width;
@@ -256,15 +269,18 @@ World_State0 world_state0_init(Int width)
 }
 
 // For when you want a scrollable world
-World_State0 world_state0_init_general(Int width, Int height, Int block_pixel_len)
+World_State0 world_state0_init_general(const Int width, const Int height, const Int block_pixel_len)
 {
     World_State0 w = {.width = width, .height = height, .block_pixel_len = block_pixel_len};
     return w;
 }
 
-void draw_food_left_in_2D_space_general(Int food_left_to_win, Int width, Int height, Int offset_x, Int offset_y) {
+void draw_food_left_in_2D_space_general(const Int food_left_to_win, const Int width, const Int height, Int offset_x,
+                                        Int offset_y)
+{
     char buffer[100];
-    if (food_left_to_win > 9) offset_x += 400;
+    if (food_left_to_win > 9)
+        offset_x += 400;
     snprintf(buffer, sizeof(buffer), "%d", food_left_to_win);
     const Int x_inc = WINDOW_WIDTH * ((food_left_to_win >= 10) ? 1.4 : 1);
     for (Int i = 0; i < height; i += WINDOW_HEIGHT * 1.25)
@@ -274,7 +290,6 @@ void draw_food_left_in_2D_space_general(Int food_left_to_win, Int width, Int hei
             DrawText(buffer, offset_x + j, offset_y + i, 800, (Color){0, 0, 0, 40});
         }
     }
-    
 }
 
 // In pixels
@@ -292,8 +307,9 @@ void draw_food_left_general(Int food_left_to_win, int x, int y)
 
 void draw_food_left(Int food_left_to_win)
 {
-    draw_food_left_general(food_left_to_win, (food_left_to_win >= 20)? -10 : 200, -40);
+    draw_food_left_general(food_left_to_win, (food_left_to_win >= 20) ? -10 : 200, -40);
 }
+
 void draw_fps(void)
 {
     char myText[100];
@@ -301,6 +317,7 @@ void draw_fps(void)
     snprintf(myText, sizeof(myText), "FPS: %d", fps);
     DrawText(myText, 10, 10, 20, LIGHTGRAY);
 }
+
 bool time_move_logic_general(double *time_for_move, const double wait_time)
 {
     double time = GetTime();
@@ -319,19 +336,19 @@ bool time_move_logic(double *time_for_move)
 // NOT PURE
 Dir get_dir_from_input(void)
 {
-    if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_L))
+    if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_L) || IsKeyPressed(KEY_D))
     {
         return Dir_Right;
     }
-    if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_H))
+    if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_H) || IsKeyPressed(KEY_A))
     {
         return Dir_Left;
     }
-    if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_K))
+    if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_K) || IsKeyPressed(KEY_W))
     {
         return Dir_Up;
     }
-    if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_J))
+    if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_J) || IsKeyPressed(KEY_S))
     {
         return Dir_Down;
     }

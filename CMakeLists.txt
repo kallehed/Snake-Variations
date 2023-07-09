@@ -14,7 +14,8 @@ endif ()
 
 set(SOURCE_DIR src)
 
-# Collect all source files from the source directory WHEN ADDING NEW FILES DON't FORGET TO cmake ..
+# Collect all source files from the source directory 
+# WHEN ADDING NEW FILES DON't FORGET TO RE-SAVE THIS FILE
 aux_source_directory(${SOURCE_DIR} SOURCE_FILES)
 
 # Add your target executable
