@@ -4,10 +4,10 @@
 #include "player_related.h"
 #include "very_general.h"
 
-void metagame_set_level_YouBlue(Meta_Game *mg)
+void level_set_YouBlue(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)gs_frame_YouBlue;
-    mg->init_code = (Meta_Game_Init_Code)gs_init_YouBlue;
+    mg->frame_code = (Level_Frame_Code)gs_frame_YouBlue;
+    mg->init_code = (Level_Init_Code)gs_init_YouBlue;
     mg->size = (sizeof(GS_YouBlue));
 }
 

@@ -3,10 +3,10 @@
 #include "level_declarations.h"
 // EverGrowing
 
-void metagame_set_level_EverGrowing(Meta_Game *mg)
+void level_set_EverGrowing(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state3_frame0;
-    mg->init_code = (Meta_Game_Init_Code)game_state3_init0;
+    mg->frame_code = (Level_Frame_Code)game_state3_frame0;
+    mg->init_code = (Level_Init_Code)game_state3_init0;
     mg->size = (sizeof(Game_State3));
 }
 

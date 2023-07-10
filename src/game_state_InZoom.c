@@ -4,10 +4,10 @@
 #include <math.h>
 #include "level_declarations.h"
 
-void metagame_set_level_InZoom(Meta_Game *mg)
+void level_set_InZoom(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state_frame_InZoom;
-    mg->init_code = (Meta_Game_Init_Code)game_state_init_InZoom;
+    mg->frame_code = (Level_Frame_Code)game_state_frame_InZoom;
+    mg->init_code = (Level_Init_Code)game_state_init_InZoom;
     mg->size = (sizeof(Game_State_InZoom));
 }
 

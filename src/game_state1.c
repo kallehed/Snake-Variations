@@ -3,17 +3,17 @@
 #include <stdlib.h>
 #include "level_declarations.h"
 
-void metagame_set_level_BlueSnakes(Meta_Game *mg)
+void level_set_BlueSnakes(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state1_frame0;
-    mg->init_code = (Meta_Game_Init_Code)game_state1_init;
+    mg->frame_code = (Level_Frame_Code)game_state1_frame0;
+    mg->init_code = (Level_Init_Code)game_state1_init;
     mg->size = (sizeof(Game_State1));
 }
 
-void metagame_set_level_UnSync(Meta_Game *mg)
+void level_set_UnSync(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state1_frame_UnSync;
-    mg->init_code = (Meta_Game_Init_Code)game_state1_init_UnSync;
+    mg->frame_code = (Level_Frame_Code)game_state1_frame_UnSync;
+    mg->init_code = (Level_Init_Code)game_state1_init_UnSync;
     mg->size = (sizeof(Game_State1_UnSync));
 }
 
@@ -101,7 +101,7 @@ Level_Return game_state1_frame0(Game_State1 *g)
             }
         }
     }
-    Int food_left_to_win = (DEV ? 8 : 8) - g->player.length;
+    Int food_left_to_win = (DEV ? 2 : 8) - g->player.length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;

@@ -2,10 +2,10 @@
 #include <math.h>
 #include "level_declarations.h"
 
-void metagame_set_level_Accel(Meta_Game *mg)
+void level_set_Accel(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state_frame_Accel;
-    mg->init_code = (Meta_Game_Init_Code)game_state_init_Accel;
+    mg->frame_code = (Level_Frame_Code)game_state_frame_Accel;
+    mg->init_code = (Level_Init_Code)game_state_init_Accel;
     mg->size = (sizeof(Game_State_Accel));
 }
 

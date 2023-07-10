@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define DEV 0
+#define DEV 1
 // Whether to cycle through all levels quickly at beginning, to test their validity
 // #define TEST_ALL_LEVELS
 #define GAME_FPS 60
@@ -49,21 +49,20 @@ typedef enum Level_Return
     Level_Return_Reset_Level,
 } Level_Return;
 
-typedef Level_Return (*Meta_Game_Frame_Code)(void *);
-typedef void (*Meta_Game_Init_Code)(void *);
+typedef Level_Return (*Level_Frame_Code)(void *);
+typedef void (*Level_Init_Code)(void *);
 
 typedef struct
 {
-    Meta_Game_Frame_Code frame_code;
-    Meta_Game_Init_Code init_code;
-    uint32_t size;
+    Level_Frame_Code frame_code;
+    Level_Init_Code init_code;
+    uint32_t size; // size in bytes of *_data
 
     void *_data; // should not be touched by anything other than main.c
-    Int frame;
-} Meta_Game;
+} Level;
 
 // for setting function pointers to init code, frame code, and mallocing the data
-typedef void (*Meta_Game_Set_Level_Code)(Meta_Game *);
+typedef void (*Set_Level_Code)(Level *);
 
 bool rect_intersection(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2);
 bool rect_intersection_wrap(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2, const World_State0 *w);
@@ -101,7 +100,8 @@ World_State0 world_state0_init(const Int width);
 World_State0 world_state0_init_general(const Int width, const Int height, const Int block_pixel_len);
 
 // In pixels
-void draw_food_left_in_2D_space_general(const Int food_left_to_win,const  Int width,const  Int height, Int offset_x, Int offset_y);
+void draw_food_left_in_2D_space_general(const Int food_left_to_win, const Int width, const Int height, Int offset_x,
+                                        Int offset_y);
 void draw_food_left_in_2D_space(Int food_left_to_win, Int width, Int height);
 void draw_food_left_general(Int food_left_to_win, int x, int y);
 void draw_food_left(Int food_left_to_win);

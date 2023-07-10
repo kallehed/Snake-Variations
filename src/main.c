@@ -4,6 +4,8 @@
 #include <stdlib.h>
 
 #include "level_declarations.h"
+#include "main.h"
+#include "very_general.h"
 
 // #define PLATFORM_WEB
 
@@ -11,70 +13,268 @@
 #include <emscripten/emscripten.h>
 #endif
 
-static const Meta_Game_Set_Level_Code SET_LEVEL_FUNCS[] = {
-    metagame_set_level_First,
-    metagame_set_level_BlueSnakes,
-    metagame_set_level_Skin,
-    metagame_set_level_Boxes,
-    metagame_set_level_EverGrowing,
-    metagame_set_level_GigFreeFast,
-    metagame_set_level_HidingBoxes,
-    metagame_set_level_YouFood,
-    metagame_set_level_Maze,
-    metagame_set_level_GetSmall,
-    metagame_set_level_StaticPlatformer,
-    metagame_set_level_Seeker,
-    metagame_set_level_UnSync,
-    metagame_set_level_Spinny,
-    metagame_set_level_OpenWorld,
-    metagame_set_level_Wait,
-    metagame_set_level_Suicide,
-    metagame_set_level_Attack,
-    metagame_set_level_Accel,
-    metagame_set_level_Zelda,
-    metagame_set_level_InZoom,
-    metagame_set_level_ObsCourse,
-    metagame_set_level_YouBlue,
-    metagame_set_level_FallFood,
-    metagame_set_level_OnceMaze,
+static const Set_Level_Code LEVEL_SET_FUNCS[] = {
+    level_set_First,
+    level_set_BlueSnakes,
+    level_set_Skin,
+    level_set_Boxes,
+    level_set_EverGrowing,
+    level_set_GigFreeFast,
+    level_set_HidingBoxes,
+    level_set_YouFood,
+    level_set_Maze,
+    level_set_GetSmall,
+    level_set_StaticPlatformer,
+    level_set_Seeker,
+    level_set_UnSync,
+    level_set_Spinny,
+    level_set_OpenWorld,
+    level_set_Wait,
+    level_set_Suicide,
+    level_set_Attack,
+    level_set_Accel,
+    level_set_Zelda,
+    level_set_InZoom,
+    level_set_ObsCourse,
+    level_set_YouBlue,
+    level_set_FallFood,
+    level_set_OnceMaze,
 };
 
-static Meta_Game meta_game_init(Int frame);
+static Level level_init(const Int frame);
 
 // handles just resetting and stuff, returns whether level was completed or not
 // DOES NOT FREE ANYTHING, just handles resets and the like
-static bool meta_game_run_level_correctly(Meta_Game *mg)
+static Level_Return level_run_correctly(Level *l)
 {
-    switch (mg->frame_code(mg->_data))
+    switch (l->frame_code(l->_data))
     {
     case Level_Return_Continue: {
         if (IsKeyPressed(KEY_R))
         {
             goto GOTO_RESET_LEVEL;
         }
+        return Level_Return_Continue;
     }
     break;
     case Level_Return_Next_Level: {
         TraceLog(LOG_INFO, "%s", "Go To Next Level\n");
-        return true;
+        return Level_Return_Next_Level;
     }
     break;
     case Level_Return_Reset_Level: {
     GOTO_RESET_LEVEL:
-        mg->init_code(mg->_data);
+        l->init_code(l->_data);
+        return Level_Return_Reset_Level;
     }
     break;
     }
+    return Level_Return_Reset_Level; // control flow CANT go here
+}
+
+// Returns status of level
+static Level_Return level_frame(Level *l)
+{
+    switch (level_run_correctly(l))
+    {
+    case Level_Return_Continue: {
+        return Level_Return_Continue;
+    }
+    break;
+    case Level_Return_Next_Level: {
+        free(l->_data);
+        l->_data = NULL;
+        return Level_Return_Next_Level;
+    }
+    break;
+    case Level_Return_Reset_Level: {
+        return Level_Return_Reset_Level;
+    }
+    break;
+    }
+    return Level_Return_Reset_Level;
+}
+
+int32_t my_min(int32_t a, int32_t b)
+{
+    if (a > b)
+        return b;
+    return a;
+}
+
+static Surprise_State surprise_init(void)
+{
+    Surprise_State s;
+    s.inputs_made = 0;
+    s.start_time = GetTime();
+
+    return s;
+}
+
+// returns true if level is done
+static bool game_handle_level(Game *g)
+{
+    switch (level_frame(&g->l))
+    {
+    case Level_Return_Continue: {
+        g->try_surprise_timer += GetFrameTime();
+        const float surprise_check_interval = 1.f; // every second
+        if (surprise_check_interval <= g->try_surprise_timer)
+        {
+            g->try_surprise_timer -= surprise_check_interval;
+            const double cur_time = GetTime() * (DEV ? (1000.0) : 1.0);
+            const double time_since_surprise = cur_time - g->time_of_prev_surprise;
+            const Int wait_time = 1800;
+            if ((Int)(time_since_surprise) > wait_time ||
+                wait_time == GetRandomValue((Int)time_since_surprise, wait_time))
+            {
+                printf("yoo this is rand! %f\n", time_since_surprise);
+                g->time_of_prev_surprise = GetTime();
+                g->game_mode = Game_Mode_Random_Surprise;
+				g->surp = surprise_init();
+            }
+        }
+    }
+    break;
+    case Level_Return_Next_Level: {
+        // level is done and meta games memory is freed
+        g->frame++;
+        g->l = level_init(g->frame);
+        return true;
+    }
+    break;
+    case Level_Return_Reset_Level: {
+        g->deaths++;
+    }
+    break;
+    }
+    // printf("deaths: %d\n", g->deaths);
     return false;
 }
 
-static void meta_game_frame(Meta_Game *mg)
+// returns true if we should exit surprise state
+static bool game_surprise(Surprise_State *surp)
 {
-    if (meta_game_run_level_correctly(mg))
+    Color background_color = BLACK;
+    Color lose_color = RED;
+    const double time_passed = GetTime() - surp->start_time;
+
+    if (time_passed > 9.5)
     {
-        free(mg->_data);
-        mg->_data = NULL;
-        *mg = meta_game_init(mg->frame + 1);
+        background_color = RED;
+    }
+    if (time_passed > 10.0) // go back
+    {
+        return true;
+    }
+
+    if (get_dir_from_input() != Dir_Nothing)
+    {
+        surp->inputs_made++;
+        lose_color = GOLD;
+    }
+
+    BeginDrawing();
+    ClearBackground(background_color);
+    DrawText("STOP!", 50, 100, 250, WHITE);
+    DrawText("Don't touch anything!", 100, 350, 60, YELLOW);
+    {
+        char text[100];
+        snprintf(text, sizeof(text), "You lose %d points!", surp->inputs_made);
+        DrawText(text, 150, 450, 30, lose_color);
+    }
+
+    {
+        double rect_y = -300.0 + 200.0 * time_passed;
+        // printf("y: %f\n", rect_y);
+        DrawRectangle(0, (int)rect_y, WINDOW_WIDTH, 100, (Color){0, 255, 0, 150});
+    }
+    {
+        double rect_x = 1200 - 200.0 * time_passed;
+        // printf("y: %f\n", rect_y);
+        DrawRectangle((int)rect_x, 0, 100, WINDOW_HEIGHT, (Color){0, 255, 0, 150});
+    }
+    {
+        double rect_y = 1700.0 - 200.0 * time_passed;
+        // printf("y: %f\n", rect_y);
+        DrawRectangle(0, (int)rect_y, WINDOW_WIDTH, 100, (Color){0, 255, 0, 150});
+    }
+    {
+        double rect_x = -1500 + 200.0 * time_passed;
+        // printf("y: %f\n", rect_y);
+        DrawRectangle((int)rect_x, 0, 100, WINDOW_HEIGHT, (Color){0, 255, 0, 150});
+    }
+
+    EndDrawing();
+    return false;
+}
+
+static Cutscene_State cutscene_init(Int points_gained, Int global_score) {
+	Cutscene_State c;
+	c.start_time = GetTime();
+	c.points_gained = points_gained;
+	c.global_score = global_score;
+	return c;
+}
+
+// returns true if cutscene is done
+static bool game_cutscene(Cutscene_State *cs)
+{
+    double time_passed = GetTime() - cs->start_time;
+
+    if (time_passed > 10.0f)
+        return true;
+
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+    DrawRectangle(time_passed * 360 - 1500, 0, 20, 1000, LIME);
+    {
+        DrawText("0", 200, -40, 800, (Color){0, 0, 0, 60});
+    }
+
+    {
+        char buffer[100];
+        snprintf(buffer, sizeof(buffer), "You have come so far!      \nPoints recieved: %d    \nTotal points: %d", cs->points_gained,
+                 cs->global_score);
+
+        int32_t i = my_min(sizeof(buffer) / sizeof(char) - 1, (int32_t)(15.0 * time_passed));
+        buffer[i] = '\0';
+        DrawText(buffer, 35, 50, 30, BLACK);
+    }
+    EndDrawing();
+    return false;
+}
+
+static void game_frame(Game *g)
+{
+    switch (g->game_mode)
+    {
+    case Game_Mode_Level: {
+        if (game_handle_level(g))
+        {
+            g->game_mode = Game_Mode_Cutscene;
+			g->cut = cutscene_init(69, g->global_score);
+        }
+    }
+    break;
+    case Game_Mode_Random_Surprise: {
+        if (game_surprise(&g->surp))
+        {
+            g->game_mode = Game_Mode_Level;
+            g->global_score -= g->surp.inputs_made;
+        }
+    }
+    break;
+    case Game_Mode_Death_Comfort: {
+    }
+    break;
+    case Game_Mode_Cutscene: {
+        if (game_cutscene(&g->cut))
+        {
+            g->game_mode = Game_Mode_Level;
+        }
+    }
+    break;
     }
 }
 
@@ -84,74 +284,79 @@ static void test_all_levels(void)
     SetTargetFPS(60); // DONT CHANGE, otherwise less will be seen
     for (int frame = 0;; frame += 2)
     {
-        Meta_Game mg = meta_game_init(frame);
+        Level l = level_init(frame);
 
-        if (-1 == mg.frame)
+        if (NULL == l.frame_code)
         {
             break;
         }
 
-        mg.init_code(mg._data);
+        l.init_code(l._data);
 
         for (int runs = 0; runs < 240; ++runs)
         {
-            meta_game_run_level_correctly(&mg);
+            meta_game_run_level_correctly(&l);
         }
-        free(mg._data);
-        mg._data = NULL;
+        free(l._data);
+        l._data = NULL;
     }
 }
 #endif
 
 // sets frame to -1 if the frame doesn't have a valid level
-static Meta_Game meta_game_init(Int frame)
+static Level level_init(const Int frame)
 {
-    Meta_Game mg;
+    Level l;
 
+    unsigned int at = frame;
+    if (at >= (sizeof(LEVEL_SET_FUNCS) / sizeof(Set_Level_Code)))
+    {
+        printf("--------\n");
+        printf("VERY BAD DEATH!!!!!!!!! AHHHHHHHH LEVEL NOT EXIST\n");
+        printf("--------\n");
+        // at = 0;
+        l.size = 0;
+        l._data = NULL;
+        l.frame_code = NULL;
+        l.init_code = NULL;
+        // l.frame = -1;
+        return l;
+    }
+    LEVEL_SET_FUNCS[at](&l);
+
+    // INIT
+    printf("Mallocing size: %u\n", l.size);
+    l._data = malloc(l.size);
+    l.init_code(l._data);
+
+    return l;
+}
+
+static Game game_init(void)
+{
+    Game g;
     if (DEV)
     {
-        Int skip = 48; // 48 latest
-        if (frame < skip)
-            frame = skip;
-    }
-    mg.frame = frame;
-
-    if (1 == frame % 2)
-    {
-        metagame_set_level_Cutscene0(&mg);
+        g.frame = 0; // 48 latest
     }
     else
     {
-        unsigned int at = frame / 2;
-        if (at >= (sizeof(SET_LEVEL_FUNCS) / sizeof(Meta_Game_Set_Level_Code)))
-        {
-            printf("--------\n");
-            printf("VERY BAD DEATH!!!!!!!!! AHHHHHHHH LEVEL NOT EXIST\n");
-            printf("--------\n");
-            // at = 0;
-            mg.size = 0;
-            mg._data = NULL;
-            mg.frame_code = NULL;
-            mg.init_code = NULL;
-            mg.frame = -1;
-            return mg;
-        }
-        SET_LEVEL_FUNCS[at](&mg);
+        g.frame = 0;
     }
-    // INIT
-    printf("Mallocing size: %u\n", mg.size);
-    mg._data = malloc(mg.size);
-    mg.init_code(mg._data);
-
-    return mg;
+    g.l = level_init(g.frame);
+    g.game_mode = Game_Mode_Level;
+    g.try_surprise_timer = 0.0f;
+    g.time_of_prev_surprise = 0.0;
+    g.deaths = 0;
+    return g;
 }
 
 static void game_loop(void)
 {
-    Meta_Game mg = meta_game_init(0);
+    Game g = game_init();
 
 #if defined(PLATFORM_WEB)
-    emscripten_set_main_loop_arg((void (*)(void *))meta_game_frame, &mg, 0, 1);
+    emscripten_set_main_loop_arg((void (*)(void *))game_frame, &g, 0, 1);
 #else
 
     SetTargetFPS(GAME_FPS); // Set our game to run at 60 frames-per-second
@@ -159,10 +364,10 @@ static void game_loop(void)
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-        meta_game_frame(&mg);
+        game_frame(&g);
     }
-    free(mg._data);
-    mg._data = NULL;
+    free(g.l._data);
+    g.l._data = NULL;
 #endif
 }
 

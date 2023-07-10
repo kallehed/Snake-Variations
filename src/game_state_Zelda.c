@@ -12,10 +12,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void metagame_set_level_Zelda(Meta_Game *mg)
+void level_set_Zelda(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state_frame_Zelda;
-    mg->init_code = (Meta_Game_Init_Code)game_state_init_Zelda;
+    mg->frame_code = (Level_Frame_Code)game_state_frame_Zelda;
+    mg->init_code = (Level_Init_Code)game_state_init_Zelda;
     mg->size = (sizeof(GS_Zelda));
 }
 

@@ -7,10 +7,10 @@
 #include <math.h>
 #include <stddef.h>
 
-void metagame_set_level_FallFood(Meta_Game *mg)
+void level_set_FallFood(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state_frame_FallFood;
-    mg->init_code = (Meta_Game_Init_Code)game_state_init_FallFood;
+    mg->frame_code = (Level_Frame_Code)game_state_frame_FallFood;
+    mg->init_code = (Level_Init_Code)game_state_init_FallFood;
     mg->size = (sizeof(GS_FallFood));
 }
 

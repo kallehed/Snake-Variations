@@ -4,43 +4,43 @@
 #include <stdlib.h>
 #include "level_declarations.h"
 
-void metagame_set_level_First(Meta_Game *mg)
+void level_set_First(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state0_frame0;
-    mg->init_code = (Meta_Game_Init_Code)game_state0_init0;
+    mg->frame_code = (Level_Frame_Code)game_state0_frame0;
+    mg->init_code = (Level_Init_Code)game_state0_init0;
     mg->size = (sizeof(Game_State0));
 }
 
-void metagame_set_level_Skin(Meta_Game *mg)
+void level_set_Skin(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state0_frame1;
-    mg->init_code = (Meta_Game_Init_Code)game_state0_init0;
+    mg->frame_code = (Level_Frame_Code)game_state0_frame1;
+    mg->init_code = (Level_Init_Code)game_state0_init0;
     mg->size = (sizeof(Game_State0));
 }
 
-void metagame_set_level_GigFreeFast(Meta_Game *mg)
+void level_set_GigFreeFast(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state0_frame2;
-    mg->init_code = (Meta_Game_Init_Code)game_state0_init1;
+    mg->frame_code = (Level_Frame_Code)game_state0_frame2;
+    mg->init_code = (Level_Init_Code)game_state0_init1;
     mg->size = (sizeof(Game_State0));
 }
-void metagame_set_level_GetSmall(Meta_Game *mg)
+void level_set_GetSmall(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state0_frameGetSmall;
-    mg->init_code = (Meta_Game_Init_Code)game_state0_init_GetSmall;
+    mg->frame_code = (Level_Frame_Code)game_state0_frameGetSmall;
+    mg->init_code = (Level_Init_Code)game_state0_init_GetSmall;
     mg->size = (sizeof(Game_State0));
 }
-void metagame_set_level_Spinny(Meta_Game *mg)
+void level_set_Spinny(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state0_frame_Spinny;
-    mg->init_code = (Meta_Game_Init_Code)game_state0_init0;
+    mg->frame_code = (Level_Frame_Code)game_state0_frame_Spinny;
+    mg->init_code = (Level_Init_Code)game_state0_init0;
     mg->size = (sizeof(Game_State0));
 }
 
-void metagame_set_level_Wait(Meta_Game *mg)
+void level_set_Wait(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state_frame_Wait;
-    mg->init_code = (Meta_Game_Init_Code)game_state_init_Wait;
+    mg->frame_code = (Level_Frame_Code)game_state_frame_Wait;
+    mg->init_code = (Level_Init_Code)game_state_init_Wait;
     mg->size = (sizeof(Game_State_Wait));
 }
 

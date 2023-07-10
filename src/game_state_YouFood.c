@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include "level_declarations.h"
 
-void metagame_set_level_YouFood(Meta_Game *mg)
+void level_set_YouFood(Level *mg)
 {
-    mg->frame_code = (Meta_Game_Frame_Code)game_state_YouFood_frame;
-    mg->init_code = (Meta_Game_Init_Code)game_state_YouFood_init;
+    mg->frame_code = (Level_Frame_Code)game_state_YouFood_frame;
+    mg->init_code = (Level_Init_Code)game_state_YouFood_init;
     mg->size = (sizeof(Game_State_YouFood));
 }
 
