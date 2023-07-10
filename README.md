@@ -3,7 +3,7 @@
 
 24 variations and theme based on Snake. 
 
-![cool gif](screenshots/bluesnakes.png)
+![cool gif](screenshots/bluesnakes.gif)
 
 ## Development:
 
