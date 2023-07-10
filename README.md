@@ -16,6 +16,8 @@ first:
 and then to run:
 `make -j6 && ./my_project`
 
+### Build for Windows:
+
 Building on windows is as simple as opening the project with Visual Studio, and having the CMake build tools installed (mine were there by default), and building with your preferred options.
 
 ### Build for the Web:
