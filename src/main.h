@@ -26,6 +26,7 @@ typedef struct
     double start_time;
 	Int points_gained;
 	Int global_score;
+	Int cutscene_nr;
 } Cutscene_State;
 
 typedef struct

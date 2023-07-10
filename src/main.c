@@ -95,6 +95,7 @@ static Level_Return level_frame(Level *l)
     return Level_Return_Reset_Level;
 }
 
+int32_t my_min(int32_t a, int32_t b);
 int32_t my_min(int32_t a, int32_t b)
 {
     if (a > b)
@@ -122,16 +123,16 @@ static bool game_handle_level(Game *g)
         if (surprise_check_interval <= g->try_surprise_timer)
         {
             g->try_surprise_timer -= surprise_check_interval;
-            const double cur_time = GetTime() * (DEV ? (1000.0) : 1.0);
+            const double cur_time = GetTime() * (DEV ? (1.0) : 1.0);
             const double time_since_surprise = cur_time - g->time_of_prev_surprise;
-            const Int wait_time = 1800;
+            const Int wait_time = (DEV) ? 500 : 1800;
             if ((Int)(time_since_surprise) > wait_time ||
                 wait_time == GetRandomValue((Int)time_since_surprise, wait_time))
             {
                 printf("yoo this is rand! %f\n", time_since_surprise);
                 g->time_of_prev_surprise = GetTime();
                 g->game_mode = Game_Mode_Random_Surprise;
-				g->surp = surprise_init();
+                g->surp = surprise_init();
             }
         }
     }
@@ -209,12 +210,14 @@ static bool game_surprise(Surprise_State *surp)
     return false;
 }
 
-static Cutscene_State cutscene_init(Int points_gained, Int global_score) {
-	Cutscene_State c;
-	c.start_time = GetTime();
-	c.points_gained = points_gained;
-	c.global_score = global_score;
-	return c;
+static Cutscene_State cutscene_init(Int points_gained, Int global_score, Int nr)
+{
+    Cutscene_State c;
+    c.start_time = GetTime();
+    c.points_gained = points_gained;
+    c.global_score = global_score;
+    c.cutscene_nr = nr;
+    return c;
 }
 
 // returns true if cutscene is done
@@ -222,26 +225,83 @@ static bool game_cutscene(Cutscene_State *cs)
 {
     double time_passed = GetTime() - cs->start_time;
 
-    if (time_passed > 10.0f)
-        return true;
-
     BeginDrawing();
     ClearBackground(RAYWHITE);
-    DrawRectangle(time_passed * 360 - 1500, 0, 20, 1000, LIME);
+    DrawRectangle(time_passed * 200 - 1300, 0, 20, 1000, LIME);
     {
         DrawText("0", 200, -40, 800, (Color){0, 0, 0, 60});
     }
 
     {
-        char buffer[100];
-        snprintf(buffer, sizeof(buffer), "You have come so far!      \nPoints recieved: %d    \nTotal points: %d", cs->points_gained,
-                 cs->global_score);
+        const char *const texts[] = {
+            "You have come so far already!",
+            "Truly great feats achieved!",
+			"Wow! Beautifully played!!", 
+			"Boxtravagantly played right there!", 
+			"Wow, that level couldn't get any longer!", 
+			"Couldn't see you there!",
+			"Boxceptionally manoeuvred right there!",
+			"Delightfully inverted, or?",
+			"That maze sure wasn't prepared for that!",
+			"Reversion is not diversion.", 
+			"Mario and Luigi surely must look up to you!",
+			"WARNING! The greatest player ever is here!",
+			"Trippy! Surely unsurreptitiously moved!",
+			"Truly flabbergasting! The horror!", 
+			"Woooow, such great plains!",
+			"Waiting? Never heard of her",
+			"Disco floor sure is getting crowded!",
+			"Hmph, AAAhh! Survival to be sure!", 
+			"Weeeeeee, snake to the moon!",
+			"You are Slink, saviour of snakekind!",
+			"Where did the cameraman go? Hello?",
+			"Ping pang, bing dang! Lots happening!",
+			"The universe is contracting onto itself", 
+			"Evil escalators sure escape my every ace!",
+			"Wow haha, levels sure are cool now!",
+        };
+        const char *const my_text = texts[cs->cutscene_nr];
 
-        int32_t i = my_min(sizeof(buffer) / sizeof(char) - 1, (int32_t)(15.0 * time_passed));
-        buffer[i] = '\0';
+        const Int my_text_len = TextLength(my_text);
+
+        Int char_at = (int32_t)(12.0 * (time_passed - 2.0));
+		if (char_at < 0) char_at = 0;
+
+        char buffer[200];
+        // first give the buffer the personal cutscene text
+        snprintf(buffer, sizeof(buffer) - 1, "%s", my_text); // spare a character for \0
+        buffer[sizeof(buffer) - 1] = '\0';
+
+        bool draw_score = char_at >= my_text_len;
+
+        if (!draw_score)
+        {
+            buffer[char_at] = '\0';
+        }
+
         DrawText(buffer, 35, 50, 30, BLACK);
+
+        if (draw_score)
+        {
+            char_at -= my_text_len + 14;
+            if (char_at < 0)
+                char_at = 0;
+
+            snprintf(buffer, sizeof(buffer) - 1, "\nPoints recieved: %d     \nTotal Points: %d", cs->points_gained,
+                     cs->global_score);
+            if (char_at < (Int)sizeof(buffer))
+            {
+                buffer[char_at] = '\0';
+            }
+
+            DrawText(buffer, 35, 50, 30, BLACK);
+        }
+
+        // printf("char_at: %d\n", char_at);
     }
     EndDrawing();
+    if (time_passed > 12.0)
+        return true;
     return false;
 }
 
@@ -253,7 +313,7 @@ static void game_frame(Game *g)
         if (game_handle_level(g))
         {
             g->game_mode = Game_Mode_Cutscene;
-			g->cut = cutscene_init(69, g->global_score);
+            g->cut = cutscene_init(69, g->global_score, g->frame - 1);
         }
     }
     break;
