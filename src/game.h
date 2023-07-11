@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game_cutscenes.h"
 #include "very_general.h"
 
 typedef enum
@@ -14,39 +15,12 @@ typedef enum
     Game_Mode_Cutscene,
 } Game_Mode;
 
-typedef struct
-{
-    double start_time;
-    Int inputs_made;
-
-} Surprise_State;
 
 typedef struct
 {
-    double start_time;
-	Int points_gained;
-	Int global_score;
-	Int cutscene_nr;
-} Cutscene_State;
+    Level_Data ld;
 
-typedef struct 
-{
-	double start_time;
-	Int deaths_in_level;
-	Int total_deaths;
-	Int evilness;
-
-} Death_Stats_State;
-
-typedef struct
-{
-    Int frame; // what level we are at
-    Level l;
-
-	Int global_score;
-
-	// For level score
-	double time_of_level_start; 
+    Int global_score;
 
     Game_Mode game_mode;
     float try_surprise_timer; // the random surprise is checked at intervals in time, this variable times that
@@ -55,12 +29,14 @@ typedef struct
 
     Cutscene_State cut;
 
-	
-	double time_of_prev_death_stats;
-	Death_Stats_State death_stats;
+    double time_of_prev_death_stats;
+    Death_Stats_State death_stats;
 
     Int global_deaths;
-	Int deaths_in_level;
-
-	Int global_evilness;
+    Int global_evilness;
 } Game;
+
+Game game_init(void);
+void game_run_frame(Game *g);
+// returns true if level is done
+bool game_handle_level(Game *g);

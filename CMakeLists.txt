@@ -27,7 +27,7 @@ else()
 	IF(CMAKE_BUILD_TYPE MATCHES Debug)
 		message("KALLEHEDS APPLICATION IS IN DEBUG")
 		target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -fsanitize=address
-			-Wcast-align -Wunused -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Wno-missing-braces)
+			-Wcast-align -Wunused -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Wno-missing-braces -Wimplicit-fallthrough -Wcast-qual -Wwrite-strings -Wbad-function-cast -Wfloat-equal -Wformat=2 -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnested-externs -Wredundant-decls -Wsequence-point -Wstrict-prototypes -Wswitch -Wundef -Wunreachable-code -Wunused-but-set-parameter)
 		target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
 	else()
 		message("KALLEHEDS IS RELEASE")

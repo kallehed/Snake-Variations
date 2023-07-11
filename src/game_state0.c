@@ -1,8 +1,8 @@
 #include "game_state0.h"
+#include "level_declarations.h"
 #include "player_related.h"
 #include "very_general.h"
 #include <stdlib.h>
-#include "level_declarations.h"
 
 void level_set_First(Level *mg)
 {
@@ -296,8 +296,9 @@ Level_Return game_state_frame_Wait(Game_State_Wait *g)
             g->warps_done++;
         }
     }
-
     Int food_left_to_win = 12 + g->warps_done - (Int)(GetTime() - g->time_started);
+    // TraceLog(LOG_INFO, "Waiting level data: warps: %d, time_started: %f, cur_time: %f, food_left: %d", g->warps_done,
+    // g->time_started, GetTime(), food_left_to_win);
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;

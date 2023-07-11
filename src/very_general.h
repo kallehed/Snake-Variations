@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+// Click 'n' to skip
 #define DEV 1
 // Whether to cycle through all levels quickly at beginning, to test their validity
 // #define TEST_ALL_LEVELS
