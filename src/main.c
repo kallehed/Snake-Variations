@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,12 +42,18 @@ static const Set_Level_Code LEVEL_SET_FUNCS[] = {
     level_set_OnceMaze,
 };
 
-static Level level_init(const Int frame);
+static void level_init(Level *l, const Int frame);
 
 // handles just resetting and stuff, returns whether level was completed or not
 // DOES NOT FREE ANYTHING, just handles resets and the like
 static Level_Return level_run_correctly(Level *l)
 {
+    if (DEV) // hacks
+    {
+        if (IsKeyPressed(KEY_N))
+            return Level_Return_Next_Level;
+    }
+
     switch (l->frame_code(l->_data))
     {
     case Level_Return_Continue: {
@@ -72,37 +79,6 @@ static Level_Return level_run_correctly(Level *l)
     return Level_Return_Reset_Level; // control flow CANT go here
 }
 
-// Returns status of level
-static Level_Return level_frame(Level *l)
-{
-    switch (level_run_correctly(l))
-    {
-    case Level_Return_Continue: {
-        return Level_Return_Continue;
-    }
-    break;
-    case Level_Return_Next_Level: {
-        free(l->_data);
-        l->_data = NULL;
-        return Level_Return_Next_Level;
-    }
-    break;
-    case Level_Return_Reset_Level: {
-        return Level_Return_Reset_Level;
-    }
-    break;
-    }
-    return Level_Return_Reset_Level;
-}
-
-int32_t my_min(int32_t a, int32_t b);
-int32_t my_min(int32_t a, int32_t b)
-{
-    if (a > b)
-        return b;
-    return a;
-}
-
 static Surprise_State surprise_init(void)
 {
     Surprise_State s;
@@ -112,12 +88,24 @@ static Surprise_State surprise_init(void)
     return s;
 }
 
+static Death_Stats_State death_stats_init(Int deaths_in_level, Int total_deaths, Int evilness)
+{
+    Death_Stats_State d;
+    d.start_time = GetTime();
+    d.deaths_in_level = deaths_in_level;
+    d.total_deaths = total_deaths;
+    d.evilness = evilness;
+    return d;
+}
+
 // returns true if level is done
 static bool game_handle_level(Game *g)
 {
-    switch (level_frame(&g->l))
+    switch (level_run_correctly(&g->l))
     {
     case Level_Return_Continue: {
+        // possibly start surprise easter egg thingy
+
         g->try_surprise_timer += GetFrameTime();
         const float surprise_check_interval = 1.f; // every second
         if (surprise_check_interval <= g->try_surprise_timer)
@@ -125,7 +113,7 @@ static bool game_handle_level(Game *g)
             g->try_surprise_timer -= surprise_check_interval;
             const double cur_time = GetTime() * (DEV ? (1.0) : 1.0);
             const double time_since_surprise = cur_time - g->time_of_prev_surprise;
-            const Int wait_time = (DEV) ? 500 : 1800;
+            const Int wait_time = (DEV) ? 500 : 1500;
             if ((Int)(time_since_surprise) > wait_time ||
                 wait_time == GetRandomValue((Int)time_since_surprise, wait_time))
             {
@@ -138,14 +126,31 @@ static bool game_handle_level(Game *g)
     }
     break;
     case Level_Return_Next_Level: {
-        // level is done and meta games memory is freed
+        // level is done, next can start
         g->frame++;
-        g->l = level_init(g->frame);
+        g->deaths_in_level = 0;
+        level_init(&g->l, g->frame);
         return true;
     }
     break;
     case Level_Return_Reset_Level: {
-        g->deaths++;
+        g->global_deaths++;
+        g->deaths_in_level++;
+
+        const double time_since_death_stats = GetTime() - g->time_of_prev_death_stats;
+        const int int_time = (int)time_since_death_stats;
+        const int max_wait = 400;
+        const bool should_show =
+            (int_time >= max_wait) || (GetRandomValue((int)time_since_death_stats, max_wait) == max_wait);
+        printf("SHOULD DEATH STATS? time passed: %f, max_wait: %d\n", time_since_death_stats, max_wait);
+
+        if (should_show)
+        {
+            g->time_of_prev_death_stats = GetTime();
+            g->game_mode = Game_Mode_Death_Stats;
+            g->global_evilness += GetRandomValue(13, 42);
+            g->death_stats = death_stats_init(g->deaths_in_level, g->global_deaths, g->global_evilness);
+        }
     }
     break;
     }
@@ -223,7 +228,7 @@ static Cutscene_State cutscene_init(Int points_gained, Int global_score, Int nr)
 // returns true if cutscene is done
 static bool game_cutscene(Cutscene_State *cs)
 {
-    double time_passed = GetTime() - cs->start_time;
+    const double time_passed = GetTime() - cs->start_time;
 
     BeginDrawing();
     ClearBackground(RAYWHITE);
@@ -236,43 +241,44 @@ static bool game_cutscene(Cutscene_State *cs)
         const char *const texts[] = {
             "You have come so far already!",
             "Truly great feats achieved!",
-			"Wow! Beautifully played!!", 
-			"Boxtravagantly played right there!", 
-			"Wow, that level couldn't get any longer!", 
-			"Couldn't see you there!",
-			"Boxceptionally manoeuvred right there!",
-			"Delightfully inverted, or?",
-			"That maze sure wasn't prepared for that!",
-			"Reversion is not diversion.", 
-			"Mario and Luigi surely must look up to you!",
-			"WARNING! The greatest player ever is here!",
-			"Trippy! Surely unsurreptitiously moved!",
-			"Truly flabbergasting! The horror!", 
-			"Woooow, such great plains!",
-			"Waiting? Never heard of her",
-			"Disco floor sure is getting crowded!",
-			"Hmph, AAAhh! Survival to be sure!", 
-			"Weeeeeee, snake to the moon!",
-			"You are Slink, saviour of snakekind!",
-			"Where did the cameraman go? Hello?",
-			"Ping pang, bing dang! Lots happening!",
-			"The universe is contracting onto itself", 
-			"Evil escalators sure escape my every ace!",
-			"Wow haha, levels sure are cool now!",
+            "Wow! Beautifully played!!",
+            "Boxtravagantly played right there!",
+            "Wow, that level couldn't get any longer!",
+            "Couldn't see you there!",
+            "Boxceptionally manoeuvred right there!",
+            "Delightfully inverted, or?",
+            "That maze sure wasn't prepared for that!",
+            "Reversion is not diversion.",
+            "Mario and Luigi surely must look up to you!",
+            "WARNING! The greatest player ever is here!",
+            "Trippy! Surely unsurreptitiously moved!",
+            "Truly flabbergasting! The horror!",
+            "Woooow, such great plains!",
+            "Waiting? Never heard of her",
+            "Disco floor sure is getting crowded!",
+            "Hmph, AAAhh! Survival to be sure!",
+            "Weeeeeee, snake to the moon!",
+            "You are Slink, saviour of snakekind!",
+            "Where did the camera-man go? Hello?",
+            "Ping pang, bing dang! Lots happening!",
+            "The universe is contracting onto itself",
+            "Evil escalators sure escape my every ace!",
+            "Wow haha, levels sure are cool now!",
         };
         const char *const my_text = texts[cs->cutscene_nr];
 
         const Int my_text_len = TextLength(my_text);
 
         Int char_at = (int32_t)(12.0 * (time_passed - 2.0));
-		if (char_at < 0) char_at = 0;
+        if (char_at < 0)
+            char_at = 0;
 
         char buffer[200];
         // first give the buffer the personal cutscene text
         snprintf(buffer, sizeof(buffer) - 1, "%s", my_text); // spare a character for \0
         buffer[sizeof(buffer) - 1] = '\0';
 
-        bool draw_score = char_at >= my_text_len;
+        const bool draw_score = char_at >= my_text_len;
 
         if (!draw_score)
         {
@@ -296,12 +302,92 @@ static bool game_cutscene(Cutscene_State *cs)
 
             DrawText(buffer, 35, 50, 30, BLACK);
         }
-
-        // printf("char_at: %d\n", char_at);
     }
     EndDrawing();
     if (time_passed > 12.0)
         return true;
+    return false;
+}
+
+static bool death_stats_frame(Death_Stats_State *ds)
+{
+    const double time_passed = GetTime() - ds->start_time;
+
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    const double time_til_first_text = 2.0;
+    bool exit_this_cutscene = false;
+    if (time_passed > time_til_first_text)
+    {
+        char text[] = "DEATH";
+        Int char_at = (Int)(10.0 * (time_passed - time_til_first_text));
+
+        const Int first_text_len = sizeof(text);
+        const bool at_first = char_at < first_text_len;
+
+        if (at_first)
+        {
+            text[char_at] = '\0';
+        }
+
+        DrawText(text, 40, 50, 220, (Color){255, 0, 0, 255});
+
+        if (!at_first)
+        {
+            char_at -= first_text_len + 20;
+            if (char_at < 0)
+                char_at = 0;
+
+            char buffer[100];
+            snprintf(buffer, sizeof(buffer) - 1, "Total deaths: %d", ds->total_deaths);
+            buffer[sizeof(buffer) - 1] = '\0';
+            const Int second_text_len = TextLength(buffer);
+
+            const bool at_second = char_at < second_text_len;
+
+            if (at_second)
+            {
+                buffer[char_at] = '\0';
+            }
+            DrawText(buffer, 100, 300, 40, (Color){200, 200, 0, 255});
+
+            if (!at_second)
+            {
+                char_at -= second_text_len + 5;
+                if (char_at < 0)
+                    char_at = 0;
+                snprintf(buffer, sizeof(buffer) - 1, "Total evilness: %d", ds->evilness);
+                buffer[sizeof(buffer) - 1] = '\0';
+                const Int third_text_len = TextLength(buffer);
+                const bool at_third = char_at < third_text_len;
+                if (at_third)
+                {
+                    buffer[char_at] = '\0';
+                }
+                DrawText(buffer, 150, 365, 30, VIOLET);
+
+                if (!at_third)
+                {
+                    char_at -= third_text_len;
+
+                    if (char_at > 5)
+                    {
+                        ClearBackground((Color){100, 0, 0, 200});
+                    }
+                    if (char_at > 8)
+                    {
+                        exit_this_cutscene = true;
+                    }
+                }
+            }
+        }
+    }
+    EndDrawing();
+
+    if (exit_this_cutscene)
+        return true;
+
     return false;
 }
 
@@ -313,7 +399,12 @@ static void game_frame(Game *g)
         if (game_handle_level(g))
         {
             g->game_mode = Game_Mode_Cutscene;
-            g->cut = cutscene_init(69, g->global_score, g->frame - 1);
+            double time_passed = GetTime() - g->time_of_level_start;
+            double score = 100.0 / (sqrt(0.02 * time_passed + 1.0));
+            Int int_score = (Int)score;
+            printf("time passed: %f, score: %f, int_score: %d\n", time_passed, score, int_score);
+            g->global_score += int_score;
+            g->cut = cutscene_init(int_score, g->global_score, g->frame - 1);
         }
     }
     break;
@@ -325,13 +416,19 @@ static void game_frame(Game *g)
         }
     }
     break;
-    case Game_Mode_Death_Comfort: {
+    case Game_Mode_Death_Stats: {
+        if (death_stats_frame(&g->death_stats))
+        {
+            g->game_mode = Game_Mode_Level;
+        }
     }
     break;
     case Game_Mode_Cutscene: {
         if (game_cutscene(&g->cut))
         {
             g->game_mode = Game_Mode_Level;
+            g->time_of_level_start = GetTime();
+            g->deaths_in_level = 0;
         }
     }
     break;
@@ -363,10 +460,11 @@ static void test_all_levels(void)
 }
 #endif
 
-// sets frame to -1 if the frame doesn't have a valid level
-static Level level_init(const Int frame)
+// sets frame to -1 if the frame doesn't have a valid level, frees previous level that was there
+static void level_init(Level *l, const Int frame)
 {
-    Level l;
+    free(l->_data);
+    l->_data = NULL;
 
     unsigned int at = frame;
     if (at >= (sizeof(LEVEL_SET_FUNCS) / sizeof(Set_Level_Code)))
@@ -375,21 +473,21 @@ static Level level_init(const Int frame)
         printf("VERY BAD DEATH!!!!!!!!! AHHHHHHHH LEVEL NOT EXIST\n");
         printf("--------\n");
         // at = 0;
-        l.size = 0;
-        l._data = NULL;
-        l.frame_code = NULL;
-        l.init_code = NULL;
+        l->size = 0;
+        l->_data = NULL;
+        l->frame_code = NULL;
+        l->init_code = NULL;
         // l.frame = -1;
-        return l;
     }
-    LEVEL_SET_FUNCS[at](&l);
+    LEVEL_SET_FUNCS[at](l);
 
     // INIT
-    printf("Mallocing size: %u\n", l.size);
-    l._data = malloc(l.size);
-    l.init_code(l._data);
+    printf("Mallocing size: %u\n", l->size);
+    l->_data = malloc(l->size);
+    if (NULL == l->_data) // Check for Out Of Memory
+        puts("!!!!!!!!! OUT OF MEMORY, MALLOC RETURNED NULL!!!!!!!!");
 
-    return l;
+    l->init_code(l->_data);
 }
 
 static Game game_init(void)
@@ -397,17 +495,22 @@ static Game game_init(void)
     Game g;
     if (DEV)
     {
-        g.frame = 0; // 48 latest
+        g.frame = 4; // 24 latest
     }
     else
     {
         g.frame = 0;
     }
-    g.l = level_init(g.frame);
+    g.l._data = NULL;
+    level_init(&g.l, g.frame);
+    g.global_score = 0;
+    g.time_of_level_start = GetTime();
     g.game_mode = Game_Mode_Level;
     g.try_surprise_timer = 0.0f;
-    g.time_of_prev_surprise = 0.0;
-    g.deaths = 0;
+    g.time_of_prev_surprise = GetTime();
+	g.time_of_prev_death_stats = GetTime();
+    g.global_deaths = 0;
+    g.deaths_in_level = 0;
     return g;
 }
 
