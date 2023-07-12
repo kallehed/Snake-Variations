@@ -79,7 +79,7 @@ Level_Return gs_frame_Ending(GS_Ending *g)
     bool print_second = false;
     bool print_third = false;
 
-    char buffer0[100]; // For score, deaths and evil
+    char buffer0[200]; // For score, deaths and evil
 
     char buffer1[100]; // For grade
 

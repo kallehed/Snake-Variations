@@ -20,6 +20,7 @@ Game game_init(void)
     g.time_of_prev_surprise = GetTime();
     g.time_of_prev_death_stats = GetTime();
     g.global_deaths = 0;
+	g.global_evilness = 0;
     return g;
 }
 
@@ -55,7 +56,7 @@ void game_run_frame(Game *g)
     case Game_Mode_Cutscene: {
         if (cutscene_frame(&g->cut))
         {
-            if (g->ld.level_num == 25)
+            if (g->ld.level_num == (TOTAL_LEVELS-1))
             {
                 g->game_mode = Game_Mode_Ending;
                 g->gs_ending = gs_init_Ending(g->global_score, g->global_deaths, g->global_evilness);

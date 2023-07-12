@@ -1,8 +1,8 @@
 #pragma once
 
 #include "game_cutscenes.h"
-#include "very_general.h"
 #include "game_state_Ending.h"
+#include "very_general.h"
 
 typedef enum
 {
@@ -14,10 +14,9 @@ typedef enum
     Game_Mode_Death_Stats,
     // After winning level
     Game_Mode_Cutscene,
-	// After winning the game
-	Game_Mode_Ending,
+    // After winning the game
+    Game_Mode_Ending,
 } Game_Mode;
-
 
 typedef struct
 {
@@ -25,17 +24,18 @@ typedef struct
 
     Int global_score;
 
-    Game_Mode game_mode;
     float try_surprise_timer; // the random surprise is checked at intervals in time, this variable times that
     double time_of_prev_surprise;
-    Surprise_State surp;
-
-    Cutscene_State cut;
 
     double time_of_prev_death_stats;
-    Death_Stats_State death_stats;
 
-	GS_Ending gs_ending;
+    Game_Mode game_mode;
+    union { // Only one can be active, or none at all when level is playing
+        Surprise_State surp;
+        Cutscene_State cut;
+        Death_Stats_State death_stats;
+        GS_Ending gs_ending;
+    };
 
     Int global_deaths;
     Int global_evilness;
