@@ -1,7 +1,7 @@
 #include "game_state_Suicide.h"
+#include "level_declarations.h"
 #include <math.h>
 #include <stdlib.h>
-#include "level_declarations.h"
 
 void level_set_Suicide(Level *mg)
 {
@@ -36,10 +36,6 @@ Level_Return game_state_frame_Suicide(Game_State_Suicide *g)
 {
     World_State0 *w = &g->w;
     // logic
-    if (IsKeyPressed(KEY_A))
-    {
-        TraceLog(LOG_INFO, "%s", "also this works!");
-    }
 
     if (g->player_flash_timer > 0.f)
     {

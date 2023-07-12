@@ -22,6 +22,7 @@ Player player_init(Pos start_pos, const Int length, const Dir dir);
 void player_draw_general(const Player *player, const Color head, const Color body, const World_State0 *w);
 void player_draw(const Player *player, const World_State0 *w);
 void player_draw_extra(const Player *player, const World_State0 *w);
+void player_draw_green(const Player *player, const World_State0 *w);
 void player_draw_flashing(const Player *player, const World_State0 *w);
 void player_set_direction_correctly(Player *player, Dir dir);
 void player_set_direction_from_input(Player *player);
@@ -33,6 +34,7 @@ bool player_intersection_point(const Player *player, const Pos point);
 bool player_intersection_points(const Player *player, const Pos *positions, const Int length);
 
 void food_draw(const Food *food, const World_State0 *w);
+void food_draw_red(const Food *food, const World_State0 *w);
 void food_set_random_position(Food *food, const World_State0 *w);
 void food_init_position(Food *food, const Player *player, const World_State0 *w);
 

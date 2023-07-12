@@ -1,4 +1,5 @@
 #include "game.h"
+#include "level.h"
 #include <math.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -9,7 +10,7 @@ Game game_init(void)
     Int start_level_num = 0;
     if (DEV)
     {
-        start_level_num = 0; // 24 latest
+        start_level_num = 0; // 25 latest
     }
     g.ld.l._data = NULL;
     level_data_init(&g.ld, start_level_num);
@@ -54,9 +55,21 @@ void game_run_frame(Game *g)
     case Game_Mode_Cutscene: {
         if (cutscene_frame(&g->cut))
         {
-            g->game_mode = Game_Mode_Level;
-            level_data_init(&g->ld, g->ld.level_num + 1);
+            if (g->ld.level_num == 25)
+            {
+                g->game_mode = Game_Mode_Ending;
+                g->gs_ending = gs_init_Ending(g->global_score, g->global_deaths, g->global_evilness);
+            }
+            else
+            {
+                g->game_mode = Game_Mode_Level;
+                level_data_init(&g->ld, g->ld.level_num + 1);
+            }
         }
+    }
+    break;
+    case Game_Mode_Ending: {
+        gs_frame_Ending(&g->gs_ending);
     }
     break;
     }
@@ -65,55 +78,70 @@ void game_run_frame(Game *g)
 // returns true if level is done
 bool game_handle_level(Game *g)
 {
-    switch (level_run_correctly(&g->ld.l))
+    if (g->ld.death_wait_timer > 0.f)
     {
-    case Level_Return_Continue: {
-        // possibly start surprise easter egg thingy
+        g->ld.death_wait_timer -= GetFrameTime();
+        BeginDrawing();
 
-        g->try_surprise_timer += GetFrameTime();
-        const float surprise_check_interval = 1.f; // every second
-        if (surprise_check_interval <= g->try_surprise_timer)
+        ClearBackground(RAYWHITE);
+        EndDrawing();
+    }
+    else
+    {
+        switch (level_run_correctly(&g->ld.l))
         {
-            g->try_surprise_timer -= surprise_check_interval;
-            const double cur_time = GetTime() * (DEV ? (1.0) : 1.0);
-            const double time_since_surprise = cur_time - g->time_of_prev_surprise;
-            const Int wait_time = (DEV) ? 850 : 850;
-            if ((Int)(time_since_surprise) > wait_time ||
-                wait_time == GetRandomValue((Int)time_since_surprise, wait_time))
+        case Level_Return_Continue: {
+            // possibly start surprise easter egg thingy
+
+            g->try_surprise_timer += GetFrameTime();
+            const float surprise_check_interval = 1.f; // every second
+            if (surprise_check_interval <= g->try_surprise_timer)
             {
-                printf("yoo this is rand! %f\n", time_since_surprise);
-                g->time_of_prev_surprise = GetTime();
-                g->game_mode = Game_Mode_Random_Surprise;
-                g->surp = surprise_init();
+                g->try_surprise_timer -= surprise_check_interval;
+                const double cur_time = GetTime() * (DEV ? (1.0) : 1.0);
+                const double time_since_surprise = cur_time - g->time_of_prev_surprise;
+                const Int wait_time = (DEV) ? 850 : 850;
+                if ((Int)(time_since_surprise) > wait_time ||
+                    wait_time == GetRandomValue((Int)time_since_surprise, wait_time))
+                {
+                    printf("yoo this is rand! %f\n", time_since_surprise);
+                    g->time_of_prev_surprise = GetTime();
+                    g->game_mode = Game_Mode_Random_Surprise;
+                    g->surp = surprise_init();
+                }
             }
         }
-    }
-    break;
-    case Level_Return_Next_Level: {
-        // level is done, next can start
-        return true;
-    }
-    break;
-    case Level_Return_Reset_Level: {
-        g->global_deaths++;
-        g->ld.deaths_in_level++;
-
-        const double time_since_death_stats = GetTime() - g->time_of_prev_death_stats;
-        const int int_time = (int)time_since_death_stats;
-        const int max_wait = 400;
-        const bool should_show =
-            (int_time >= max_wait) || (GetRandomValue((int)time_since_death_stats, max_wait) == max_wait);
-        printf("SHOULD DEATH STATS? time passed: %f, max_wait: %d\n", time_since_death_stats, max_wait);
-
-        if (should_show)
-        {
-            g->time_of_prev_death_stats = GetTime();
-            g->game_mode = Game_Mode_Death_Stats;
-            g->global_evilness += GetRandomValue(13, 42);
-            g->death_stats = death_stats_init(g->ld.deaths_in_level, g->global_deaths, g->global_evilness);
+        break;
+        case Level_Return_Next_Level: {
+            // level is done, next can start
+            return true;
         }
-    }
-    break;
+        break;
+        case Level_Return_Reset_Level: {
+            g->global_deaths++;
+            g->ld.deaths_in_level++;
+
+            const double time_since_death_stats = GetTime() - g->time_of_prev_death_stats;
+            const int int_time = (int)time_since_death_stats;
+            const int max_wait = 400;
+            const bool should_show =
+                (int_time >= max_wait) || (GetRandomValue((int)time_since_death_stats, max_wait) == max_wait);
+            printf("SHOULD DEATH STATS? time passed: %f, max_wait: %d\n", time_since_death_stats, max_wait);
+
+            if (should_show)
+            {
+                g->time_of_prev_death_stats = GetTime();
+                g->game_mode = Game_Mode_Death_Stats;
+                g->global_evilness += GetRandomValue(13, 42);
+                g->death_stats = death_stats_init(g->ld.deaths_in_level, g->global_deaths, g->global_evilness);
+            }
+            else
+            {
+                g->ld.death_wait_timer = LEVEL_DATA_DEATH_WAIT_TIME;
+            }
+        }
+        break;
+        }
     }
     // printf("deaths: %d\n", g->deaths);
     return false;

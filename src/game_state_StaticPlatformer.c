@@ -1,8 +1,8 @@
 #include "game_state_StaticPlatformer.h"
+#include "level_declarations.h"
 #include "player_related.h"
 #include "very_general.h"
 #include <stdlib.h>
-#include "level_declarations.h"
 
 void level_set_StaticPlatformer(Level *mg)
 {
@@ -84,7 +84,7 @@ void map_draw(const SPlatformer_Block map[], const Int map_width, const Int map_
         for (Int j = 0; j < map_width; ++j)
         {
             SPlatformer_Block block = map[i * map_width + j];
-            Color col = {0,255,255,255};
+            Color col = {0, 255, 255, 255};
             switch (block)
             {
 

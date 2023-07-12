@@ -49,7 +49,7 @@ void snake_pather_move(Snake_Pather *snake_pather, World_State0 *w)
 
 bool snake_pather_intersect_point(const Snake_Pather *pather, Pos point)
 {
-	return points_intersect_point(pather->positions, pather->len, point);
+    return points_intersect_point(pather->positions, pather->len, point);
 }
 
 bool snake_pather_player_intersection(Snake_Pather *snake_pather, Player *player)

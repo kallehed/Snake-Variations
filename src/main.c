@@ -41,7 +41,7 @@ static void test_all_levels(void)
 
 static void game_loop(void)
 {
-	Game *g = malloc(sizeof(Game));
+    Game *g = malloc(sizeof(Game));
     *g = game_init();
 
 #if defined(PLATFORM_WEB)
@@ -59,7 +59,7 @@ static void game_loop(void)
     g->ld.l._data = NULL;
 #endif
 
-	free(g);
+    free(g);
 }
 
 int main(void)

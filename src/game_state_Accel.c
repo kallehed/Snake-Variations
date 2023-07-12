@@ -1,6 +1,6 @@
 #include "game_state_Accel.h"
-#include <math.h>
 #include "level_declarations.h"
+#include <math.h>
 
 void level_set_Accel(Level *mg)
 {
@@ -13,7 +13,6 @@ void game_state_init_Accel(Game_State_Accel *new_g)
 {
     Game_State_Accel g;
     g.w = world_state0_init(24);
-    // g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
     g.player = player_init((Pos){.x = 10, .y = 10}, 3, Dir_Right);
     food_init_position(&g.food, &g.player, &g.w);
     g.time_for_move = 1.0;

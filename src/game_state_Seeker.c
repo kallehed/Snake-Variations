@@ -1,10 +1,10 @@
 #include "game_state_Seeker.h"
+#include "level_declarations.h"
 #include "player_related.h"
 #include "raylib.h"
 #include "very_general.h"
 #include <math.h>
 #include <stdlib.h>
-#include "level_declarations.h"
 
 void level_set_Seeker(Level *mg)
 {
@@ -34,10 +34,6 @@ Level_Return game_state_frame_Seeker(Game_State_Seeker *g)
 {
     World_State0 *w = &g->w;
     // logic
-    if (IsKeyPressed(KEY_A))
-    {
-        TraceLog(LOG_INFO, "%s", "also this works!");
-    }
 
     player_set_direction_from_input(&g->player);
 

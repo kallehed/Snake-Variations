@@ -101,7 +101,7 @@ void game_state_init_Wait(Game_State_Wait *new_g)
 // normal snake
 Level_Return game_state0_frame0(Game_State0 *g)
 {
-    World_State0 *w = &g->w;
+    const World_State0 *w = &g->w;
     // logic
     player_set_direction_from_input(&g->player);
 
@@ -138,7 +138,7 @@ Level_Return game_state0_frame0(Game_State0 *g)
 // flashier snake
 Level_Return game_state0_frame1(Game_State0 *g)
 {
-    World_State0 *w = &g->w;
+    const World_State0 *w = &g->w;
     // logic
     player_set_direction_from_input(&g->player);
 
@@ -171,7 +171,7 @@ Level_Return game_state0_frame1(Game_State0 *g)
 
 Level_Return game_state0_frameGetSmall(Game_State0 *g)
 {
-    World_State0 *w = &g->w;
+    const World_State0 *w = &g->w;
     // logic
     player_set_direction_from_input(&g->player);
 
@@ -208,7 +208,7 @@ Level_Return game_state0_frameGetSmall(Game_State0 *g)
 // gigantic free fast
 Level_Return game_state0_frame2(Game_State0 *g)
 {
-    World_State0 *w = &g->w;
+    const World_State0 *w = &g->w;
     // logic
     player_set_direction_from_input(&g->player);
 
@@ -241,7 +241,7 @@ Level_Return game_state0_frame2(Game_State0 *g)
 // Spinny
 Level_Return game_state0_frame_Spinny(Game_State0 *g)
 {
-    World_State0 *w = &g->w;
+    const World_State0 *w = &g->w;
     // logic
     player_set_direction_from_input_spinny(&g->player);
 
@@ -274,7 +274,7 @@ Level_Return game_state0_frame_Spinny(Game_State0 *g)
 
 Level_Return game_state_frame_Wait(Game_State_Wait *g)
 {
-    World_State0 *w = &g->w;
+    const World_State0 *w = &g->w;
     // logic
     player_set_direction_from_input(&g->player);
 

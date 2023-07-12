@@ -1,6 +1,6 @@
 #include "game_state_YouFood.h"
-#include <stdlib.h>
 #include "level_declarations.h"
+#include <stdlib.h>
 
 void level_set_YouFood(Level *mg)
 {

@@ -93,8 +93,8 @@ Level_Return game_state_frame_FallFood(GS_FallFood *g)
     // drawing
     BeginDrawing();
     ClearBackground(RAYWHITE);
-	DrawRectangle(0, 0, WINDOW_WIDTH, 10, RED);
-	DrawRectangle(0, WINDOW_HEIGHT - 10, WINDOW_WIDTH, 10, RED);
+    DrawRectangle(0, 0, WINDOW_WIDTH, 10, RED);
+    DrawRectangle(0, WINDOW_HEIGHT - 10, WINDOW_WIDTH, 10, RED);
     {
         g->cam_y_speed -= 2.f * GetFrameTime();
         g->cam_y += g->cam_y_speed * GetFrameTime();

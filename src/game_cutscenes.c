@@ -52,7 +52,7 @@ bool cutscene_frame(Cutscene_State *cs)
             "The universe is contracting onto itself",
             "Evil escalators sure escape my every ace!",
             "Wow haha, levels sure are cool now!",
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX", // not real
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX", 
         };
         const char *const my_text = texts[cs->cutscene_nr];
 

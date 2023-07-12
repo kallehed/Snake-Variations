@@ -1,10 +1,10 @@
 #include "game_state_OpenWorld.h"
+#include "level_declarations.h"
 #include "maze_stuff.h"
 #include "player_related.h"
 #include "raylib.h"
 #include "snake_pather.h"
 #include "very_general.h"
-#include "level_declarations.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -133,7 +133,9 @@ void game_state_init_OpenWorld(Game_State_OpenWorld *new_g)
 
     Int p_idx = 0;
     {
-        Snake_Pather_Way ways[] = {{.dir = Dir_Right, .len = 100},};
+        Snake_Pather_Way ways[] = {
+            {.dir = Dir_Right, .len = 100},
+        };
 
         tail_lengths[p_idx] = 30;
         tail_dirs[p_idx] = Dir_Left;

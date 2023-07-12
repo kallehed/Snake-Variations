@@ -30,10 +30,6 @@ Level_Return gs_frame_YouBlue(GS_YouBlue *g)
 {
     World_State0 *w = &g->w;
     // logic
-    if (IsKeyPressed(KEY_A))
-    {
-        TraceLog(LOG_INFO, "%s", "also this works!");
-    }
 
     for (Int p = 0; p < g->player_index; ++p)
     {

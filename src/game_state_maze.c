@@ -1,9 +1,9 @@
 #include "game_state_maze.h"
+#include "level_declarations.h"
 #include "maze_stuff.h"
 #include "snake_pather.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "level_declarations.h"
 
 void level_set_Maze(Level *mg)
 {

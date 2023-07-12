@@ -1,10 +1,10 @@
 #include "level.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
 #include "level_declarations.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-static const Set_Level_Code LEVEL_SET_FUNCS[] = {
+static const Set_Level_Code LEVEL_SET_FUNCS[TOTAL_LEVELS] = {
     level_set_First,
     level_set_BlueSnakes,
     level_set_Skin,
@@ -30,6 +30,7 @@ static const Set_Level_Code LEVEL_SET_FUNCS[] = {
     level_set_YouBlue,
     level_set_FallFood,
     level_set_OnceMaze,
+    level_set_Final,
 };
 
 // frees previous level that was there
@@ -48,7 +49,7 @@ void level_init(Level *l, const Int frame)
         l->_data = NULL;
         l->frame_code = NULL;
         l->init_code = NULL;
-		return;
+        return;
     }
     LEVEL_SET_FUNCS[at](l);
 
@@ -61,13 +62,13 @@ void level_init(Level *l, const Int frame)
     l->init_code(l->_data);
 }
 
-
 void level_data_init(Level_Data *ld, Int level_num)
 {
     ld->deaths_in_level = 0;
     ld->time_of_level_start = GetTime();
     ld->deaths_in_level = 0;
     ld->level_num = level_num;
+	ld->death_wait_timer = 0.f;
     level_init(&ld->l, ld->level_num);
 }
 
@@ -105,7 +106,6 @@ Level_Return level_run_correctly(Level *l)
     }
     return Level_Return_Reset_Level; // control flow CANT go here
 }
-
 
 // gives the score depending on how long the player took to complete the level
 Int level_data_get_score(Level_Data *ld)

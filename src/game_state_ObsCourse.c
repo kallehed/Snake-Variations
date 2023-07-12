@@ -1,9 +1,9 @@
 #include "game_state_ObsCourse.h"
+#include "level_declarations.h"
 #include "player_related.h"
 #include "very_general.h"
 #include <math.h>
 #include <stddef.h>
-#include "level_declarations.h"
 
 void level_set_ObsCourse(Level *mg)
 {
@@ -99,8 +99,8 @@ Level_Return game_state_frame_ObsCourse(Game_State_ObsCourse *g)
     // drawing
     BeginDrawing();
     ClearBackground(RAYWHITE);
-	DrawRectangle(0, 0, 10, WINDOW_HEIGHT, RED);
-	DrawRectangle(WINDOW_WIDTH - 10, 0, 10, WINDOW_HEIGHT, RED);
+    DrawRectangle(0, 0, 10, WINDOW_HEIGHT, RED);
+    DrawRectangle(WINDOW_WIDTH - 10, 0, 10, WINDOW_HEIGHT, RED);
     draw_fps();
     {
         // TraceLog(LOG_INFO, "cam_x: %f", cam_x); // 2*width/(3)  width/ 2

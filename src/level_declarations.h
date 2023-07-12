@@ -27,3 +27,4 @@ void level_set_ObsCourse(Level *mg);
 void level_set_YouBlue(Level *mg);
 void level_set_FallFood(Level *mg);
 void level_set_OnceMaze(Level *mg);
+void level_set_Final(Level *mg);

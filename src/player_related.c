@@ -16,7 +16,8 @@ Player player_init(Pos start_pos, const Int length, const Dir dir)
 
     p.length = length;
     p.idx_pos = p.length - 1;
-    for (Int i = p.idx_pos; i >= 0; --i) {
+    for (Int i = p.idx_pos; i >= 0; --i)
+    {
         p.positions[i] = start_pos;
         start_pos = pos_move(start_pos, dir_opposite(dir));
     }
@@ -58,6 +59,25 @@ void player_draw_extra(const Player *player, const World_State0 *w)
         else
         {
             color = (i % 6 == 0) ? GOLD : (i % 2 == 0) ? ORANGE : MAROON;
+        }
+        draw_block_at(pos, color, w);
+    }
+}
+
+void player_draw_green(const Player *player, const World_State0 *w)
+{
+    for (Int i = 0; i < player->length; ++i)
+    {
+        const Pos pos = player_nth_position(player, i);
+
+        Color color;
+        if (i == 0)
+        {
+            color = GREEN;
+        }
+        else
+        {
+            color = (i % 6 == 0) ? DARKBROWN : (i % 2 == 0) ? LIME : DARKGREEN;
         }
         draw_block_at(pos, color, w);
     }
@@ -203,6 +223,10 @@ bool player_intersection_points(const Player *player, const Pos *positions, cons
 void food_draw(const Food *food, const World_State0 *w)
 {
     draw_block_at(food->pos, GREEN, w);
+}
+void food_draw_red(const Food *food, const World_State0 *w)
+{
+    draw_block_at(food->pos, RED, w);
 }
 void food_set_random_position(Food *food, const World_State0 *w)
 {

@@ -2,17 +2,20 @@
 
 #include "game_cutscenes.h"
 #include "very_general.h"
+#include "game_state_Ending.h"
 
 typedef enum
 {
-    // actually playing
+    // Actually playing
     Game_Mode_Level,
-    // randomly entered when playing
+    // Randomly entered when playing
     Game_Mode_Random_Surprise,
-    // randomly entered after dying
+    // Randomly entered after dying
     Game_Mode_Death_Stats,
-    //
+    // After winning level
     Game_Mode_Cutscene,
+	// After winning the game
+	Game_Mode_Ending,
 } Game_Mode;
 
 
@@ -31,6 +34,8 @@ typedef struct
 
     double time_of_prev_death_stats;
     Death_Stats_State death_stats;
+
+	GS_Ending gs_ending;
 
     Int global_deaths;
     Int global_evilness;

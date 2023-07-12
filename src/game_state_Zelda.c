@@ -1,12 +1,12 @@
 #include "game_state_Zelda.h"
 #include "box_general.h"
 #include "box_maze0_stuff.h"
+#include "level_declarations.h"
 #include "maze_stuff.h"
 #include "player_related.h"
 #include "raylib.h"
 #include "snake_pather.h"
 #include "very_general.h"
-#include "level_declarations.h"
 
 #include <math.h>
 #include <stdio.h>

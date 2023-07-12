@@ -1,7 +1,7 @@
 #include "game_state1.h"
+#include "level_declarations.h"
 #include "very_general.h"
 #include <stdlib.h>
-#include "level_declarations.h"
 
 void level_set_BlueSnakes(Level *mg)
 {
@@ -50,10 +50,6 @@ Level_Return game_state1_frame0(Game_State1 *g)
 {
     World_State0 *w = &g->w;
     // logic
-    if (IsKeyPressed(KEY_A))
-    {
-        TraceLog(LOG_INFO, "%s", "also this works!");
-    }
 
     player_set_direction_from_input(&g->player);
 
@@ -89,13 +85,13 @@ Level_Return game_state1_frame0(Game_State1 *g)
                 g->snakes[g->evil_snake_index] = (Seeker_Snake){.length = 2, Dir_Right, {{0, 5}, {1, 5}}};
                 Seeker_Snake *snake = &g->snakes[g->evil_snake_index];
 
-				const Dir_And_Pos stuff = random_outside_edge_position_and_normal(w);
-				Pos start = stuff.pos;
-				Dir dir = stuff.dir;
-				Dir tail_dir = dir_opposite(dir);
+                const Dir_And_Pos stuff = random_outside_edge_position_and_normal(w);
+                Pos start = stuff.pos;
+                Dir dir = stuff.dir;
+                Dir tail_dir = dir_opposite(dir);
 
                 snake->length = GetRandomValue(2, 10);
-				set_positions_as_line_from_without_wrapping(snake->positions, snake->length, start, tail_dir);
+                set_positions_as_line_from_without_wrapping(snake->positions, snake->length, start, tail_dir);
                 snake->direction = dir;
                 ++g->evil_snake_index;
             }
@@ -127,10 +123,6 @@ Level_Return game_state1_frame_UnSync(Game_State1_UnSync *gu)
     Game_State1 *g = &gu->g1;
     World_State0 *w = &g->w;
     // logic
-    if (IsKeyPressed(KEY_A))
-    {
-        TraceLog(LOG_INFO, "%s", "also this works!");
-    }
 
     player_set_direction_from_input(&g->player);
 
@@ -169,13 +161,13 @@ Level_Return game_state1_frame_UnSync(Game_State1_UnSync *gu)
                 gu->evil_snake_intervals[g->evil_snake_index] = GetRandomValue(5, 20) / 100.0;
                 gu->evil_snake_time_for_moves[g->evil_snake_index] = 0.0;
 
-				const Dir_And_Pos stuff = random_outside_edge_position_and_normal(w);
-				Pos start = stuff.pos;
-				Dir dir = stuff.dir;
-				Dir tail_dir = dir_opposite(dir);
+                const Dir_And_Pos stuff = random_outside_edge_position_and_normal(w);
+                Pos start = stuff.pos;
+                Dir dir = stuff.dir;
+                Dir tail_dir = dir_opposite(dir);
 
                 snake->length = GetRandomValue(2, 10);
-				set_positions_as_line_from_without_wrapping(snake->positions, snake->length, start, tail_dir);
+                set_positions_as_line_from_without_wrapping(snake->positions, snake->length, start, tail_dir);
                 snake->direction = dir;
                 ++g->evil_snake_index;
             }

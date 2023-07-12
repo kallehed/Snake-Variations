@@ -1,8 +1,8 @@
 #include "game_state_Attack.h"
+#include "level_declarations.h"
 #include "raylib.h"
 #include "very_general.h"
 #include <stdlib.h>
-#include "level_declarations.h"
 
 void level_set_Attack(Level *mg)
 {
@@ -32,10 +32,6 @@ Level_Return game_state_frame_Attack(Game_State_Attack *g)
 {
     World_State0 *w = &g->w;
     // logic
-    if (IsKeyPressed(KEY_A))
-    {
-        TraceLog(LOG_INFO, "%s", "also this works!");
-    }
 
     if (g->player_inv_timer > 0.f)
     {
