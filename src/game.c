@@ -1,8 +1,13 @@
 #include "game.h"
 #include "level.h"
+#include "music.h"
 #include <math.h>
+#include <raylib.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <sys/cdefs.h>
 
 Game game_init(void)
 {
@@ -20,8 +25,44 @@ Game game_init(void)
     g.time_of_prev_surprise = GetTime();
     g.time_of_prev_death_stats = GetTime();
     g.global_deaths = 0;
-	g.global_evilness = 0;
+    g.global_evilness = 0;
+
+    g.cur_music = 0;
+
+    static const char *filenames[] = {
+        "f/music/snake_basic.ogg",
+        "f/music/snake_base_headed.ogg",
+        "f/music/cutscene_magical.ogg",
+        "f/music/snake_weird.ogg",
+		"f/music/snake_drummy.ogg",
+		"f/music/snake_scary.ogg",
+		"f/music/snake_doom.ogg",
+		"f/music/snake_celeb.ogg",
+		"f/music/snake_mess.ogg",
+		"f/music/snake_final.ogg",
+    };
+	_Static_assert(sizeof(filenames)/sizeof(filenames[0]) == TOTAL_MUSICS, "Must provide correct number of files for musics!");
+    for (Int i = 0; i < TOTAL_MUSICS; ++i)
+    {
+        g.musics[i] = LoadMusicStream(filenames[i]);
+        PlayMusicStream(g.musics[i]);
+    }
+
+    g.musics[Music_Cutscene_Magical].looping = false;
+
+    g.cur_music = Music_Snake_Basic;
+
     return g;
+}
+
+void game_deinit(Game *g)
+{
+    free(g->ld.l._data);
+    g->ld.l._data = NULL;
+    for (Int i = 0; i < TOTAL_MUSICS; ++i)
+    {
+        UnloadMusicStream(g->musics[i]);
+    }
 }
 
 void game_run_frame(Game *g)
@@ -34,7 +75,10 @@ void game_run_frame(Game *g)
             g->game_mode = Game_Mode_Cutscene;
             Int add_score = level_data_get_score(&g->ld);
             g->global_score += add_score;
-            g->cut = cutscene_init(add_score, g->global_score, g->ld.level_num);
+            g->cur_music = Music_Cutscene_Magical;
+            StopMusicStream(g->musics[g->cur_music]);
+            PlayMusicStream(g->musics[g->cur_music]);
+            g->cut = cutscene_init(add_score, g->global_score, g->ld.level_enum);
         }
     }
     break;
@@ -54,18 +98,10 @@ void game_run_frame(Game *g)
     }
     break;
     case Game_Mode_Cutscene: {
+		UpdateMusicStream(g->musics[g->cur_music]); // Update music buffer with new stream data
         if (cutscene_frame(&g->cut))
         {
-            if (g->ld.level_num == (TOTAL_LEVELS-1))
-            {
-                g->game_mode = Game_Mode_Ending;
-                g->gs_ending = gs_init_Ending(g->global_score, g->global_deaths, g->global_evilness);
-            }
-            else
-            {
-                g->game_mode = Game_Mode_Level;
-                level_data_init(&g->ld, g->ld.level_num + 1);
-            }
+            game_init_next_level(g);
         }
     }
     break;
@@ -73,6 +109,24 @@ void game_run_frame(Game *g)
         gs_frame_Ending(&g->gs_ending);
     }
     break;
+    }
+}
+
+void game_init_next_level(Game *g)
+{
+    // For final Ending cutscene
+    if (g->ld.level_enum >= (TOTAL_LEVELS - 1))
+    {
+        g->game_mode = Game_Mode_Ending;
+        g->gs_ending = gs_init_Ending(g->global_score, g->global_deaths, g->global_evilness);
+    }
+    else
+    // Next level
+    {
+        g->ld.level_enum++;
+        g->cur_music = level_get_music(g->ld.level_enum);
+        g->game_mode = Game_Mode_Level;
+        level_data_init(&g->ld, g->ld.level_enum);
     }
 }
 
@@ -89,6 +143,7 @@ bool game_handle_level(Game *g)
     }
     else
     {
+		UpdateMusicStream(g->musics[g->cur_music]); // Update music buffer with new stream data
         switch (level_run_correctly(&g->ld.l))
         {
         case Level_Return_Continue: {
@@ -101,7 +156,7 @@ bool game_handle_level(Game *g)
                 g->try_surprise_timer -= surprise_check_interval;
                 const double cur_time = GetTime() * (DEV ? (1.0) : 1.0);
                 const double time_since_surprise = cur_time - g->time_of_prev_surprise;
-                const Int wait_time = (DEV) ? 850 : 850;
+                const Int wait_time = 850;
                 if ((Int)(time_since_surprise) > wait_time ||
                     wait_time == GetRandomValue((Int)time_since_surprise, wait_time))
                 {

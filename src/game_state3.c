@@ -50,7 +50,7 @@ Level_Return game_state3_frame0(Game_State3 *g)
         // printf("player len: %d\n", g->player.length);
     }
 
-    Int points_left = (DEV ? 6 : 6) - g->player_points;
+    Int points_left = 6 - g->player_points;
     if (points_left == 0)
         return Level_Return_Next_Level;
 

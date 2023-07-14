@@ -97,7 +97,7 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
         }
     }
 
-    Int food_left_to_win = (DEV ? 6 : 6) - g->player.length;
+    Int food_left_to_win = 6 - g->player.length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;

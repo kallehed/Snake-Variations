@@ -55,8 +55,7 @@ static void game_loop(void)
     {
         game_run_frame(g);
     }
-    free(g->ld.l._data);
-    g->ld.l._data = NULL;
+	game_deinit(g);
 #endif
 
     free(g);
@@ -64,12 +63,18 @@ static void game_loop(void)
 
 int main(void)
 {
+    SetConfigFlags(FLAG_MSAA_4X_HINT); // NOTE: Try to enable MSAA 4X
+
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Snake Variations");
 
+    InitAudioDevice(); // Initialize audio device
+	
 #ifdef TEST_ALL_LEVELS
     test_all_levels();
 #endif
     game_loop();
+
+	CloseAudioDevice();
 
     CloseWindow();
 

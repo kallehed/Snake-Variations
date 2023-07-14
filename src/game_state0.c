@@ -117,7 +117,7 @@ Level_Return game_state0_frame0(Game_State0 *g)
         food_player_collision_logic(&g->player, &g->food, w);
     }
 
-    Int food_left_to_win = (DEV ? 2 : 6) - g->player.length;
+    Int food_left_to_win = 7 - g->player.length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -151,7 +151,7 @@ Level_Return game_state0_frame1(Game_State0 *g)
         food_player_collision_logic(&g->player, &g->food, w);
     }
 
-    Int food_left_to_win = (DEV ? 2 : 12) - g->player.length;
+    Int food_left_to_win = 12 - g->player.length;
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
 
@@ -221,7 +221,7 @@ Level_Return game_state0_frame2(Game_State0 *g)
         food_player_collision_logic(&g->player, &g->food, w);
     }
 
-    Int food_left_to_win = (DEV ? 8 : 8) - g->player.length;
+    Int food_left_to_win = 8 - g->player.length;
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
 
@@ -254,7 +254,7 @@ Level_Return game_state0_frame_Spinny(Game_State0 *g)
         food_player_collision_logic(&g->player, &g->food, w);
     }
 
-    Int food_left_to_win = (DEV ? 10 : 10) - g->player.length;
+    Int food_left_to_win = 10 - g->player.length;
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
 

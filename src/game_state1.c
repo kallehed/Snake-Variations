@@ -97,7 +97,7 @@ Level_Return game_state1_frame0(Game_State1 *g)
             }
         }
     }
-    Int food_left_to_win = (DEV ? 2 : 8) - g->player.length;
+    Int food_left_to_win = 8 - g->player.length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -173,7 +173,7 @@ Level_Return game_state1_frame_UnSync(Game_State1_UnSync *gu)
             }
         }
     }
-    Int food_left_to_win = (DEV ? 8 : 8) - g->player.length;
+    Int food_left_to_win = 8 - g->player.length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;

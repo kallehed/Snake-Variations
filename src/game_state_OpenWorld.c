@@ -21,9 +21,7 @@ void game_state_init_OpenWorld(Game_State_OpenWorld *new_g)
 {
     Game_State_OpenWorld g;
     g.w = world_state0_init_general(GAME_STATE_OPENWORLD_WIDTH, GAME_STATE_OPENWORLD_HEIGHT, 20);
-    g.player = (Player){.length = 2, .idx_pos = 1, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
-    g.player.positions[0] = (Pos){.x = 5, .y = 5};
-    g.player.positions[1] = (Pos){.x = 6, .y = 5};
+	g.player = player_init((Pos){6,5},2,Dir_Right);
     g.time_for_move = 1.0;
 
     const char *map[] = {

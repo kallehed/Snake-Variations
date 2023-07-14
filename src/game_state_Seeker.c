@@ -99,7 +99,7 @@ Level_Return game_state_frame_Seeker(Game_State_Seeker *g)
 
         food_player_collision_logic(&g->player, &g->food, w);
     }
-    Int food_left_to_win = (DEV ? 8 : 8) - g->player.length;
+    Int food_left_to_win = 8 - g->player.length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;

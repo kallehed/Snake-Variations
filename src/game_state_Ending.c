@@ -70,12 +70,12 @@ Level_Return gs_frame_Ending(GS_Ending *g)
 
     Int text_y = (Int)(50.0 * (GetTime() - g->start_time - 95.0));
 
-    if (DEV)
-        text_y += WINDOW_HEIGHT * 8 + 200;
-    if (DEV && text_y > 0)
-    {
-        text_y *= 2;
-    }
+    // if (DEV)
+    //     text_y += WINDOW_HEIGHT * 8 + 200;
+    // if (DEV && text_y > 0)
+    // {
+    //     text_y *= 2;
+    // }
     bool print_second = false;
     bool print_third = false;
 
