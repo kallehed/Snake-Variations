@@ -7,7 +7,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/cdefs.h>
 
 Game game_init(void)
 {
