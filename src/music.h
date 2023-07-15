@@ -11,5 +11,8 @@ typedef enum {
 	Music_Snake_Church,
 	Music_Snake_Mess,
 	Music_Snake_Final,
+	Music_Snake_Ending,
+	Music_Snake_Surprise,
+	Music_Snake_Death,
 	TOTAL_MUSICS,
 } Music_Enum;

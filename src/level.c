@@ -129,7 +129,6 @@ Int level_data_get_score(Level_Data *ld)
 
 Music_Enum level_get_music(Level_Enum level_enum)
 {
-
     switch (level_enum)
     {
     case Level_Final:

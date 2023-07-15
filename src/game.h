@@ -5,6 +5,9 @@
 #include "very_general.h"
 #include "music.h"
 
+#define GAME_SURPRISE_CUTSCENE_WAIT_TIME ((DEV)? 850 : 850)
+#define GAME_DEATH_STATS_CUTSCENE_WAIT_TIME 400
+
 typedef enum
 {
     // Actually playing
@@ -51,3 +54,12 @@ void game_run_frame(Game *g);
 void game_init_next_level(Game *g);
 // returns true if level is done
 bool game_handle_level(Game *g);
+
+// also adds up score from the level and the like
+void game_init_cutscene(Game *g);
+
+void game_logic_for_init_surprise_cutscene(Game *g);
+
+void game_init_death_stats_cutscene(Game *g);
+
+
