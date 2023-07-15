@@ -1,7 +1,9 @@
 
 # Snake Variations
 
-24 variations and theme based on Snake. 
+25 variations and theme based on Snake. 
+
+Play online here: https://kallehed.github.io/Snake-Variations/
 
 ![cool gif](screenshots/bluesnakes.gif)
 
