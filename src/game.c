@@ -52,7 +52,6 @@ Game game_init(void)
     {
         static const char *filenames[] = {
             "f/sound/snake_sound_die.ogg",
-            "f/sound/snake_sound_eat2.ogg",
         };
         _Static_assert(sizeof(filenames) / sizeof(filenames[0]) == TOTAL_SOUNDS,
                        "Must provide correct number of files for sounds!");
