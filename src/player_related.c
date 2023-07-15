@@ -1,4 +1,5 @@
 #include "player_related.h"
+#include "music.h"
 
 Pos player_nth_position(const Player *player, Int idx) // TODO MAKE THIS FASTER
 {
@@ -125,6 +126,7 @@ void player_set_direction_correctly(Player *player, Dir dir)
         if (player->current_direction != Dir_Up)
             player->next_direction = Dir_Down;
     }
+	break;
     case Dir_Nothing: {
     }
     break;

@@ -28,24 +28,39 @@ Game game_init(void)
 
     g.cur_music = 0;
 
-    static const char *filenames[] = {
-        "f/music/snake_basic.ogg", "f/music/snake_base_headed.ogg", "f/music/cutscene_magical.ogg",
-        "f/music/snake_weird.ogg", "f/music/snake_drummy.ogg",      "f/music/snake_scary.ogg",
-        "f/music/snake_doom.ogg",  "f/music/snake_celeb.ogg",       "f/music/snake_mess.ogg",
-        "f/music/snake_final.ogg", "f/music/snake_ending.ogg",      "f/music/snake_surprise.ogg",
-        "f/music/snake_death.ogg",
-    };
-    _Static_assert(sizeof(filenames) / sizeof(filenames[0]) == TOTAL_MUSICS,
-                   "Must provide correct number of files for musics!");
-    for (Int i = 0; i < TOTAL_MUSICS; ++i)
+    // Music
     {
-        g.musics[i] = LoadMusicStream(filenames[i]);
-        PlayMusicStream(g.musics[i]);
+        static const char *filenames[] = {
+            "f/music/snake_basic.ogg", "f/music/snake_base_headed.ogg", "f/music/cutscene_magical.ogg",
+            "f/music/snake_weird.ogg", "f/music/snake_drummy.ogg",      "f/music/snake_scary.ogg",
+            "f/music/snake_doom.ogg",  "f/music/snake_celeb.ogg",       "f/music/snake_mess.ogg",
+            "f/music/snake_final.ogg", "f/music/snake_ending.ogg",      "f/music/snake_surprise.ogg",
+            "f/music/snake_death.ogg",
+        };
+        _Static_assert(sizeof(filenames) / sizeof(filenames[0]) == TOTAL_MUSICS,
+                       "Must provide correct number of files for musics!");
+        for (Int i = 0; i < TOTAL_MUSICS; ++i)
+        {
+            g.musics[i] = LoadMusicStream(filenames[i]);
+            PlayMusicStream(g.musics[i]);
+        }
+        g.musics[Music_Cutscene_Magical].looping = false;
+
+        g.cur_music = Music_Snake_Basic;
     }
-
-    g.musics[Music_Cutscene_Magical].looping = false;
-
-    g.cur_music = Music_Snake_Basic;
+    // Sound
+    {
+        static const char *filenames[] = {
+            "f/sound/snake_sound_die.ogg",
+            "f/sound/snake_sound_eat2.ogg",
+        };
+        _Static_assert(sizeof(filenames) / sizeof(filenames[0]) == TOTAL_SOUNDS,
+                       "Must provide correct number of files for sounds!");
+        for (Int i = 0; i < TOTAL_SOUNDS; ++i)
+        {
+            g.sounds[i] = LoadSound(filenames[i]);
+        }
+    }
 
     return g;
 }
@@ -57,6 +72,10 @@ void game_deinit(Game *g)
     for (Int i = 0; i < TOTAL_MUSICS; ++i)
     {
         UnloadMusicStream(g->musics[i]);
+    }
+    for (Int i = 0; i < TOTAL_SOUNDS; ++i)
+    {
+        UnloadSound(g->sounds[i]);
     }
 }
 
@@ -152,6 +171,8 @@ bool game_handle_level(Game *g)
         case Level_Return_Reset_Level: {
             g->global_deaths++;
             g->ld.deaths_in_level++;
+
+            PlaySound(g->sounds[Sound_Snake_Die]);
 
             const double time_since_death_stats = GetTime() - g->time_of_prev_death_stats;
             const int int_time = (int)time_since_death_stats;

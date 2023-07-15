@@ -46,6 +46,8 @@ typedef struct
 
 	Music_Enum cur_music;
 	Music musics[TOTAL_MUSICS];
+
+	Sound sounds[TOTAL_SOUNDS];
 } Game;
 
 Game game_init(void);
