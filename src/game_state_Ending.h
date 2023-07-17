@@ -14,6 +14,7 @@ typedef struct
     double seeker_wait_times[GS_ENDING_MAX_SEEKERS];
     Seeker_Snake seekers[GS_ENDING_MAX_SEEKERS];
 	double start_time;
+	double offset_time;
 
 	Int score;
 	Int deaths;

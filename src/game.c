@@ -25,6 +25,7 @@ Game game_init(void)
     g.time_of_prev_death_stats = GetTime();
     g.global_deaths = 0;
     g.global_evilness = 0;
+    g.cheat_counter = 0;
 
     g.cur_music = 0;
 
@@ -80,6 +81,7 @@ void game_deinit(Game *g)
 
 void game_run_frame(Game *g)
 {
+
     switch (g->game_mode)
     {
     case Game_Mode_Level: {
@@ -144,6 +146,15 @@ void game_init_next_level(Game *g)
 // returns true if level is done
 bool game_handle_level(Game *g)
 {
+    if (IsKeyPressed(KEY_M))
+    {
+        g->cheat_counter++;
+    }
+    if (g->cheat_counter >= 3)
+    {
+        g->cheat_counter = 0;
+        return true;
+    }
     if (g->ld.death_wait_timer > 0.f)
     {
         g->ld.death_wait_timer -= GetFrameTime();

@@ -9,6 +9,7 @@ typedef struct
     Int points_gained;
     Int global_score;
     Int cutscene_nr;
+	Int cheat_state;
 } Cutscene_State; // Inbetween levels
 
 typedef struct

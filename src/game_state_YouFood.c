@@ -35,7 +35,7 @@ Level_Return game_state_YouFood_frame(Game_State_YouFood *g)
 
     if (time_move_logic_general(&g->time_for_move, 0.135))
     {
-        if (GetRandomValue(1, 3) == 1)
+        if (GetRandomValue(1, 6) == 1)
             player_set_direction_correctly(&g->player, GetRandomValue(0, 3));
         if (player_move(&g->player, w))
         {
@@ -49,7 +49,7 @@ Level_Return game_state_YouFood_frame(Game_State_YouFood *g)
         food_player_collision_logic(&g->player, &g->food, w);
     }
 
-    Int food_left_to_win = 7 - g->player.length;
+    Int food_left_to_win = 5 - g->player.length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;

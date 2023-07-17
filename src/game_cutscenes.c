@@ -10,6 +10,7 @@ Cutscene_State cutscene_init(Int points_gained, Int global_score, Int cutscene_n
     c.points_gained = points_gained;
     c.global_score = global_score;
     c.cutscene_nr = cutscene_nr;
+	c.cheat_state = 0;
     return c;
 }
 
@@ -17,6 +18,10 @@ Cutscene_State cutscene_init(Int points_gained, Int global_score, Int cutscene_n
 bool cutscene_frame(Cutscene_State *cs)
 {
     const double time_passed = GetTime() - cs->start_time;
+
+	if (IsKeyPressed(KEY_M)) cs->cheat_state++;
+
+	if (cs->cheat_state >= 3) {return true;}
 
     BeginDrawing();
     ClearBackground(RAYWHITE);

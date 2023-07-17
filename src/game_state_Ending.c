@@ -25,6 +25,7 @@ GS_Ending gs_init_Ending(Int score, Int deaths, Int evilness)
     g.score = score;
     g.deaths = deaths;
     g.evilness = evilness;
+	g.offset_time = 0.0;
 
     return g;
 }
@@ -68,7 +69,11 @@ Level_Return gs_frame_Ending(GS_Ending *g)
                            "It's grasp has set you free.\n\n\n\n\n"
                            "The mighty world has fallen before you.";
 
-    Int text_y = (Int)(50.0 * (GetTime() - g->start_time - 95.0));
+    Int text_y = (Int)(50.0 * (GetTime() + g->offset_time - g->start_time - 95.0));
+
+	if (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_DOWN)) {
+		g->offset_time += 1.5;
+	}
 
     // if (DEV)
     //     text_y += WINDOW_HEIGHT * 8 + 200;
@@ -112,7 +117,7 @@ Level_Return gs_frame_Ending(GS_Ending *g)
                 text_y = 0;
             char grade = '0';
 
-            grade = round((double)'F' - ((double)'F' - (double)'A') * ((double)(g->score + 100.0 * sin(g->evilness)) / (TOTAL_LEVELS * 60.0)));
+            grade = round((double)'F' - ((double)'F' - (double)'A') * ((double)(g->score + 100.0 * sin(g->evilness)) / (TOTAL_LEVELS * 70.0)));
 
             if (grade < 'A')
                 grade = 'A';

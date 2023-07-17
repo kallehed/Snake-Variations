@@ -26,6 +26,7 @@ void game_state1_init(Game_State1 *new_g)
     food_init_position(&g.food, &g.player, &g.w);
     g.time_for_move = 1.0;
     g.evil_snake_index = 0;
+    g.evil_snake_hindrance = 0;
 
     *new_g = g;
 }
@@ -40,6 +41,7 @@ void game_state1_init_UnSync(Game_State1_UnSync *new_g)
     food_init_position(&g.food, &g.player, &g.w);
     g.time_for_move = 1.0;
     g.evil_snake_index = 0;
+    g.evil_snake_hindrance = 0;
 
     gu.g1 = g;
 
@@ -77,8 +79,10 @@ Level_Return game_state1_frame0(Game_State1 *g)
         food_player_collision_logic(&g->player, &g->food, w);
 
         // spawn evil snakes
-        if (g->evil_snake_index < g->player.length - 1)
+        if (g->evil_snake_index + g->evil_snake_hindrance < g->player.length - 1)
         {
+            if (GetRandomValue(1, 3) != 1)
+                ++g->evil_snake_hindrance;
             if (g->evil_snake_index < GAME_STATE1_TOTAL_EVIL_SNAKES)
             {
                 // spawn
@@ -151,8 +155,10 @@ Level_Return game_state1_frame_UnSync(Game_State1_UnSync *gu)
         food_player_collision_logic(&g->player, &g->food, w);
 
         // spawn evil snakes
-        if (g->evil_snake_index < g->player.length - 1)
+        if (g->evil_snake_index + g->evil_snake_hindrance < g->player.length - 1)
         {
+            if (GetRandomValue(1, 3) == 1)
+                ++g->evil_snake_hindrance;
             if (g->evil_snake_index < GAME_STATE1_TOTAL_EVIL_SNAKES)
             {
                 // spawn

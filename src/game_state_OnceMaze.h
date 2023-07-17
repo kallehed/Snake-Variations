@@ -6,7 +6,7 @@
 #include "snake_pather.h"
 #include "very_general.h"
 
-#define GS_FOODS 27
+#define GS_FOODS 23
 #define GS_WIDTH 47 // you CANT change these, hardcoded
 #define GS_PIXEL_SIZE 18
 #define GS_HEIGHT 35

@@ -44,6 +44,8 @@ typedef struct
     Int global_deaths;
     Int global_evilness;
 
+	Int cheat_counter;
+
 	Music_Enum cur_music;
 	Music musics[TOTAL_MUSICS];
 

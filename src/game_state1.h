@@ -11,6 +11,7 @@ typedef struct
     Food food;
     double time_for_move;
     Int evil_snake_index;
+	Int evil_snake_hindrance;
     Seeker_Snake snakes[GAME_STATE1_TOTAL_EVIL_SNAKES];
 } Game_State1;
 
