@@ -16,9 +16,7 @@ void game_state_Maze_init(Game_State_Maze *new_g)
 {
     Game_State_Maze g;
     g.w = world_state0_init(GAME_STATE_MAZE_WIDTH);
-    g.player = (Player){.length = 2, .idx_pos = 1, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
-    g.player.positions[1] = (Pos){.x = g.w.width / 2, g.w.height / 2};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2 - 1, g.w.height / 2};
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 2, Dir_Right);
 
     Snake_Pather_Way ways0[] = {{Dir_Right, 2}, {Dir_Down, 6}, {Dir_Left, 2}, {Dir_Up, 6}};
     g.evil_snake_paths[0] = snake_pather_init_except_position(ways0, 4);

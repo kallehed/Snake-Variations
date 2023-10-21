@@ -16,11 +16,7 @@ void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g)
     Game_State_StaticPlatformer g;
     g.w = world_state0_init(SPLATFORMER_MAP_WIDTH);
     // HEIGHT 22, WIDTH 30
-    g.player = (Player){.idx_pos = 1,
-                        .length = 2,
-                        .next_direction = Dir_Right,
-                        .current_direction = Dir_Nothing,
-                        .positions = {{.x = 1, .y = 20}, {.x = 2, .y = 20}}};
+    g.player = player_init((Pos){.x = 1, 20}, 2, Dir_Right);
     g.time_for_move = 1.0;
     g.turn = false;
 

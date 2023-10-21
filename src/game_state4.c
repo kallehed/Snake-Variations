@@ -13,12 +13,7 @@ void game_state4_init(Game_State4 *new_g)
 {
     Game_State4 g;
     g.w = world_state0_init(60);
-    g.player = (Player){.length = 5, .idx_pos = 4, .current_direction = Dir_Right, .next_direction = Dir_Right};
-    g.player.positions[4] = (Pos){.x = g.w.width / 2, g.w.height / 2};
-    g.player.positions[3] = (Pos){.x = g.w.width / 2 - 1, g.w.height / 2};
-    g.player.positions[2] = (Pos){.x = g.w.width / 2 - 2, g.w.height / 2};
-    g.player.positions[1] = (Pos){.x = g.w.width / 2 - 3, g.w.height / 2};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2 - 4, g.w.height / 2};
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 5, Dir_Right);
 
     food_init_position(&g.food, &g.player, &g.w);
 

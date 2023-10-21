@@ -13,8 +13,7 @@ void game_state_YouFood_init(Game_State_YouFood *new_g)
 {
     Game_State_YouFood g;
     g.w = world_state0_init(24);
-    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, Dir_Right);
     food_init_position(&g.food, &g.player, &g.w);
     g.food_dir = Dir_Nothing;
     g.time_for_move = 1.0;

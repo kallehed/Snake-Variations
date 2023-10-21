@@ -14,8 +14,7 @@ void game_state_init_Suicide(Game_State_Suicide *new_g)
 {
     Game_State_Suicide g;
     g.w = world_state0_init(28);
-    g.player = (Player){.length = 10, .idx_pos = 9, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
-    set_positions_as_line_from(g.player.positions, g.player.length, (Pos){3, 10}, Dir_Right, &g.w);
+    g.player = player_init((Pos){3, 10}, 10, Dir_Right);
     g.time_for_move = 1.0;
 
     g.player_flash_timer = -1.f;

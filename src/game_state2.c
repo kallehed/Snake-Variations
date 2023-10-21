@@ -12,12 +12,8 @@ void game_state2_init(Game_State2 *new_g)
 {
     Game_State2 g;
     g.w = world_state0_init(24);
-    g.player = (Player){.length = 5, .idx_pos = 4, .current_direction = Dir_Right, .next_direction = Dir_Right};
-    g.player.positions[4] = (Pos){.x = g.w.width / 2, g.w.height / 2};
-    g.player.positions[3] = (Pos){.x = g.w.width / 2 - 1, g.w.height / 2};
-    g.player.positions[2] = (Pos){.x = g.w.width / 2 - 2, g.w.height / 2};
-    g.player.positions[1] = (Pos){.x = g.w.width / 2 - 3, g.w.height / 2};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2 - 4, g.w.height / 2};
+
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 5, Dir_Right);
 
     g.boxes[0] = (Box){.p = {1, 1}, .w_h = {1, 1}};
     g.boxes[1] = (Box){.p = {10, 5}, .w_h = {1, 1}};

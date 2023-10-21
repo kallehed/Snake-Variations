@@ -14,7 +14,7 @@ void game_state3_init0(Game_State3 *new_g)
 {
     Game_State3 g;
     g.w = world_state0_init(24);
-    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, Dir_Right);
     g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
     g.player_points = 0;
     food_init_position(&g.food, &g.player, &g.w);

@@ -15,10 +15,7 @@ void game_state_init_Attack(Game_State_Attack *new_g)
 {
     Game_State_Attack g;
     g.w = world_state0_init(28);
-    g.player = (Player){.length = 12, .idx_pos = 11, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
-    set_positions_as_line_from_without_wrapping(g.player.positions, g.player.length,
-                                                (Pos){.x = -5 + g.w.width / 2, g.w.height / 2}, Dir_Right);
-
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 12, Dir_Right);
     g.player_inv_timer = 0.f;
     g.time_for_move = 1.0;
     g.start_time = GetTime();

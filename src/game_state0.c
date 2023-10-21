@@ -48,8 +48,7 @@ void game_state0_init0(Game_State0 *new_g)
 {
     Game_State0 g;
     g.w = world_state0_init(12);
-    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, Dir_Right);
     food_init_position(&g.food, &g.player, &g.w);
     g.time_for_move = 1.0;
 
@@ -61,8 +60,7 @@ void game_state0_init1(Game_State0 *new_g)
 {
     Game_State0 g;
     g.w = world_state0_init(120);
-    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, Dir_Right);
     food_init_position(&g.food, &g.player, &g.w);
     g.time_for_move = 1.0;
 
@@ -73,8 +71,7 @@ void game_state0_init_GetSmall(Game_State0 *new_g)
 {
     Game_State0 g;
     g.w = world_state0_init(12);
-    g.player = (Player){.length = 12, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 12, Dir_Right);
     for (Int i = 1; i < PLAYER_MAX_POSITIONS; ++i)
     {
         g.player.positions[i] = (Pos){.x = -1, .y = -1};
@@ -89,8 +86,7 @@ void game_state_init_Wait(Game_State_Wait *new_g)
 {
     Game_State_Wait g;
     g.w = world_state0_init(12);
-    g.player = (Player){.length = 1, .idx_pos = 0, .current_direction = Dir_Nothing, .next_direction = Dir_Right};
-    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, Dir_Right);
     g.warps_done = 0;
     g.time_started = GetTime();
     g.time_for_move = 1.0;
