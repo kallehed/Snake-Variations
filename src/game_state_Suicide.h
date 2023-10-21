@@ -10,7 +10,7 @@
 typedef struct
 {
     World_State0 w;
-    Player player;
+    Player *player;
     double time_for_move;
     float player_flash_timer; // starts at high number, reaches 0 -> stop flashing
     double seeker_time_for_moves[GAME_STATE_SUICIDE_MAX_SEEKERS];
@@ -18,5 +18,5 @@ typedef struct
     Seeker_Snake seekers[GAME_STATE_SUICIDE_MAX_SEEKERS];
 } Game_State_Suicide;
 
-void game_state_init_Suicide(Game_State_Suicide *new_g);
+void game_state_init_Suicide(Game_State_Suicide *new_g, Allo *allo);
 Level_Return game_state_frame_Suicide(Game_State_Suicide *g);

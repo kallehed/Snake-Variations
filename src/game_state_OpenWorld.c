@@ -17,11 +17,11 @@ void level_set_OpenWorld(Level *mg)
     mg->size = (sizeof(Game_State_OpenWorld));
 }
 
-void game_state_init_OpenWorld(Game_State_OpenWorld *new_g)
+void game_state_init_OpenWorld(Game_State_OpenWorld *new_g, Allo *allo)
 {
     Game_State_OpenWorld g;
     g.w = world_state0_init_general(GAME_STATE_OPENWORLD_WIDTH, GAME_STATE_OPENWORLD_HEIGHT, 20);
-	g.player = player_init((Pos){6,5},2,Dir_Right);
+	g.player = player_init((Pos){6,5},2, 100,Dir_Right, allo);
     g.time_for_move = 1.0;
 
     const char *map[] = {
@@ -200,11 +200,11 @@ Level_Return game_state_frame_OpenWorld(Game_State_OpenWorld *g)
 {
     World_State0 *w = &g->w;
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
-        if (maze0_player_move((Maze0_Cell *)g->maze, GAME_STATE_OPENWORLD_WIDTH, &g->player, w))
+        if (maze0_player_move((Maze0_Cell *)g->maze, GAME_STATE_OPENWORLD_WIDTH, g->player, w))
         {
             // player died
             return Level_Return_Reset_Level;
@@ -215,18 +215,18 @@ Level_Return game_state_frame_OpenWorld(Game_State_OpenWorld *g)
         }
         for (Int i = 0; i < GAME_STATE_OPENWORLD_PATHERS; ++i)
         {
-            if (snake_pather_player_intersection(&g->pathers[i], &g->player))
+            if (snake_pather_player_intersection(&g->pathers[i], g->player))
             {
                 return Level_Return_Reset_Level;
             }
         }
         for (Int i = 0; i < GAME_STATE_OPENWORLD_FOODS; ++i)
         {
-            food_player_collision_logic_food_disappear(&g->player, &g->foods[i]);
+            food_player_collision_logic_food_disappear(g->player, &g->foods[i]);
         }
     }
 
-    Int food_left_to_win = (GAME_STATE_OPENWORLD_FOODS + 2) - g->player.length;
+    Int food_left_to_win = (GAME_STATE_OPENWORLD_FOODS + 2) - g->player->length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -234,7 +234,7 @@ Level_Return game_state_frame_OpenWorld(Game_State_OpenWorld *g)
     // drawing
     BeginDrawing();
     {
-        Pos p_pos = player_nth_position(&g->player, 0);
+        Pos p_pos = player_nth_position(g->player, 0);
         const float max_x = (float)w->block_pixel_len * (float)w->width - (float)WINDOW_WIDTH;
         const float max_y = (float)w->block_pixel_len * (float)w->height - (float)WINDOW_HEIGHT;
         float cam_x = fminf(max_x, fmaxf(0.f, (float)(p_pos.x * w->block_pixel_len - WINDOW_WIDTH / 2)));
@@ -254,7 +254,7 @@ Level_Return game_state_frame_OpenWorld(Game_State_OpenWorld *g)
     }
     draw_food_left_in_2D_space(food_left_to_win, w->width * w->block_pixel_len, w->height * w->block_pixel_len);
 
-    player_draw(&g->player, w);
+    player_draw(g->player, w);
     for (Int i = 0; i < GAME_STATE_OPENWORLD_FOODS; ++i)
     {
         food_draw(&g->foods[i], w);

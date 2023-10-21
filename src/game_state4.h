@@ -7,12 +7,12 @@
 typedef struct
 {
     World_State0 w;
-    Player player;
+    Player *player;
     Food food;
     Box boxes[GAME_STATE4_BOXES];
     double time_for_move;
 } Game_State4;
 
-void game_state4_init(Game_State4 *new_g);
+void game_state4_init(Game_State4 *new_g, Allo *allo);
 
 Level_Return game_state4_frame0(Game_State4 *g);

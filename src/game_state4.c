@@ -9,13 +9,13 @@ void level_set_HidingBoxes(Level *mg)
     mg->size = (sizeof(Game_State4));
 }
 
-void game_state4_init(Game_State4 *new_g)
+void game_state4_init(Game_State4 *new_g, Allo *allo)
 {
     Game_State4 g;
     g.w = world_state0_init(60);
-    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 5, Dir_Right);
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 5, 100, Dir_Right, allo);
 
-    food_init_position(&g.food, &g.player, &g.w);
+    food_init_position(&g.food, g.player, &g.w);
 
     g.boxes[0] = (Box){.p = {1, 1}, .w_h = {4, 4}};
     g.boxes[1] = (Box){.p = {10, 5}, .w_h = {1, 1}};
@@ -47,11 +47,11 @@ void game_state4_init(Game_State4 *new_g)
 Level_Return game_state4_frame0(Game_State4 *g)
 {
 
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic_general(&g->time_for_move, 0.08))
     {
-        if (player_move(&g->player, &g->w))
+        if (player_move(g->player, &g->w))
         {
             // player died
             TraceLog(LOG_INFO, "%s", "YOU DIED!");
@@ -59,12 +59,12 @@ Level_Return game_state4_frame0(Game_State4 *g)
             return Level_Return_Reset_Level;
         }
 
-        boxes_collision_logic(g->boxes, GAME_STATE4_BOXES, player_nth_position(&g->player, 0),
-                                     g->player.current_direction, (Pos){1, 1}, -1, &g->w);
+        boxes_collision_logic(g->boxes, GAME_STATE4_BOXES, player_nth_position(g->player, 0),
+                                     g->player->current_direction, (Pos){1, 1}, -1, &g->w);
 
-        food_player_collision_logic(&g->player, &g->food, &g->w);
+        food_player_collision_logic(g->player, &g->food, &g->w);
     }
-    Int food_left_to_win = 16 - g->player.length;
+    Int food_left_to_win = 16 - g->player->length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -76,7 +76,7 @@ Level_Return game_state4_frame0(Game_State4 *g)
     ClearBackground(RAYWHITE);
 
     draw_food_left(food_left_to_win);
-    player_draw_extra(&g->player, &g->w);
+    player_draw_extra(g->player, &g->w);
     food_draw(&g->food, &g->w);
     for (Int i = 0; i < GAME_STATE4_BOXES; i++)
     {

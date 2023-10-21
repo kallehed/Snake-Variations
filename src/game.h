@@ -50,6 +50,8 @@ typedef struct
 	Music musics[TOTAL_MUSICS];
 
 	Sound sounds[TOTAL_SOUNDS];
+
+    Allo allo;
 } Game;
 
 Game game_init(void);

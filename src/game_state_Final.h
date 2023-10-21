@@ -6,10 +6,10 @@
 typedef struct
 {
     World_State0 w;
-    Player player;
+    Player *player;
     Food food;
     double time_for_move;
 } GS_Final;
 
-void GS_init_Final(GS_Final *new_g);
+void GS_init_Final(GS_Final *new_g, Allo *allo);
 Level_Return GS_frame_Final(GS_Final *g);

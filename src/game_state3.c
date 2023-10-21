@@ -10,14 +10,14 @@ void level_set_EverGrowing(Level *mg)
     mg->size = (sizeof(Game_State3));
 }
 
-void game_state3_init0(Game_State3 *new_g)
+void game_state3_init0(Game_State3 *new_g, Allo *allo)
 {
     Game_State3 g;
     g.w = world_state0_init(24);
-    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, Dir_Right);
-    g.player.positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
+    g.player->positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
     g.player_points = 0;
-    food_init_position(&g.food, &g.player, &g.w);
+    food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;
 
     *new_g = g;
@@ -28,26 +28,26 @@ Level_Return game_state3_frame0(Game_State3 *g)
 {
     World_State0 *w = &g->w;
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
-        Int player_len = g->player.length;
+        Int player_len = g->player->length;
 
-        g->player.length++;
-        if (player_move(&g->player, w))
+        g->player->length++;
+        if (player_move(g->player, w))
         {
             return Level_Return_Reset_Level;
         }
-        g->player.length--;
-        if (pos_equal(player_nth_position(&g->player, 0), g->food.pos))
+        g->player->length--;
+        if (pos_equal(player_nth_position(g->player, 0), g->food.pos))
         {
-            food_init_position(&g->food, &g->player, w);
+            food_init_position(&g->food, g->player, w);
             g->player_points++;
         }
-        g->player.length = player_len + 1;
+        g->player->length = player_len + 1;
 
-        // printf("player len: %d\n", g->player.length);
+        // printf("player len: %d\n", g->player->length);
     }
 
     Int points_left = 5 - g->player_points;
@@ -60,7 +60,7 @@ Level_Return game_state3_frame0(Game_State3 *g)
 
     draw_food_left(points_left);
 
-    player_draw_extra(&g->player, w);
+    player_draw_extra(g->player, w);
     food_draw(&g->food, w);
 
     draw_fps();

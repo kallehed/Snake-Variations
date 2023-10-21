@@ -1,14 +1,15 @@
 #pragma once
 #include "very_general.h"
+#include "allocator.h"
 
-#define PLAYER_MAX_POSITIONS (300)
 typedef struct Player
 {
     Int idx_pos;
     Int length;
     Dir next_direction;
     Dir current_direction;
-    Pos positions[PLAYER_MAX_POSITIONS];
+    Int max_length;
+    Pos positions[];
 } Player;
 
 typedef struct Food
@@ -17,7 +18,8 @@ typedef struct Food
 } Food;
 
 Pos player_nth_position(const Player *player, Int idx);
-Player player_init(Pos start_pos, const Int length, const Dir dir);
+Player *player_init(Pos start_pos, const Int length, const Int max_length, const Dir dir, Allo *allo);
+void player_set_positions(Player *p, Pos start_pos, Int length, const Dir dir);
 // Cycle through positions of player
 void player_draw_general(const Player *player, const Color head, const Color body, const World_State0 *w);
 void player_draw(const Player *player, const World_State0 *w);

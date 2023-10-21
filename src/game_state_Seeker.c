@@ -13,12 +13,12 @@ void level_set_Seeker(Level *mg)
     mg->size = (sizeof(Game_State_Seeker));
 }
 
-void game_state_init_Seeker(Game_State_Seeker *new_g)
+void game_state_init_Seeker(Game_State_Seeker *new_g, Allo *allo)
 {
     Game_State_Seeker g;
     g.w = world_state0_init(28);
-    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, Dir_Right);
-    food_init_position(&g.food, &g.player, &g.w);
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
+    food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;
     g.seeker_time_for_move = 1.0;
 
@@ -34,7 +34,7 @@ Level_Return game_state_frame_Seeker(Game_State_Seeker *g)
     World_State0 *w = &g->w;
     // logic
 
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     bool seeker_grows = false;
 
@@ -46,7 +46,7 @@ Level_Return game_state_frame_Seeker(Game_State_Seeker *g)
             g->seeker.length++;
 
         {
-            Pos p_pos = player_nth_position(&g->player, 0);
+            Pos p_pos = player_nth_position(g->player, 0);
             Pos s_pos = g->seeker.positions[0];
             Dir d;
             if (abs(p_pos.x - s_pos.x) > abs(p_pos.y - s_pos.y))
@@ -80,7 +80,7 @@ Level_Return game_state_frame_Seeker(Game_State_Seeker *g)
 
         seeker_move(&g->seeker, w);
 
-        if (seeker_player_collision_logic(&g->seeker, &g->player))
+        if (seeker_player_collision_logic(&g->seeker, g->player))
         {
             return Level_Return_Reset_Level;
         }
@@ -88,7 +88,7 @@ Level_Return game_state_frame_Seeker(Game_State_Seeker *g)
 
     if (time_move_logic(&g->time_for_move))
     {
-        if (player_move(&g->player, w))
+        if (player_move(g->player, w))
         {
             // player died
             TraceLog(LOG_INFO, "%s", "YOU DIED!");
@@ -96,9 +96,9 @@ Level_Return game_state_frame_Seeker(Game_State_Seeker *g)
             return Level_Return_Reset_Level;
         }
 
-        food_player_collision_logic(&g->player, &g->food, w);
+        food_player_collision_logic(g->player, &g->food, w);
     }
-    Int food_left_to_win = 8 - g->player.length;
+    Int food_left_to_win = 8 - g->player->length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -114,7 +114,7 @@ Level_Return game_state_frame_Seeker(Game_State_Seeker *g)
 
     draw_food_left(food_left_to_win);
 
-    player_draw(&g->player, w);
+    player_draw(g->player, w);
     seeker_draw(&g->seeker, w);
     food_draw(&g->food, w);
 

@@ -44,49 +44,49 @@ void level_set_Wait(Level *mg)
     mg->size = (sizeof(Game_State_Wait));
 }
 
-void game_state0_init0(Game_State0 *new_g)
+void game_state0_init0(Game_State0 *new_g, Allo *allo)
 {
     Game_State0 g;
     g.w = world_state0_init(12);
-    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, Dir_Right);
-    food_init_position(&g.food, &g.player, &g.w);
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
+    food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;
 
     *new_g = g;
 }
 
 // Gigantic free fast
-void game_state0_init1(Game_State0 *new_g)
+void game_state0_init1(Game_State0 *new_g, Allo *allo)
 {
     Game_State0 g;
     g.w = world_state0_init(120);
-    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, Dir_Right);
-    food_init_position(&g.food, &g.player, &g.w);
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
+    food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;
 
     *new_g = g;
 }
 
-void game_state0_init_GetSmall(Game_State0 *new_g)
+void game_state0_init_GetSmall(Game_State0 *new_g, Allo *allo)
 {
     Game_State0 g;
     g.w = world_state0_init(12);
-    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 12, Dir_Right);
-    for (Int i = 1; i < PLAYER_MAX_POSITIONS; ++i)
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 12, 12, Dir_Right, allo);
+    for (Int i = 1; i < 12; ++i)
     {
-        g.player.positions[i] = (Pos){.x = -1, .y = -1};
+        g.player->positions[i] = (Pos){.x = -1, .y = -1};
     }
-    food_init_position(&g.food, &g.player, &g.w);
+    food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;
 
     *new_g = g;
 }
 
-void game_state_init_Wait(Game_State_Wait *new_g)
+void game_state_init_Wait(Game_State_Wait *new_g, Allo *allo)
 {
     Game_State_Wait g;
     g.w = world_state0_init(12);
-    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, Dir_Right);
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
     g.warps_done = 0;
     g.time_started = GetTime();
     g.time_for_move = 1.0;
@@ -99,21 +99,21 @@ Level_Return game_state0_frame0(Game_State0 *g)
 {
     const World_State0 *w = &g->w;
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
-        if (player_move(&g->player, w))
+        if (player_move(g->player, w))
         {
             // player died
             TraceLog(LOG_INFO, "%s", "YOU DIED!");
 
             return Level_Return_Reset_Level;
         }
-        food_player_collision_logic(&g->player, &g->food, w);
+        food_player_collision_logic(g->player, &g->food, w);
     }
 
-    Int food_left_to_win = 7 - g->player.length;
+    Int food_left_to_win = 7 - g->player->length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -123,7 +123,7 @@ Level_Return game_state0_frame0(Game_State0 *g)
     ClearBackground(RAYWHITE);
 
     draw_food_left(food_left_to_win);
-    player_draw(&g->player, w);
+    player_draw(g->player, w);
     food_draw(&g->food, w);
 
     draw_fps();
@@ -136,18 +136,18 @@ Level_Return game_state0_frame1(Game_State0 *g)
 {
     const World_State0 *w = &g->w;
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
-        if (player_move(&g->player, w))
+        if (player_move(g->player, w))
         {
             return Level_Return_Reset_Level;
         }
-        food_player_collision_logic(&g->player, &g->food, w);
+        food_player_collision_logic(g->player, &g->food, w);
     }
 
-    Int food_left_to_win = 12 - g->player.length;
+    Int food_left_to_win = 12 - g->player->length;
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
 
@@ -157,7 +157,7 @@ Level_Return game_state0_frame1(Game_State0 *g)
 
     draw_food_left(food_left_to_win);
 
-    player_draw_extra(&g->player, w);
+    player_draw_extra(g->player, w);
     food_draw(&g->food, w);
 
     draw_fps();
@@ -169,22 +169,22 @@ Level_Return game_state0_frameGetSmall(Game_State0 *g)
 {
     const World_State0 *w = &g->w;
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
-        if (player_move(&g->player, w))
+        if (player_move(g->player, w))
         {
             return Level_Return_Reset_Level;
         }
-        if (pos_equal(player_nth_position(&g->player, 0), g->food.pos))
+        if (pos_equal(player_nth_position(g->player, 0), g->food.pos))
         {
-            --g->player.length;
-            food_init_position(&g->food, &g->player, w);
+            --g->player->length;
+            food_init_position(&g->food, g->player, w);
         }
     }
 
-    Int food_left_to_win = g->player.length;
+    Int food_left_to_win = g->player->length;
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
 
@@ -194,7 +194,7 @@ Level_Return game_state0_frameGetSmall(Game_State0 *g)
 
     draw_food_left(food_left_to_win);
 
-    player_draw_extra(&g->player, w);
+    player_draw_extra(g->player, w);
     food_draw(&g->food, w);
 
     draw_fps();
@@ -206,18 +206,18 @@ Level_Return game_state0_frame2(Game_State0 *g)
 {
     const World_State0 *w = &g->w;
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic_general(&g->time_for_move, 0.02))
     {
-        if (player_move(&g->player, w))
+        if (player_move(g->player, w))
         {
             return Level_Return_Reset_Level;
         }
-        food_player_collision_logic(&g->player, &g->food, w);
+        food_player_collision_logic(g->player, &g->food, w);
     }
 
-    Int food_left_to_win = 8 - g->player.length;
+    Int food_left_to_win = 8 - g->player->length;
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
 
@@ -227,7 +227,7 @@ Level_Return game_state0_frame2(Game_State0 *g)
 
     draw_food_left(food_left_to_win);
 
-    player_draw_extra(&g->player, w);
+    player_draw_extra(g->player, w);
     food_draw(&g->food, w);
 
     draw_fps();
@@ -239,18 +239,18 @@ Level_Return game_state0_frame_Spinny(Game_State0 *g)
 {
     const World_State0 *w = &g->w;
     // logic
-    player_set_direction_from_input_spinny(&g->player);
+    player_set_direction_from_input_spinny(g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
-        if (player_move(&g->player, w))
+        if (player_move(g->player, w))
         {
             return Level_Return_Reset_Level;
         }
-        food_player_collision_logic(&g->player, &g->food, w);
+        food_player_collision_logic(g->player, &g->food, w);
     }
 
-    Int food_left_to_win = 10 - g->player.length;
+    Int food_left_to_win = 10 - g->player->length;
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
 
@@ -260,7 +260,7 @@ Level_Return game_state0_frame_Spinny(Game_State0 *g)
 
     draw_food_left(food_left_to_win);
 
-    player_draw_extra(&g->player, w);
+    player_draw_extra(g->player, w);
     food_draw(&g->food, w);
 
     draw_fps();
@@ -272,19 +272,19 @@ Level_Return game_state_frame_Wait(Game_State_Wait *g)
 {
     const World_State0 *w = &g->w;
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
-        Pos start = player_nth_position(&g->player, 0);
-        if (player_move(&g->player, w))
+        Pos start = player_nth_position(g->player, 0);
+        if (player_move(g->player, w))
         {
             // player died
             TraceLog(LOG_INFO, "%s", "YOU DIED!");
 
             return Level_Return_Reset_Level;
         }
-        Pos end = player_nth_position(&g->player, 0);
+        Pos end = player_nth_position(g->player, 0);
 
         Int dist = abs(start.x - end.x + start.y - end.y);
         if (dist > 1)
@@ -304,7 +304,7 @@ Level_Return game_state_frame_Wait(Game_State_Wait *g)
     ClearBackground(RAYWHITE);
     draw_food_left(food_left_to_win);
 
-    player_draw(&g->player, w);
+    player_draw(g->player, w);
 
     draw_fps();
     EndDrawing();

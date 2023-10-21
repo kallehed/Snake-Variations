@@ -9,12 +9,12 @@ void level_set_Accel(Level *mg)
     mg->size = (sizeof(Game_State_Accel));
 }
 
-void game_state_init_Accel(Game_State_Accel *new_g)
+void game_state_init_Accel(Game_State_Accel *new_g, Allo *allo)
 {
     Game_State_Accel g;
     g.w = world_state0_init(24);
-    g.player = player_init((Pos){.x = 10, .y = 10}, 3, Dir_Right);
-    food_init_position(&g.food, &g.player, &g.w);
+    g.player = player_init((Pos){.x = 10, .y = 10}, 3, 100, Dir_Right, allo);
+    food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;
 
     *new_g = g;
@@ -24,20 +24,20 @@ Level_Return game_state_frame_Accel(Game_State_Accel *g)
 {
     World_State0 *w = &g->w;
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     double wait_time = 0.01 + pow(sin(GetTime()), 2.0);
 
     if (time_move_logic_general(&g->time_for_move, wait_time))
     {
-        if (player_move(&g->player, w))
+        if (player_move(g->player, w))
         {
             return Level_Return_Reset_Level;
         }
-        food_player_collision_logic(&g->player, &g->food, w);
+        food_player_collision_logic(g->player, &g->food, w);
     }
 
-    Int food_left_to_win = 9 - g->player.length;
+    Int food_left_to_win = 9 - g->player->length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -47,7 +47,7 @@ Level_Return game_state_frame_Accel(Game_State_Accel *g)
     ClearBackground(VIOLET);
 
     draw_food_left(food_left_to_win);
-    player_draw_general(&g->player, SKYBLUE, BLUE, w);
+    player_draw_general(g->player, SKYBLUE, BLUE, w);
     food_draw(&g->food, w);
 
     draw_fps();

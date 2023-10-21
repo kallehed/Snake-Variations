@@ -12,7 +12,7 @@ typedef int8_t SPlatformer_Block;
 
 typedef struct {
     World_State0 w;
-    Player player;
+    Player *player;
     Food foods[SPLATFORMER_MAX_FOODS];
     double time_for_move;
 	bool turn;
@@ -21,7 +21,7 @@ typedef struct {
 
 } Game_State_StaticPlatformer;
 
-void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g); 
+void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g, Allo *allo); 
 
 void map_draw(const SPlatformer_Block map[], const Int map_width, const Int map_height, const World_State0 *w);
 

@@ -10,11 +10,11 @@ void level_set_Suicide(Level *mg)
     mg->size = (sizeof(Game_State_Suicide));
 }
 
-void game_state_init_Suicide(Game_State_Suicide *new_g)
+void game_state_init_Suicide(Game_State_Suicide *new_g, Allo *allo)
 {
     Game_State_Suicide g;
     g.w = world_state0_init(28);
-    g.player = player_init((Pos){3, 10}, 10, Dir_Right);
+    g.player = player_init((Pos){3, 10}, 10, 100, Dir_Right, allo);
     g.time_for_move = 1.0;
 
     g.player_flash_timer = -1.f;
@@ -41,7 +41,7 @@ Level_Return game_state_frame_Suicide(Game_State_Suicide *g)
         g->player_flash_timer -= GetFrameTime();
     }
 
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     // For seeker
     for (Int i = 0; i < GAME_STATE_SUICIDE_MAX_SEEKERS; ++i)
@@ -56,7 +56,7 @@ Level_Return game_state_frame_Suicide(Game_State_Suicide *g)
             }
             else
             {
-                const Pos p_pos = player_nth_position(&g->player, 0);
+                const Pos p_pos = player_nth_position(g->player, 0);
                 const Pos s_pos = g->seekers[i].positions[0];
                 Dir d;
                 { // compute the dir which is closest to player, so you can avoid the player
@@ -106,7 +106,7 @@ Level_Return game_state_frame_Suicide(Game_State_Suicide *g)
 
     if (time_move_logic(&g->time_for_move))
     {
-        if (player_move(&g->player, w))
+        if (player_move(g->player, w))
         {
             return Level_Return_Reset_Level;
         }
@@ -114,12 +114,12 @@ Level_Return game_state_frame_Suicide(Game_State_Suicide *g)
         {
             for (Int i = 0; i < GAME_STATE_SUICIDE_MAX_SEEKERS; ++i)
             {
-                if (seeker_player_collision_logic(&g->seekers[i], &g->player))
+                if (seeker_player_collision_logic(&g->seekers[i], g->player))
                 {
                     g->player_flash_timer = GAME_STATE_SUICIDE_FLASH_TIME;
-                    g->player.length--;
+                    g->player->length--;
 
-                    g->seekers[i].length = g->player.length;
+                    g->seekers[i].length = g->player->length;
 
                     Dir_And_Pos stuff = random_outside_edge_position_and_normal(w);
                     set_positions_as_line_from_without_wrapping(g->seekers[i].positions, g->seekers[i].length,
@@ -129,7 +129,7 @@ Level_Return game_state_frame_Suicide(Game_State_Suicide *g)
             }
         }
     }
-    Int food_left_to_win = g->player.length;
+    Int food_left_to_win = g->player->length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -143,11 +143,11 @@ Level_Return game_state_frame_Suicide(Game_State_Suicide *g)
 
     if (g->player_flash_timer > 0.f)
     {
-        player_draw_flashing(&g->player, w);
+        player_draw_flashing(g->player, w);
     }
     else
     {
-        player_draw(&g->player, w);
+        player_draw(g->player, w);
     }
 
     {

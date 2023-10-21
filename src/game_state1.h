@@ -7,7 +7,7 @@
 typedef struct
 {
     World_State0 w;
-    Player player;
+    Player *player;
     Food food;
     double time_for_move;
     Int evil_snake_index;
@@ -22,7 +22,7 @@ typedef struct
     double evil_snake_time_for_moves[GAME_STATE1_TOTAL_EVIL_SNAKES];
 } Game_State1_UnSync;
 
-void game_state1_init(Game_State1 *new_g);
-void game_state1_init_UnSync(Game_State1_UnSync *new_g);
+void game_state1_init(Game_State1 *new_g, Allo *allo);
+void game_state1_init_UnSync(Game_State1_UnSync *new_g, Allo *allo);
 Level_Return game_state1_frame0(Game_State1 *g);
 Level_Return game_state1_frame_UnSync(Game_State1_UnSync *g);

@@ -7,6 +7,18 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+// TODO: Continue this code
+// Make it point to memory in buffer 
+// which should be put somewhere
+//, alloc should probably have a pointer to its
+// internal data, and then we will cast that to the right type 
+// and then we will push to buffer, and all will be good 
+// so, create new struct, which will be in data of allocator interface
+// then cast that in actual alloc function, so no crazy things happen.
+void *alloc(void *this, Int mem)
+{
+    return malloc(mem);
+}
 
 Game game_init(void)
 {
@@ -17,7 +29,8 @@ Game game_init(void)
         start_level_num = 0; // 25 latest
     }
     g.ld.l._data = NULL;
-    level_data_init(&g.ld, start_level_num);
+    g.allo = (Allo){.alloc = alloc};
+    level_data_init(&g.ld, start_level_num, &g.allo);
     g.global_score = 0;
     g.game_mode = Game_Mode_Level;
     g.try_surprise_timer = 0.0f;
@@ -49,6 +62,7 @@ Game game_init(void)
 
         g.cur_music = Music_Snake_Basic;
     }
+
     // Sound
     {
         static const char *filenames[] = {
@@ -139,7 +153,7 @@ void game_init_next_level(Game *g)
         g->ld.level_enum++;
         g->cur_music = level_get_music(g->ld.level_enum);
         g->game_mode = Game_Mode_Level;
-        level_data_init(&g->ld, g->ld.level_enum);
+        level_data_init(&g->ld, g->ld.level_enum, &g->allo);
     }
 }
 
@@ -166,7 +180,7 @@ bool game_handle_level(Game *g)
     else
     {
         UpdateMusicStream(g->musics[g->cur_music]); // Update music buffer with new stream data
-        switch (level_run_correctly(&g->ld.l))
+        switch (level_run_correctly(&g->ld.l, &g->allo))
         {
         case Level_Return_Continue: {
             // possibly start surprise easter egg thingy

@@ -18,7 +18,7 @@
 typedef struct
 {
     World_State0 w;
-    Player player;
+    Player *player;
     float player_inv_timer;
     // What zelda room they are in, set to -1 in beginning to notify that rooms shouldn't be changed at start
     Int room_x, room_y;
@@ -32,6 +32,6 @@ typedef struct
     Maze0_Cell maze[GS_ZELDA_HEIGHT][GS_ZELDA_WIDTH];
 } GS_Zelda;
 
-void game_state_init_Zelda(GS_Zelda *new_g);
+void game_state_init_Zelda(GS_Zelda *new_g, Allo *allo);
 
 Level_Return game_state_frame_Zelda(GS_Zelda *g);

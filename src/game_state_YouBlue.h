@@ -11,7 +11,7 @@ typedef struct
 {
     World_State0 w;
 	double start_time;
-    Player players[GS_YOUBLUE_TOTAL_PLAYERS];
+    Player *players[GS_YOUBLUE_TOTAL_PLAYERS];
 	float player_inv_timers[GS_YOUBLUE_TOTAL_PLAYERS];
 	Int player_index;
 	Dir turn_dir;
@@ -20,5 +20,5 @@ typedef struct
     Seeker_Snake snakes[GS_YOUBLUE_TOTAL_SEEKERS];
 } GS_YouBlue;
 
-void gs_init_YouBlue(GS_YouBlue *new_g);
+void gs_init_YouBlue(GS_YouBlue *new_g, Allo *allo);
 Level_Return gs_frame_YouBlue(GS_YouBlue *g);

@@ -14,12 +14,12 @@ void level_set_OnceMaze(Level *mg)
     mg->size = (sizeof(GS_OnceMaze));
 }
 
-void game_state_OnceMaze_init(GS_OnceMaze *new_g)
+void game_state_OnceMaze_init(GS_OnceMaze *new_g, Allo *allo)
 {
     GS_OnceMaze g;
     g.w = world_state0_init_general(GS_WIDTH, GS_HEIGHT, GS_PIXEL_SIZE);
 
-    g.player = player_init((Pos){.x = GS_WIDTH / 2, .y = 5}, 2, Dir_Right);
+    g.player = player_init((Pos){.x = GS_WIDTH / 2, .y = 5}, 2, 300, Dir_Right, allo);
     g.points = 0;
 
     Int snake_lengths[GS_MAX_PATHERS];
@@ -120,15 +120,15 @@ Level_Return game_state_OnceMaze_frame(GS_OnceMaze *g)
     World_State0 *w = &g->w;
     // logic
 
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic_general(&g->time_for_move, 0.123))
     {
-        if (maze0_player_can_move((Maze0_Cell *)g->maze, GS_WIDTH, &g->player, w))
+        if (maze0_player_can_move((Maze0_Cell *)g->maze, GS_WIDTH, g->player, w))
         {
-            if (player_move(&g->player, w))
+            if (player_move(g->player, w))
                 return Level_Return_Reset_Level;
-            g->player.length++;
+            g->player->length++;
         }
 
         for (Int i = 0; i < GS_MAX_PATHERS; ++i)
@@ -136,7 +136,7 @@ Level_Return game_state_OnceMaze_frame(GS_OnceMaze *g)
 
         for (Int i = 0; i < GS_MAX_PATHERS; ++i)
         {
-            if (snake_pather_intersect_point(&g->evil_snake_paths[i], player_nth_position(&g->player, 0)))
+            if (snake_pather_intersect_point(&g->evil_snake_paths[i], player_nth_position(g->player, 0)))
             {
                 return Level_Return_Reset_Level;
             }
@@ -144,7 +144,7 @@ Level_Return game_state_OnceMaze_frame(GS_OnceMaze *g)
 
         for (Int i = 0; i < GS_FOODS; ++i)
         {
-            if (pos_equal(player_nth_position(&g->player, 0), g->foods[i].pos))
+            if (pos_equal(player_nth_position(g->player, 0), g->foods[i].pos))
             {
                 g->points++;
                 g->foods[i].pos = (Pos){.x = -1, .y = -1};
@@ -163,7 +163,7 @@ Level_Return game_state_OnceMaze_frame(GS_OnceMaze *g)
 
     draw_food_left(food_left_to_win);
     maze0_draw((Maze0_Cell *)g->maze, GS_WIDTH, GS_HEIGHT, w);
-    player_draw_extra(&g->player, w);
+    player_draw_extra(g->player, w);
     for (Int i = 0; i < GS_FOODS; ++i)
     {
         food_draw(&g->foods[i], w);

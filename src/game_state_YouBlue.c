@@ -11,12 +11,16 @@ void level_set_YouBlue(Level *mg)
     mg->size = (sizeof(GS_YouBlue));
 }
 
-void gs_init_YouBlue(GS_YouBlue *new_g)
+void gs_init_YouBlue(GS_YouBlue *new_g, Allo *allo)
 {
     GS_YouBlue g;
     g.w = world_state0_init(28);
     g.start_time = GetTime();
-    g.players[0] = player_init((Pos){g.w.width / 2, g.w.height / 2}, 8, Dir_Right);
+
+    for (Int i = 0; i < GS_YOUBLUE_TOTAL_PLAYERS; ++i) {
+        g.players[i] = player_init((Pos){g.w.width / 2, g.w.height / 2}, 8, 100, Dir_Right, allo);
+    }
+
     g.player_inv_timers[0] = 0.f;
     g.player_index = 1;
     g.turn_dir = Dir_Nothing;
@@ -54,9 +58,9 @@ Level_Return gs_frame_YouBlue(GS_YouBlue *g)
         {
             if (GetRandomValue(1, 10) == 1)
             {
-                player_set_direction_correctly(&g->players[p], GetRandomValue(0, 3));
+                player_set_direction_correctly(g->players[p], GetRandomValue(0, 3));
             }
-            player_move(&g->players[p], w);
+            player_move(g->players[p], w);
         }
         for (Int p = 0; p < g->player_index; ++p)
         {
@@ -64,10 +68,10 @@ Level_Return gs_frame_YouBlue(GS_YouBlue *g)
             {
                 for (Int i = 0; i < g->seeker_index; ++i)
                 {
-                    if (seeker_player_collision_logic(&g->snakes[i], &g->players[p]))
+                    if (seeker_player_collision_logic(&g->snakes[i], g->players[p]))
                     {
                         g->player_inv_timers[p] = GS_YOUBLUE_PLAYER_INV_TIME;
-                        g->players[p].length--;
+                        g->players[p]->length--;
                         break;
                     }
                 }
@@ -112,7 +116,7 @@ Level_Return gs_frame_YouBlue(GS_YouBlue *g)
         {
             if (g->player_index < GS_YOUBLUE_TOTAL_PLAYERS)
             {
-                g->players[g->player_index] = player_init((Pos){0, 0}, 6, Dir_Right);
+                player_set_positions(g->players[g->player_index], (Pos){0, 0}, 6, Dir_Right);
                 ++g->player_index;
             }
         }
@@ -120,7 +124,7 @@ Level_Return gs_frame_YouBlue(GS_YouBlue *g)
     Int food_left_to_win = 0;
     for (Int p = 0; p < g->player_index; ++p)
     {
-        food_left_to_win += g->players[p].length;
+        food_left_to_win += g->players[p]->length;
     }
 
     if (food_left_to_win <= 0)
@@ -148,11 +152,11 @@ Level_Return gs_frame_YouBlue(GS_YouBlue *g)
     {
         if (g->player_inv_timers[p] <= 0.f)
         {
-            player_draw(&g->players[p], w);
+            player_draw(g->players[p], w);
         }
         else
         {
-            player_draw_flashing(&g->players[p], w);
+            player_draw_flashing(g->players[p], w);
         }
     }
 

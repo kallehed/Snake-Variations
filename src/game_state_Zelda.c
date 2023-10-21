@@ -19,11 +19,11 @@ void level_set_Zelda(Level *mg)
     mg->size = (sizeof(GS_Zelda));
 }
 
-void game_state_init_Zelda(GS_Zelda *new_g)
+void game_state_init_Zelda(GS_Zelda *new_g, Allo *allo)
 {
     GS_Zelda g;
     g.w = world_state0_init_general(GS_ZELDA_WIDTH, GS_ZELDA_HEIGHT, WINDOW_WIDTH / GS_ZELDA_ROOM_WIDTH);
-    g.player = player_init((Pos){.x = GS_ZELDA_ROOM_WIDTH * 2.5, .y = GS_ZELDA_ROOM_HEIGHT * 1.5}, 8, Dir_Right);
+    g.player = player_init((Pos){.x = GS_ZELDA_ROOM_WIDTH * 2.5, .y = GS_ZELDA_ROOM_HEIGHT * 1.5}, 8, 100, Dir_Right, allo);
     g.player_inv_timer = 0.f;
     g.room_x = -1;
     g.room_y = -1;
@@ -209,22 +209,22 @@ Level_Return game_state_frame_Zelda(GS_Zelda *g)
 
     if (g->room_change_timer <= 0.f)
     {
-        player_set_direction_from_input(&g->player);
+        player_set_direction_from_input(g->player);
 
         if (time_move_logic_general(&g->time_for_move, 0.105))
         {
-            if (maze0_player_can_move((Maze0_Cell *)g->maze, GS_ZELDA_WIDTH, &g->player, w))
+            if (maze0_player_can_move((Maze0_Cell *)g->maze, GS_ZELDA_WIDTH, g->player, w))
             {
                 if (!boxes_collision_logic_maze0(
                         g->boxes, GS_ZELDA_MAX_BOXES,
-                        move_inside_grid(player_nth_position(&g->player, 0), g->player.next_direction, w),
-                        g->player.next_direction, (Pos){1, 1}, -1, (Maze0_Cell *)g->maze, GS_ZELDA_WIDTH, w))
+                        move_inside_grid(player_nth_position(g->player, 0), g->player->next_direction, w),
+                        g->player->next_direction, (Pos){1, 1}, -1, (Maze0_Cell *)g->maze, GS_ZELDA_WIDTH, w))
                 {
-                    if (player_move(&g->player, w))
+                    if (player_move(g->player, w))
                     {
                         if (g->player_inv_timer <= 0.f)
                         {
-                            g->player.length--;
+                            g->player->length--;
                             g->player_inv_timer = GS_ZELDA_PLAYER_INV_TIME;
                         }
                     }
@@ -233,7 +233,7 @@ Level_Return game_state_frame_Zelda(GS_Zelda *g)
 
             // Calculate possible new room we shall transition to
             {
-                const Pos p_pos = player_nth_position(&g->player, 0);
+                const Pos p_pos = player_nth_position(g->player, 0);
                 const Int room_x = p_pos.x / GS_ZELDA_ROOM_WIDTH;
                 const Int room_y = p_pos.y / GS_ZELDA_ROOM_HEIGHT;
                 if (room_x != g->room_x || room_y != g->room_y)
@@ -258,10 +258,10 @@ Level_Return game_state_frame_Zelda(GS_Zelda *g)
             {
                 for (Int i = 0; i < GS_ZELDA_PATHERS; ++i)
                 {
-                    if (snake_pather_player_intersection(&g->pathers[i], &g->player))
+                    if (snake_pather_player_intersection(&g->pathers[i], g->player))
                     {
                         g->player_inv_timer = GS_ZELDA_PLAYER_INV_TIME;
-                        g->player.length--;
+                        g->player->length--;
                         break;
                     }
                 }
@@ -276,9 +276,9 @@ Level_Return game_state_frame_Zelda(GS_Zelda *g)
 
     Int score = GS_ZELDA_MAX_POINTS;
 
-    for (Int i = 0; i < g->player.length; ++i) // Player collisions with buttons
+    for (Int i = 0; i < g->player->length; ++i) // Player collisions with buttons
     {
-        Pos pos = player_nth_position(&g->player, i);
+        Pos pos = player_nth_position(g->player, i);
         if (g->maze[pos.y][pos.x] == Maze0_Cell_Button)
         {
             score--;
@@ -300,7 +300,7 @@ Level_Return game_state_frame_Zelda(GS_Zelda *g)
         }
     }
 
-    if (g->player.length <= 0)
+    if (g->player->length <= 0)
         return Level_Return_Reset_Level;
 
     if (score <= 0)
@@ -333,11 +333,11 @@ Level_Return game_state_frame_Zelda(GS_Zelda *g)
 
     if (g->player_inv_timer > 0.f)
     {
-        player_draw_flashing(&g->player, w);
+        player_draw_flashing(g->player, w);
     }
     else
     {
-        player_draw_extra(&g->player, w);
+        player_draw_extra(g->player, w);
     }
     for (Int i = 0; i < GS_ZELDA_MAX_BOXES; ++i)
     {

@@ -12,11 +12,11 @@ void level_set_Maze(Level *mg)
     mg->size = (sizeof(Game_State_Maze));
 }
 
-void game_state_Maze_init(Game_State_Maze *new_g)
+void game_state_Maze_init(Game_State_Maze *new_g, Allo *allo)
 {
     Game_State_Maze g;
     g.w = world_state0_init(GAME_STATE_MAZE_WIDTH);
-    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 2, Dir_Right);
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 2, 100, Dir_Right, allo);
 
     Snake_Pather_Way ways0[] = {{Dir_Right, 2}, {Dir_Down, 6}, {Dir_Left, 2}, {Dir_Up, 6}};
     g.evil_snake_paths[0] = snake_pather_init_except_position(ways0, 4);
@@ -72,18 +72,18 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
     World_State0 *w = &g->w;
     // logic
 
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic_general(&g->time_for_move, 0.123))
     {
-		maze0_player_move((Maze0_Cell *)g->maze, GAME_STATE_MAZE_WIDTH, &g->player, w);
+		maze0_player_move((Maze0_Cell *)g->maze, GAME_STATE_MAZE_WIDTH, g->player, w);
 
         for (Int i = 0; i < GAME_STATE_MAZE_TOTAL_EVIL_SNAKE_PATHS; ++i)
             snake_pather_move(&g->evil_snake_paths[i], w);
 
         for (Int i = 0; i < GAME_STATE_MAZE_TOTAL_EVIL_SNAKE_PATHS; ++i)
         {
-            if (snake_pather_player_intersection(&g->evil_snake_paths[i], &g->player))
+            if (snake_pather_player_intersection(&g->evil_snake_paths[i], g->player))
             {
                 return Level_Return_Reset_Level;
             }
@@ -91,11 +91,11 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
 
         for (Int i = 0; i < GAME_STATE_MAZE_FOODS; ++i)
         {
-            food_player_collision_logic_food_disappear(&g->player, &g->foods[i]);
+            food_player_collision_logic_food_disappear(g->player, &g->foods[i]);
         }
     }
 
-    Int food_left_to_win = 6 - g->player.length;
+    Int food_left_to_win = 6 - g->player->length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -106,7 +106,7 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
 
     draw_food_left(food_left_to_win);
     maze0_draw((Maze0_Cell *)g->maze, GAME_STATE_MAZE_WIDTH, GAME_STATE_MAZE_HEIGHT, w);
-    player_draw_extra(&g->player, w);
+    player_draw_extra(g->player, w);
     for (Int i = 0; i < GAME_STATE_MAZE_FOODS; ++i)
     {
         food_draw(&g->foods[i], w);

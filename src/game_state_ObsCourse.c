@@ -12,12 +12,12 @@ void level_set_ObsCourse(Level *mg)
     mg->size = (sizeof(Game_State_ObsCourse));
 }
 
-void game_state_init_ObsCourse(Game_State_ObsCourse *new_g)
+void game_state_init_ObsCourse(Game_State_ObsCourse *new_g, Allo *allo)
 {
     Game_State_ObsCourse g;
     g.w = world_state0_init(20);
     g.w = world_state0_init_general(GS_OBSCOURSE_WIDTH, GS_OBSCOURSE_HEIGHT, WINDOW_HEIGHT / GS_OBSCOURSE_HEIGHT);
-    g.player = player_init((Pos){4, 5}, GS_OBSCOURSE_PLAYER_START_LENGTH, Dir_Right);
+    g.player = player_init((Pos){4, 5}, GS_OBSCOURSE_PLAYER_START_LENGTH, 100, Dir_Right, allo);
     g.time_for_move = 1.0;
 
     g.cam_x = 0.f;
@@ -66,11 +66,11 @@ Level_Return game_state_frame_ObsCourse(Game_State_ObsCourse *g)
 {
     const World_State0 *const w = &g->w;
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
-        if (maze0_player_move((Maze0_Cell *)g->maze, GS_OBSCOURSE_WIDTH, &g->player, w))
+        if (maze0_player_move((Maze0_Cell *)g->maze, GS_OBSCOURSE_WIDTH, g->player, w))
         {
             // player died
             TraceLog(LOG_INFO, "%s", "YOU DIED!");
@@ -78,12 +78,12 @@ Level_Return game_state_frame_ObsCourse(Game_State_ObsCourse *g)
             return Level_Return_Reset_Level;
         }
         for (Int i = 0; i < GS_OBSCOURSE_MAX_FOODS; ++i)
-            food_player_collision_logic_food_disappear(&g->player, &g->foods[i]);
+            food_player_collision_logic_food_disappear(g->player, &g->foods[i]);
     }
 
     // die by going offscreen
     {
-        const Pos p_pos = player_nth_position(&g->player, 0);
+        const Pos p_pos = player_nth_position(g->player, 0);
         if ((p_pos.x + 1) * w->block_pixel_len < g->cam_x ||
             (p_pos.x - 1) * w->block_pixel_len > g->cam_x + WINDOW_WIDTH)
         {
@@ -91,7 +91,7 @@ Level_Return game_state_frame_ObsCourse(Game_State_ObsCourse *g)
         }
     }
 
-    const Int food_left_to_win = GS_OBSCOURSE_MAX_FOODS + GS_OBSCOURSE_PLAYER_START_LENGTH - g->player.length;
+    const Int food_left_to_win = GS_OBSCOURSE_MAX_FOODS + GS_OBSCOURSE_PLAYER_START_LENGTH - g->player->length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -131,7 +131,7 @@ Level_Return game_state_frame_ObsCourse(Game_State_ObsCourse *g)
         draw_food_left_general(food_left_to_win, wid * (((Int)(g->cam_x + WINDOW_WIDTH)) / wid), -40);
     }
 
-    player_draw(&g->player, w);
+    player_draw(g->player, w);
     for (Int i = 0; i < GS_OBSCOURSE_MAX_FOODS; ++i)
     {
         food_draw(&g->foods[i], w);

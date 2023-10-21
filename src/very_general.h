@@ -50,8 +50,10 @@ typedef enum Level_Return
     Level_Return_Reset_Level,
 } Level_Return;
 
+typedef struct Allo Allo;
+
 typedef Level_Return (*Level_Frame_Code)(void *);
-typedef void (*Level_Init_Code)(void *);
+typedef void (*Level_Init_Code)(void *, Allo *);
 
 typedef struct
 {

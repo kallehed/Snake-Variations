@@ -14,7 +14,7 @@
 typedef struct
 {
     World_State0 w;
-    Player player;
+    Player *player;
 	Int points;
     double time_for_move;
     Food foods[GS_FOODS];
@@ -22,5 +22,5 @@ typedef struct
     Maze0_Cell maze[GS_HEIGHT][GS_WIDTH];
 } GS_OnceMaze;
 
-void game_state_OnceMaze_init(GS_OnceMaze *new_g);
+void game_state_OnceMaze_init(GS_OnceMaze *new_g, Allo *allo);
 Level_Return game_state_OnceMaze_frame(GS_OnceMaze *g);

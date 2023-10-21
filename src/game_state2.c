@@ -8,12 +8,12 @@ void level_set_Boxes(Level *mg)
     mg->init_code = (Level_Init_Code)game_state2_init;
     mg->size = (sizeof(Game_State2));
 }
-void game_state2_init(Game_State2 *new_g)
+void game_state2_init(Game_State2 *new_g, Allo *allo)
 {
     Game_State2 g;
     g.w = world_state0_init(24);
 
-    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 5, Dir_Right);
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 5, 100, Dir_Right, allo);
 
     g.boxes[0] = (Box){.p = {1, 1}, .w_h = {1, 1}};
     g.boxes[1] = (Box){.p = {10, 5}, .w_h = {1, 1}};
@@ -26,11 +26,11 @@ void game_state2_init(Game_State2 *new_g)
 Level_Return game_state2_frame0(Game_State2 *g)
 {
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
-        if (player_move(&g->player, &g->w))
+        if (player_move(g->player, &g->w))
         {
             // player died
             TraceLog(LOG_INFO, "%s", "YOU DIED!");
@@ -38,8 +38,8 @@ Level_Return game_state2_frame0(Game_State2 *g)
             return Level_Return_Reset_Level;
         }
 
-        boxes_collision_logic(g->boxes, GAME_STATE2_BOXES, player_nth_position(&g->player, 0),
-                                     g->player.current_direction, (Pos){1, 1}, -1, &g->w);
+        boxes_collision_logic(g->boxes, GAME_STATE2_BOXES, player_nth_position(g->player, 0),
+                                     g->player->current_direction, (Pos){1, 1}, -1, &g->w);
     }
 
     Pos pos[GAME_STATE2_MAX_POS] = {
@@ -60,7 +60,7 @@ Level_Return game_state2_frame0(Game_State2 *g)
             }
         }
     }
-    points += player_intersection_points(&g->player, pos, GAME_STATE2_MAX_POS);
+    points += player_intersection_points(g->player, pos, GAME_STATE2_MAX_POS);
 
     if (points == GAME_STATE2_MAX_POS)
     {
@@ -76,7 +76,7 @@ Level_Return game_state2_frame0(Game_State2 *g)
     {
         draw_block_at(pos[i], GREEN, &g->w);
     }
-    player_draw_extra(&g->player, &g->w);
+    player_draw_extra(g->player, &g->w);
     for (Int i = 0; i < GAME_STATE2_BOXES; i++)
     {
         box_draw(&g->boxes[i], &g->w);

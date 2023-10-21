@@ -9,7 +9,7 @@
 typedef struct
 {
     World_State0 w;
-    Player player;
+    Player *player;
     float player_inv_timer;
     double time_for_move;
     double start_time;
@@ -18,5 +18,5 @@ typedef struct
     Seeker_Snake snakes[GS_MAX_SNAKES];
 } Game_State_Attack;
 
-void game_state_init_Attack(Game_State_Attack *new_g);
+void game_state_init_Attack(Game_State_Attack *new_g, Allo *allo);
 Level_Return game_state_frame_Attack(Game_State_Attack *g);

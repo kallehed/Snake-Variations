@@ -11,11 +11,11 @@ void level_set_Attack(Level *mg)
     mg->size = (sizeof(Game_State_Attack));
 }
 
-void game_state_init_Attack(Game_State_Attack *new_g)
+void game_state_init_Attack(Game_State_Attack *new_g, Allo *allo)
 {
     Game_State_Attack g;
     g.w = world_state0_init(28);
-    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 12, Dir_Right);
+    g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 12, 100, Dir_Right, allo);
     g.player_inv_timer = 0.f;
     g.time_for_move = 1.0;
     g.start_time = GetTime();
@@ -35,11 +35,11 @@ Level_Return game_state_frame_Attack(Game_State_Attack *g)
         g->player_inv_timer -= GetFrameTime();
     }
 
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic(&g->time_for_move))
     {
-        if (player_move(&g->player, w))
+        if (player_move(g->player, w))
         {
             return Level_Return_Reset_Level;
         }
@@ -48,9 +48,9 @@ Level_Return game_state_frame_Attack(Game_State_Attack *g)
         {
             for (Int i = 0; i < g->evil_snake_index; ++i)
             {
-                if (seeker_player_collision_logic(&g->snakes[i], &g->player))
+                if (seeker_player_collision_logic(&g->snakes[i], g->player))
                 {
-                    g->player.length -= 1;
+                    g->player->length -= 1;
                     g->player_inv_timer = GS_PLAYER_INV_TIME;
                     set_positions_as_line_from_without_wrapping(g->snakes[i].positions, g->snakes[i].length,
                                                                 (Pos){.x = -1, .y = -1}, Dir_Nothing);
@@ -60,7 +60,7 @@ Level_Return game_state_frame_Attack(Game_State_Attack *g)
             }
         }
 
-        if (g->player.length <= 0)
+        if (g->player->length <= 0)
         {
             return Level_Return_Reset_Level;
         }
@@ -106,11 +106,11 @@ Level_Return game_state_frame_Attack(Game_State_Attack *g)
 
     if (g->player_inv_timer > 0.f)
     {
-        player_draw_flashing(&g->player, w);
+        player_draw_flashing(g->player, w);
     }
     else
     {
-        player_draw(&g->player, w);
+        player_draw(g->player, w);
     }
 
     for (Int i = 0; i < g->evil_snake_index; ++i)

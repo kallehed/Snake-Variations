@@ -8,11 +8,11 @@
 typedef struct
 {
     World_State0 w;
-    Player player;
+    Player *player;
     Box boxes[GAME_STATE2_BOXES];
     double time_for_move;
 } Game_State2;
 
-void game_state2_init(Game_State2 *new_g);
+void game_state2_init(Game_State2 *new_g, Allo *allo);
 
 Level_Return game_state2_frame0(Game_State2 *g);

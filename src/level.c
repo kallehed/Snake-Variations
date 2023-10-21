@@ -47,7 +47,7 @@ static Set_Level_Code get_set_level_code_from_enum(Level_Enum e)
 }
 
 // frees previous level that was there
-void level_init(Level *l, const Level_Enum level_enum)
+void level_init(Level *l, const Level_Enum level_enum, Allo *allo)
 {
     free(l->_data);
     l->_data = NULL;
@@ -64,29 +64,28 @@ void level_init(Level *l, const Level_Enum level_enum)
     setter(l);
 
     // INIT
-    printf("Mallocing size: %u\n", l->size);
-    l->_data = malloc(l->size);
+    printf("Allocing size: %u\n", l->size);
+    l->_data = allo->alloc(allo, l->size);
     if (NULL == l->_data) // Check for Out Of Memory
         puts("!!!!!!!!! OUT OF MEMORY, MALLOC RETURNED NULL!!!!!!!!");
 
-    l->init_code(l->_data);
+    l->init_code(l->_data, allo);
 }
 
-void level_data_init(Level_Data *ld, Level_Enum level_enum)
+void level_data_init(Level_Data *ld, Level_Enum level_enum, Allo *allo)
 {
     ld->deaths_in_level = 0;
     ld->time_of_level_start = GetTime();
     ld->deaths_in_level = 0;
     ld->level_enum = level_enum;
     ld->death_wait_timer = 0.f;
-    level_init(&ld->l, ld->level_enum);
+    level_init(&ld->l, ld->level_enum, allo);
 }
 
 // handles just resetting and stuff, returns whether level was completed or not
 // DOES NOT FREE ANYTHING, just handles resets and the like
-Level_Return level_run_correctly(Level *l)
+Level_Return level_run_correctly(Level *l, Allo *allo)
 {
-
     if (IsKeyPressed(KEY_R))
     {
         goto GOTO_RESET_LEVEL;
@@ -109,7 +108,7 @@ Level_Return level_run_correctly(Level *l)
     break;
     case Level_Return_Reset_Level: {
     GOTO_RESET_LEVEL:
-        l->init_code(l->_data);
+        l->init_code(l->_data, allo);
         return Level_Return_Reset_Level;
     }
     break;
@@ -133,8 +132,8 @@ Music_Enum level_get_music(Level_Enum level_enum)
     {
     case Level_Final:
         return Music_Snake_Final;
-	case Level_OnceMaze:
-		return Music_Snake_Weird;
+    case Level_OnceMaze:
+        return Music_Snake_Weird;
     case Level_YouBlue:
         return Music_Snake_Mess;
     case Level_Zelda:

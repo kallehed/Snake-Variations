@@ -11,12 +11,12 @@ void level_set_StaticPlatformer(Level *mg)
     mg->size = (sizeof(Game_State_StaticPlatformer));
 }
 
-void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g)
+void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g, Allo *allo)
 {
     Game_State_StaticPlatformer g;
     g.w = world_state0_init(SPLATFORMER_MAP_WIDTH);
     // HEIGHT 22, WIDTH 30
-    g.player = player_init((Pos){.x = 1, 20}, 2, Dir_Right);
+    g.player = player_init((Pos){.x = 1, 20}, 2, 100, Dir_Right, allo);
     g.time_for_move = 1.0;
     g.turn = false;
 
@@ -102,60 +102,60 @@ Level_Return game_state_frame_StaticPlatformer(Game_State_StaticPlatformer *g)
 {
     World_State0 *w = &g->w;
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic_general(&g->time_for_move, 0.175))
     {
         g->turn = !g->turn;
 
-        Dir saved_dir = g->player.next_direction;
+        Dir saved_dir = g->player->next_direction;
 
         if (g->turn)
         {
-            g->player.next_direction = Dir_Down;
+            g->player->next_direction = Dir_Down;
         }
         else
         {
             // Make sure you can only go up if all your parts are bound to something beneath them
-            if (g->player.next_direction == Dir_Up)
+            if (g->player->next_direction == Dir_Up)
             {
-                for (Int i = 0; i + 1 < g->player.length; ++i)
+                for (Int i = 0; i + 1 < g->player->length; ++i)
                 {
-                    Pos pos = player_nth_position(&g->player, i);
+                    Pos pos = player_nth_position(g->player, i);
                     Pos under_pos = move_inside_grid(pos, Dir_Down, w);
                     if (g->map[under_pos.y][under_pos.x] == SPlatformer_Block_Solid)
-                    // !player_position_in_player(&g->player, under_pos))
+                    // !player_position_in_player(g->player, under_pos))
                     {
                         // fall down one step
                         goto GOTO_ALLOWED;
                     }
                 }
-                g->player.next_direction = Dir_Nothing;
+                g->player->next_direction = Dir_Nothing;
             GOTO_ALLOWED:;
             }
         }
-        Pos head = player_nth_position(&g->player, 0);
-        Pos next_pos = move_inside_grid(head, g->player.next_direction, w);
+        Pos head = player_nth_position(g->player, 0);
+        Pos next_pos = move_inside_grid(head, g->player->next_direction, w);
         bool next_is_solid = g->map[next_pos.y][next_pos.x] == SPlatformer_Block_Solid;
-        bool next_is_snake = player_position_in_player(&g->player, next_pos);
+        bool next_is_snake = player_position_in_player(g->player, next_pos);
         if (!next_is_solid && !next_is_snake)
         {
-            player_move(&g->player, w);
+            player_move(g->player, w);
         }
 
         if (g->turn)
         {
-            g->player.next_direction = saved_dir;
+            g->player->next_direction = saved_dir;
         }
 
-        // g->player.positions[g->player.idx_pos].y++;
+        // g->player->positions[g->player->idx_pos].y++;
         for (Int i = 0; i < SPLATFORMER_MAX_FOODS; ++i)
         {
-            food_player_collision_logic_food_disappear(&g->player, &g->foods[i]);
+            food_player_collision_logic_food_disappear(g->player, &g->foods[i]);
         }
     }
 
-    Int food_left_to_win = SPLATFORMER_MAX_FOODS + 2 - g->player.length;
+    Int food_left_to_win = SPLATFORMER_MAX_FOODS + 2 - g->player->length;
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
 
@@ -166,7 +166,7 @@ Level_Return game_state_frame_StaticPlatformer(Game_State_StaticPlatformer *g)
     draw_food_left(food_left_to_win);
     map_draw((SPlatformer_Block *)g->map, SPLATFORMER_MAP_WIDTH, SPLATFORMER_MAP_HEIGHT, w);
 
-    player_draw_extra(&g->player, w);
+    player_draw_extra(g->player, w);
     for (Int i = 0; i < SPLATFORMER_MAX_FOODS; ++i)
         food_draw(&g->foods[i], w);
 

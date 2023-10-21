@@ -5,24 +5,28 @@ Pos player_nth_position(const Player *player, Int idx) // TODO MAKE THIS FASTER
 {
     Int i = player->idx_pos - idx;
     while (i < 0)
-        i += PLAYER_MAX_POSITIONS;
+        i += player->max_length;
     return player->positions[i];
 }
 
-Player player_init(Pos start_pos, const Int length, const Dir dir)
+Player *player_init(Pos start_pos, const Int length, const Int max_length, const Dir dir, Allo *allo)
 {
-    Player p;
-    p.current_direction = dir;
-    p.next_direction = dir;
+    Player *p = allo->alloc(allo, sizeof(Player) + max_length * sizeof(Pos));
+    p->max_length = max_length;
+    player_set_positions(p, start_pos, length, dir);
+    return p;
+}
 
-    p.length = length;
-    p.idx_pos = p.length - 1;
-    for (Int i = p.idx_pos; i >= 0; --i)
+void player_set_positions(Player *p, Pos start_pos, Int length, const Dir dir) {
+    p->length = length;
+    p->current_direction = dir;
+    p->next_direction = dir;
+    p->idx_pos = p->length - 1;
+    for (Int i = p->idx_pos; i >= 0; --i)
     {
-        p.positions[i] = start_pos;
+        p->positions[i] = start_pos;
         start_pos = pos_move(start_pos, dir_opposite(dir));
     }
-    return p;
 }
 
 // Cycle through positions of player
@@ -37,10 +41,11 @@ void player_draw_general(const Player *player, const Color head, const Color bod
         --i;
         if (i < 0)
         {
-            i = PLAYER_MAX_POSITIONS - 1;
+            i = player->max_length - 1;
         }
     }
 }
+
 void player_draw(const Player *player, const World_State0 *w)
 {
     player_draw_general(player, RED, MAROON, w);
@@ -126,7 +131,7 @@ void player_set_direction_correctly(Player *player, Dir dir)
         if (player->current_direction != Dir_Up)
             player->next_direction = Dir_Down;
     }
-	break;
+    break;
     case Dir_Nothing: {
     }
     break;
@@ -180,7 +185,7 @@ bool player_move(Player *player, const World_State0 *w)
     prev_pos = move_inside_grid(prev_pos, player->current_direction, w);
 
     ++player->idx_pos;
-    if (player->idx_pos >= PLAYER_MAX_POSITIONS)
+    if (player->idx_pos >= player->max_length)
     {
         player->idx_pos = 0;
     }
@@ -190,7 +195,7 @@ bool player_move(Player *player, const World_State0 *w)
     for (Int i = player->idx_pos - 1, cells = 1; cells < player->length; ++cells)
     {
         if (i < 0)
-            i = PLAYER_MAX_POSITIONS - 1;
+            i = player->max_length - 1;
 
         if (player->positions[i].x == prev_pos.x && player->positions[i].y == prev_pos.y)
         {
@@ -226,10 +231,12 @@ void food_draw(const Food *food, const World_State0 *w)
 {
     draw_block_at(food->pos, GREEN, w);
 }
+
 void food_draw_red(const Food *food, const World_State0 *w)
 {
     draw_block_at(food->pos, RED, w);
 }
+
 void food_set_random_position(Food *food, const World_State0 *w)
 {
     Coord x = GetRandomValue(0, w->width - 1);
@@ -237,6 +244,7 @@ void food_set_random_position(Food *food, const World_State0 *w)
     food->pos.x = x;
     food->pos.y = y;
 }
+
 void food_init_position(Food *food, const Player *player, const World_State0 *w)
 {
     do
@@ -244,6 +252,7 @@ void food_init_position(Food *food, const Player *player, const World_State0 *w)
         food_set_random_position(food, w);
     } while (player_intersection_point(player, food->pos));
 }
+
 void food_player_collision_logic(Player *player, Food *food, const World_State0 *w)
 {
     if (pos_equal(player_nth_position(player, 0), food->pos))

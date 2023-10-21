@@ -11,13 +11,13 @@
 typedef struct
 {
     World_State0 w;
-    Player player;
+    Player *player;
     double time_for_move;
     Food foods[GAME_STATE_OPENWORLD_FOODS];
 	Snake_Pather pathers[GAME_STATE_OPENWORLD_PATHERS];
     Maze0_Cell maze[GAME_STATE_OPENWORLD_HEIGHT][GAME_STATE_OPENWORLD_WIDTH];
 } Game_State_OpenWorld;
 
-void game_state_init_OpenWorld(Game_State_OpenWorld *new_g);
+void game_state_init_OpenWorld(Game_State_OpenWorld *new_g, Allo *allo);
 
 Level_Return game_state_frame_OpenWorld(Game_State_OpenWorld *g);

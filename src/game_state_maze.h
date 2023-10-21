@@ -12,13 +12,13 @@
 typedef struct
 {
     World_State0 w;
-    Player player;
+    Player *player;
     double time_for_move;
     Food foods[GAME_STATE_MAZE_FOODS];
     Snake_Pather evil_snake_paths[GAME_STATE_MAZE_TOTAL_EVIL_SNAKE_PATHS];
     Maze0_Cell maze[GAME_STATE_MAZE_HEIGHT][GAME_STATE_MAZE_WIDTH];
 } Game_State_Maze;
 
-void game_state_Maze_init(Game_State_Maze *new_g);
+void game_state_Maze_init(Game_State_Maze *new_g, Allo *allo);
 Level_Return game_state_Maze_frame(Game_State_Maze *g);
 

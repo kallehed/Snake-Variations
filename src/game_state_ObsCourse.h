@@ -18,7 +18,7 @@ typedef struct
 typedef struct
 {
     World_State0 w;
-    Player player;
+    Player *player;
     Food foods[GS_OBSCOURSE_MAX_FOODS];
     double time_for_move;
     float cam_x;
@@ -26,5 +26,5 @@ typedef struct
     Maze0_Cell maze[GS_OBSCOURSE_HEIGHT][GS_OBSCOURSE_WIDTH];
 } Game_State_ObsCourse;
 
-void game_state_init_ObsCourse(Game_State_ObsCourse *new_g);
+void game_state_init_ObsCourse(Game_State_ObsCourse *new_g, Allo *allo);
 Level_Return game_state_frame_ObsCourse(Game_State_ObsCourse *g);

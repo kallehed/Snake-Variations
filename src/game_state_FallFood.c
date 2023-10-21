@@ -14,12 +14,12 @@ void level_set_FallFood(Level *mg)
     mg->size = (sizeof(GS_FallFood));
 }
 
-void game_state_init_FallFood(GS_FallFood *new_g)
+void game_state_init_FallFood(GS_FallFood *new_g, Allo *allo)
 {
     GS_FallFood g;
     g.w = world_state0_init_general(GS_FALLFOOD_WIDTH, GS_FALLFOOD_HEIGHT, WINDOW_WIDTH / GS_FALLFOOD_WIDTH);
-    g.player = player_init((Pos){5, GS_FALLFOOD_HEIGHT - 5}, GS_FALLFOOD_PLAYER_START_LENGTH, Dir_Right);
-    food_init_position(&g.food, &g.player, &g.w);
+    g.player = player_init((Pos){5, GS_FALLFOOD_HEIGHT - 5}, GS_FALLFOOD_PLAYER_START_LENGTH, 100, Dir_Right, allo);
+    food_init_position(&g.food, g.player, &g.w);
     g.food = (Food){.pos = (Pos){.x = 9, GS_FALLFOOD_HEIGHT - 15}};
     g.time_for_move = 1.0;
 
@@ -56,28 +56,28 @@ Level_Return game_state_frame_FallFood(GS_FallFood *g)
 {
     const World_State0 *const w = &g->w;
     // logic
-    player_set_direction_from_input(&g->player);
+    player_set_direction_from_input(g->player);
 
     if (time_move_logic_general(&g->time_for_move, 0.09))
     {
-        if (maze0_player_move((Maze0_Cell *)g->maze, GS_FALLFOOD_WIDTH, &g->player, w))
+        if (maze0_player_move((Maze0_Cell *)g->maze, GS_FALLFOOD_WIDTH, g->player, w))
         {
             // player died
             TraceLog(LOG_INFO, "%s", "YOU DIED!");
 
             return Level_Return_Reset_Level;
         }
-        if (pos_equal(player_nth_position(&g->player, 0), g->food.pos))
+        if (pos_equal(player_nth_position(g->player, 0), g->food.pos))
         {
-            ++g->player.length;
+            ++g->player->length;
             g->food.pos = (Pos){.x = GetRandomValue(0, GS_FALLFOOD_WIDTH - 1),
-                                .y = (player_nth_position(&g->player, 0).y - 20 + GetRandomValue(-5, 5)) / 2 * 2 + 1};
+                                .y = (player_nth_position(g->player, 0).y - 20 + GetRandomValue(-5, 5)) / 2 * 2 + 1};
         }
     }
 
     // die by going offscreen
     {
-        const Pos p_pos = player_nth_position(&g->player, 0);
+        const Pos p_pos = player_nth_position(g->player, 0);
         if ((p_pos.y + 1) * w->block_pixel_len < g->cam_y ||
             (p_pos.y - 1) * w->block_pixel_len > g->cam_y + WINDOW_HEIGHT)
         {
@@ -85,7 +85,7 @@ Level_Return game_state_frame_FallFood(GS_FallFood *g)
         }
     }
 
-    const Int food_left_to_win = GS_FALLFOOD_TOTAL_FOOD_TO_GET + GS_FALLFOOD_PLAYER_START_LENGTH - g->player.length;
+    const Int food_left_to_win = GS_FALLFOOD_TOTAL_FOOD_TO_GET + GS_FALLFOOD_PLAYER_START_LENGTH - g->player->length;
 
     if (food_left_to_win <= 0)
         return Level_Return_Next_Level;
@@ -107,7 +107,7 @@ Level_Return game_state_frame_FallFood(GS_FallFood *g)
         draw_food_left_general(food_left_to_win, 10, wid * (((Int)(g->cam_y + WINDOW_HEIGHT)) / wid));
     }
 
-    player_draw_extra(&g->player, w);
+    player_draw_extra(g->player, w);
     food_draw(&g->food, w);
 
     EndDrawing();
