@@ -1,4 +1,5 @@
 #include "game.h"
+#include "allocator.h"
 #include "level.h"
 #include "music.h"
 #include <assert.h>
@@ -7,40 +8,27 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-// TODO: Continue this code
-// Make it point to memory in buffer 
-// which should be put somewhere
-//, alloc should probably have a pointer to its
-// internal data, and then we will cast that to the right type 
-// and then we will push to buffer, and all will be good 
-// so, create new struct, which will be in data of allocator interface
-// then cast that in actual alloc function, so no crazy things happen.
-void *alloc(void *this, Int mem)
-{
-    return malloc(mem);
-}
 
-Game game_init(void)
+void game_init(Game *g)
 {
-    Game g;
     Int start_level_num = 0;
     if (DEV)
     {
         start_level_num = 0; // 25 latest
     }
-    g.ld.l._data = NULL;
-    g.allo = (Allo){.alloc = alloc};
-    level_data_init(&g.ld, start_level_num, &g.allo);
-    g.global_score = 0;
-    g.game_mode = Game_Mode_Level;
-    g.try_surprise_timer = 0.0f;
-    g.time_of_prev_surprise = GetTime();
-    g.time_of_prev_death_stats = GetTime();
-    g.global_deaths = 0;
-    g.global_evilness = 0;
-    g.cheat_counter = 0;
+    g->ld.l._data = NULL;
+    g->allo = bump_allo_init();
+    level_data_init(&g->ld, start_level_num, &g->allo);
+    g->global_score = 0;
+    g->game_mode = Game_Mode_Level;
+    g->try_surprise_timer = 0.0f;
+    g->time_of_prev_surprise = GetTime();
+    g->time_of_prev_death_stats = GetTime();
+    g->global_deaths = 0;
+    g->global_evilness = 0;
+    g->cheat_counter = 0;
 
-    g.cur_music = 0;
+    g->cur_music = 0;
 
     // Music
     {
@@ -55,12 +43,12 @@ Game game_init(void)
                        "Must provide correct number of files for musics!");
         for (Int i = 0; i < TOTAL_MUSICS; ++i)
         {
-            g.musics[i] = LoadMusicStream(filenames[i]);
-            PlayMusicStream(g.musics[i]);
+            g->musics[i] = LoadMusicStream(filenames[i]);
+            PlayMusicStream(g->musics[i]);
         }
-        g.musics[Music_Cutscene_Magical].looping = false;
+        g->musics[Music_Cutscene_Magical].looping = false;
 
-        g.cur_music = Music_Snake_Basic;
+        g->cur_music = Music_Snake_Basic;
     }
 
     // Sound
@@ -72,16 +60,14 @@ Game game_init(void)
                        "Must provide correct number of files for sounds!");
         for (Int i = 0; i < TOTAL_SOUNDS; ++i)
         {
-            g.sounds[i] = LoadSound(filenames[i]);
+            g->sounds[i] = LoadSound(filenames[i]);
         }
     }
-
-    return g;
 }
 
 void game_deinit(Game *g)
 {
-    free(g->ld.l._data);
+    allo_deinit(&g->allo);
     g->ld.l._data = NULL;
     for (Int i = 0; i < TOTAL_MUSICS; ++i)
     {

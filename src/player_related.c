@@ -11,7 +11,7 @@ Pos player_nth_position(const Player *player, Int idx) // TODO MAKE THIS FASTER
 
 Player *player_init(Pos start_pos, const Int length, const Int max_length, const Dir dir, Allo *allo)
 {
-    Player *p = allo->alloc(allo, sizeof(Player) + max_length * sizeof(Pos));
+    Player *p = allo_alloc(allo, sizeof(Player) + max_length * sizeof(Pos));
     p->max_length = max_length;
     player_set_positions(p, start_pos, length, dir);
     return p;

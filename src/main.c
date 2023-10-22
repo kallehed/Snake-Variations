@@ -15,6 +15,7 @@
 #endif
 
 #ifdef TEST_ALL_LEVELS
+// this function will not work anymore TODO
 static void test_all_levels(void)
 {
     SetTargetFPS(60); // DONT CHANGE, otherwise less will be seen
@@ -42,7 +43,7 @@ static void test_all_levels(void)
 static void game_loop(void)
 {
     Game *g = malloc(sizeof(Game));
-    *g = game_init();
+    game_init(g);
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop_arg((void (*)(void *))game_run_frame, g, 0, 1);

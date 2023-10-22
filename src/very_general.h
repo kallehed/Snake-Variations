@@ -50,7 +50,15 @@ typedef enum Level_Return
     Level_Return_Reset_Level,
 } Level_Return;
 
-typedef struct Allo Allo;
+// Allocator, fields should not be used in ordinary code
+// instead, allo_* functions should be used instead
+typedef struct
+{
+    void *(*_alloc)(void *, Int);
+    void (*_reset)(void *);
+    void (*_deinit)(void *);
+    void *_data;
+} Allo;
 
 typedef Level_Return (*Level_Frame_Code)(void *);
 typedef void (*Level_Init_Code)(void *, Allo *);
@@ -66,6 +74,13 @@ typedef struct
 
 // for setting function pointers to init code, frame code, and mallocing the data
 typedef void (*Set_Level_Code)(Level *);
+
+// alloc bytes
+void *allo_alloc(Allo *allo, Int needed);
+// reset allocator and "free" any memory allocated
+void allo_reset(Allo *allo);
+// completely deconstruct allocator
+void allo_deinit(Allo *allo);
 
 bool rect_intersection(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2);
 bool rect_intersection_wrap(const Pos r1, const Pos w_h1, const Pos r2, const Pos w_h2, const World_State0 *w);

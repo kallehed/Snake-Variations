@@ -49,7 +49,7 @@ static Set_Level_Code get_set_level_code_from_enum(Level_Enum e)
 // frees previous level that was there
 void level_init(Level *l, const Level_Enum level_enum, Allo *allo)
 {
-    free(l->_data);
+    allo_reset(allo);
     l->_data = NULL;
 
     Set_Level_Code setter = get_set_level_code_from_enum(level_enum);
@@ -64,10 +64,10 @@ void level_init(Level *l, const Level_Enum level_enum, Allo *allo)
     setter(l);
 
     // INIT
-    printf("Allocing size: %u\n", l->size);
-    l->_data = allo->alloc(allo, l->size);
+    printf("level_init: Level allocing size: %u\n", l->size);
+    l->_data = allo_alloc(allo, l->size);
     if (NULL == l->_data) // Check for Out Of Memory
-        puts("!!!!!!!!! OUT OF MEMORY, MALLOC RETURNED NULL!!!!!!!!");
+        puts("!!!!!!!!! OUT OF MEMORY, MALLOC RETURNED NULL!!!!!!!!\n");
 
     l->init_code(l->_data, allo);
 }

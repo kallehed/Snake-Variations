@@ -54,7 +54,7 @@ typedef struct
     Allo allo;
 } Game;
 
-Game game_init(void);
+void game_init(Game *);
 void game_deinit(Game *g);
 void game_run_frame(Game *g);
 void game_init_next_level(Game *g);
