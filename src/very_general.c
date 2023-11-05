@@ -270,18 +270,19 @@ void draw_snakelike(const Pos positions[], const Int length, const Color head, c
     }
 }
 
-World_State0 world_state0_init(const Int width)
+World_State0 world_state0_init(const Int width, Sound sounds[])
 {
     World_State0 w = {.width = width};
     w.block_pixel_len = WINDOW_WIDTH / w.width;
     w.height = WINDOW_HEIGHT / w.block_pixel_len;
+    w.sounds = sounds;
     return w;
 }
 
 // For when you want a scrollable world
-World_State0 world_state0_init_general(const Int width, const Int height, const Int block_pixel_len)
+World_State0 world_state0_init_general(const Int width, const Int height, const Int block_pixel_len, Sound sounds[])
 {
-    World_State0 w = {.width = width, .height = height, .block_pixel_len = block_pixel_len};
+    World_State0 w = {.width = width, .height = height, .block_pixel_len = block_pixel_len, .sounds = sounds};
     return w;
 }
 

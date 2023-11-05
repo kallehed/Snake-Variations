@@ -48,9 +48,9 @@ typedef struct
 
 
 // frees previous level that was there
-void level_init(Level *l, const Level_Enum level_enum, Allo *allo);
+void level_init(Level *l, const Level_Enum level_enum, Allo *allo, Sound sounds[]);
 
-void level_data_init(Level_Data *ld, const Level_Enum level_enum, Allo *allo);
+void level_data_init(Level_Data *ld, const Level_Enum level_enum, Allo *allo, Sound sounds[]);
 
 // gives the score depending on how long the player took to complete the level
 Int level_data_get_score(Level_Data *ld);

@@ -11,10 +11,10 @@ void level_set_InZoom(Level *mg)
     mg->size = (sizeof(Game_State_InZoom));
 }
 
-void game_state_init_InZoom(Game_State_InZoom *new_g, Allo *allo)
+void game_state_init_InZoom(Game_State_InZoom *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_InZoom g;
-    g.w = world_state0_init(20);
+    g.w = world_state0_init(20, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
     food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;

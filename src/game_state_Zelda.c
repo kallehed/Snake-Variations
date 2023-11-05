@@ -19,10 +19,10 @@ void level_set_Zelda(Level *mg)
     mg->size = (sizeof(GS_Zelda));
 }
 
-void game_state_init_Zelda(GS_Zelda *new_g, Allo *allo)
+void game_state_init_Zelda(GS_Zelda *new_g, Allo *allo, Sound sounds[])
 {
     GS_Zelda g;
-    g.w = world_state0_init_general(GS_ZELDA_WIDTH, GS_ZELDA_HEIGHT, WINDOW_WIDTH / GS_ZELDA_ROOM_WIDTH);
+    g.w = world_state0_init_general(GS_ZELDA_WIDTH, GS_ZELDA_HEIGHT, WINDOW_WIDTH / GS_ZELDA_ROOM_WIDTH, sounds);
     g.player = player_init((Pos){.x = GS_ZELDA_ROOM_WIDTH * 2.5, .y = GS_ZELDA_ROOM_HEIGHT * 1.5}, 8, 100, Dir_Right, allo);
     g.player_inv_timer = 0.f;
     g.room_x = -1;

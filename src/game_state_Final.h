@@ -11,5 +11,5 @@ typedef struct
     double time_for_move;
 } GS_Final;
 
-void GS_init_Final(GS_Final *new_g, Allo *allo);
+void GS_init_Final(GS_Final *new_g, Allo *allo, Sound sounds[]);
 Level_Return GS_frame_Final(GS_Final *g);

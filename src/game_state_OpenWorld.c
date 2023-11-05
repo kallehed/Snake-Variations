@@ -17,10 +17,10 @@ void level_set_OpenWorld(Level *mg)
     mg->size = (sizeof(Game_State_OpenWorld));
 }
 
-void game_state_init_OpenWorld(Game_State_OpenWorld *new_g, Allo *allo)
+void game_state_init_OpenWorld(Game_State_OpenWorld *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_OpenWorld g;
-    g.w = world_state0_init_general(GAME_STATE_OPENWORLD_WIDTH, GAME_STATE_OPENWORLD_HEIGHT, 20);
+    g.w = world_state0_init_general(GAME_STATE_OPENWORLD_WIDTH, GAME_STATE_OPENWORLD_HEIGHT, 20, sounds);
 	g.player = player_init((Pos){6,5},2, 100,Dir_Right, allo);
     g.time_for_move = 1.0;
 
@@ -222,7 +222,7 @@ Level_Return game_state_frame_OpenWorld(Game_State_OpenWorld *g)
         }
         for (Int i = 0; i < GAME_STATE_OPENWORLD_FOODS; ++i)
         {
-            food_player_collision_logic_food_disappear(g->player, &g->foods[i]);
+            food_player_collision_logic_food_disappear(g->player, &g->foods[i], w);
         }
     }
 

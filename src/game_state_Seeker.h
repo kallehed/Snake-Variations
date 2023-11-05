@@ -15,6 +15,6 @@ typedef struct
     Int moves;
 } Game_State_Seeker;
 
-void game_state_init_Seeker(Game_State_Seeker *new_g, Allo *allo);
+void game_state_init_Seeker(Game_State_Seeker *new_g, Allo *allo, Sound sounds[]);
 
 Level_Return game_state_frame_Seeker(Game_State_Seeker *g);

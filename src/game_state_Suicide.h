@@ -18,5 +18,5 @@ typedef struct
     Seeker_Snake seekers[GAME_STATE_SUICIDE_MAX_SEEKERS];
 } Game_State_Suicide;
 
-void game_state_init_Suicide(Game_State_Suicide *new_g, Allo *allo);
+void game_state_init_Suicide(Game_State_Suicide *new_g, Allo *allo, Sound sounds[]);
 Level_Return game_state_frame_Suicide(Game_State_Suicide *g);

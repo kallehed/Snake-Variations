@@ -1,4 +1,3 @@
-
 #include "game_state_YouBlue.h"
 #include "level_declarations.h"
 #include "player_related.h"
@@ -11,13 +10,14 @@ void level_set_YouBlue(Level *mg)
     mg->size = (sizeof(GS_YouBlue));
 }
 
-void gs_init_YouBlue(GS_YouBlue *new_g, Allo *allo)
+void gs_init_YouBlue(GS_YouBlue *new_g, Allo *allo, Sound sounds[])
 {
     GS_YouBlue g;
-    g.w = world_state0_init(28);
+    g.w = world_state0_init(28, sounds);
     g.start_time = GetTime();
 
-    for (Int i = 0; i < GS_YOUBLUE_TOTAL_PLAYERS; ++i) {
+    for (Int i = 0; i < GS_YOUBLUE_TOTAL_PLAYERS; ++i)
+    {
         g.players[i] = player_init((Pos){g.w.width / 2, g.w.height / 2}, 8, 100, Dir_Right, allo);
     }
 

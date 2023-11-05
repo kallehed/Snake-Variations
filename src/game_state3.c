@@ -10,10 +10,10 @@ void level_set_EverGrowing(Level *mg)
     mg->size = (sizeof(Game_State3));
 }
 
-void game_state3_init0(Game_State3 *new_g, Allo *allo)
+void game_state3_init0(Game_State3 *new_g, Allo *allo, Sound sounds[])
 {
     Game_State3 g;
-    g.w = world_state0_init(24);
+    g.w = world_state0_init(24, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
     g.player->positions[0] = (Pos){.x = g.w.width / 2, g.w.height / 2};
     g.player_points = 0;
@@ -40,8 +40,10 @@ Level_Return game_state3_frame0(Game_State3 *g)
             return Level_Return_Reset_Level;
         }
         g->player->length--;
+
         if (pos_equal(player_nth_position(g->player, 0), g->food.pos))
         {
+            play_eat_sound(w);
             food_init_position(&g->food, g->player, w);
             g->player_points++;
         }

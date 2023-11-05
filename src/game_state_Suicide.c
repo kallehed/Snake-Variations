@@ -10,10 +10,10 @@ void level_set_Suicide(Level *mg)
     mg->size = (sizeof(Game_State_Suicide));
 }
 
-void game_state_init_Suicide(Game_State_Suicide *new_g, Allo *allo)
+void game_state_init_Suicide(Game_State_Suicide *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_Suicide g;
-    g.w = world_state0_init(28);
+    g.w = world_state0_init(28, sounds);
     g.player = player_init((Pos){3, 10}, 10, 100, Dir_Right, allo);
     g.time_for_move = 1.0;
 

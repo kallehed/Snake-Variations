@@ -11,10 +11,10 @@ void level_set_Final(Level *mg)
     mg->size = (sizeof(GS_Final));
 }
 
-void GS_init_Final(GS_Final *new_g, Allo *allo)
+void GS_init_Final(GS_Final *new_g, Allo *allo, Sound sounds[])
 {
     GS_Final g;
-    g.w = world_state0_init(24);
+    g.w = world_state0_init(24, sounds);
     g.player = player_init((Pos){10, 10}, 1, 100, Dir_Right, allo);
     food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;

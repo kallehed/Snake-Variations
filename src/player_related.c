@@ -17,7 +17,8 @@ Player *player_init(Pos start_pos, const Int length, const Int max_length, const
     return p;
 }
 
-void player_set_positions(Player *p, Pos start_pos, Int length, const Dir dir) {
+void player_set_positions(Player *p, Pos start_pos, Int length, const Dir dir)
+{
     p->length = length;
     p->current_direction = dir;
     p->next_direction = dir;
@@ -253,19 +254,28 @@ void food_init_position(Food *food, const Player *player, const World_State0 *w)
     } while (player_intersection_point(player, food->pos));
 }
 
+void play_eat_sound(const World_State0 *w) {
+    Sound sound = w->sounds[Sound_Snake_Eat];
+    float pitch = 1.f + 0.1f*((float)GetRandomValue(-5, 7));
+    SetSoundPitch(sound, pitch);
+    PlaySound(sound);
+}
+
 void food_player_collision_logic(Player *player, Food *food, const World_State0 *w)
 {
     if (pos_equal(player_nth_position(player, 0), food->pos))
     {
+        play_eat_sound(w);
         ++player->length;
         food_init_position(food, player, w);
     }
 }
 
-void food_player_collision_logic_food_disappear(Player *player, Food *food)
+void food_player_collision_logic_food_disappear(Player *player, Food *food, const World_State0 *w)
 {
     if (pos_equal(player_nth_position(player, 0), food->pos))
     {
+        play_eat_sound(w);
         ++player->length;
         food->pos = (Pos){.x = -1, .y = -1};
     }

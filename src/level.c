@@ -48,7 +48,7 @@ static Set_Level_Code get_set_level_code_from_enum(Level_Enum e)
 
 // sets the level pointers and stuff, also initializes the level
 // frees previous level that was there
-void level_init(Level *l, const Level_Enum level_enum, Allo *allo)
+void level_init(Level *l, const Level_Enum level_enum, Allo *allo, Sound sounds[])
 {
     allo_reset(allo);
     l->_data = NULL;
@@ -70,17 +70,17 @@ void level_init(Level *l, const Level_Enum level_enum, Allo *allo)
     if (NULL == l->_data) // Check for Out Of Memory
         puts("!!!!!!!!! OUT OF MEMORY, ALLOC RETURNED NULL!!!!!!!!\n");
 
-    l->init_code(l->_data, allo);
+    l->init_code(l->_data, allo, sounds);
 }
 
-void level_data_init(Level_Data *ld, Level_Enum level_enum, Allo *allo)
+void level_data_init(Level_Data *ld, Level_Enum level_enum, Allo *allo, Sound sounds[])
 {
     ld->deaths_in_level = 0;
     ld->time_of_level_start = GetTime();
     ld->deaths_in_level = 0;
     ld->level_enum = level_enum;
     ld->death_wait_timer = 0.f;
-    level_init(&ld->l, ld->level_enum, allo);
+    level_init(&ld->l, ld->level_enum, allo, sounds);
 }
 
 // gives the score depending on how long the player took to complete the level

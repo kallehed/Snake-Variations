@@ -14,10 +14,10 @@ void level_set_FallFood(Level *mg)
     mg->size = (sizeof(GS_FallFood));
 }
 
-void game_state_init_FallFood(GS_FallFood *new_g, Allo *allo)
+void game_state_init_FallFood(GS_FallFood *new_g, Allo *allo, Sound sounds[])
 {
     GS_FallFood g;
-    g.w = world_state0_init_general(GS_FALLFOOD_WIDTH, GS_FALLFOOD_HEIGHT, WINDOW_WIDTH / GS_FALLFOOD_WIDTH);
+    g.w = world_state0_init_general(GS_FALLFOOD_WIDTH, GS_FALLFOOD_HEIGHT, WINDOW_WIDTH / GS_FALLFOOD_WIDTH, sounds);
     g.player = player_init((Pos){5, GS_FALLFOOD_HEIGHT - 5}, GS_FALLFOOD_PLAYER_START_LENGTH, 100, Dir_Right, allo);
     food_init_position(&g.food, g.player, &g.w);
     g.food = (Food){.pos = (Pos){.x = 9, GS_FALLFOOD_HEIGHT - 15}};

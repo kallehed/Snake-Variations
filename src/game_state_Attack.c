@@ -11,10 +11,10 @@ void level_set_Attack(Level *mg)
     mg->size = (sizeof(Game_State_Attack));
 }
 
-void game_state_init_Attack(Game_State_Attack *new_g, Allo *allo)
+void game_state_init_Attack(Game_State_Attack *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_Attack g;
-    g.w = world_state0_init(28);
+    g.w = world_state0_init(28, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 12, 100, Dir_Right, allo);
     g.player_inv_timer = 0.f;
     g.time_for_move = 1.0;

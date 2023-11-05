@@ -9,10 +9,10 @@ void level_set_Accel(Level *mg)
     mg->size = (sizeof(Game_State_Accel));
 }
 
-void game_state_init_Accel(Game_State_Accel *new_g, Allo *allo)
+void game_state_init_Accel(Game_State_Accel *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_Accel g;
-    g.w = world_state0_init(24);
+    g.w = world_state0_init(24, sounds);
     g.player = player_init((Pos){.x = 10, .y = 10}, 3, 100, Dir_Right, allo);
     food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;

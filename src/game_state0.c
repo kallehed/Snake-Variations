@@ -44,10 +44,10 @@ void level_set_Wait(Level *mg)
     mg->size = (sizeof(Game_State_Wait));
 }
 
-void game_state0_init0(Game_State0 *new_g, Allo *allo)
+void game_state0_init0(Game_State0 *new_g, Allo *allo, Sound sounds[])
 {
     Game_State0 g;
-    g.w = world_state0_init(12);
+    g.w = world_state0_init(12, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
     food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;
@@ -56,10 +56,10 @@ void game_state0_init0(Game_State0 *new_g, Allo *allo)
 }
 
 // Gigantic free fast
-void game_state0_init1(Game_State0 *new_g, Allo *allo)
+void game_state0_init1(Game_State0 *new_g, Allo *allo, Sound sounds[])
 {
     Game_State0 g;
-    g.w = world_state0_init(120);
+    g.w = world_state0_init(120, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
     food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;
@@ -67,10 +67,10 @@ void game_state0_init1(Game_State0 *new_g, Allo *allo)
     *new_g = g;
 }
 
-void game_state0_init_GetSmall(Game_State0 *new_g, Allo *allo)
+void game_state0_init_GetSmall(Game_State0 *new_g, Allo *allo, Sound sounds[])
 {
     Game_State0 g;
-    g.w = world_state0_init(12);
+    g.w = world_state0_init(12, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 12, 12, Dir_Right, allo);
     for (Int i = 1; i < 12; ++i)
     {
@@ -82,10 +82,10 @@ void game_state0_init_GetSmall(Game_State0 *new_g, Allo *allo)
     *new_g = g;
 }
 
-void game_state_init_Wait(Game_State_Wait *new_g, Allo *allo)
+void game_state_init_Wait(Game_State_Wait *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_Wait g;
-    g.w = world_state0_init(12);
+    g.w = world_state0_init(12, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
     g.warps_done = 0;
     g.time_started = GetTime();

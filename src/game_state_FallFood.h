@@ -19,5 +19,5 @@ typedef struct
     Maze0_Cell maze[GS_FALLFOOD_HEIGHT][GS_FALLFOOD_WIDTH];
 } GS_FallFood;
 
-void game_state_init_FallFood(GS_FallFood *new_g, Allo *allo);
+void game_state_init_FallFood(GS_FallFood *new_g, Allo *allo, Sound sounds[]);
 Level_Return game_state_frame_FallFood(GS_FallFood *g);

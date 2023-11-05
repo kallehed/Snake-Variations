@@ -19,5 +19,6 @@ typedef enum {
 
 typedef enum {
 	Sound_Snake_Die,
+    Sound_Snake_Eat,
 	TOTAL_SOUNDS
 } Sound_Enum;

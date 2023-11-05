@@ -18,7 +18,7 @@ void game_init(Game *g)
     }
     g->ld.l._data = NULL;
     g->allo = bump_allo_init();
-    level_data_init(&g->ld, start_level_num, &g->allo);
+    level_data_init(&g->ld, start_level_num, &g->allo, g->sounds);
     g->global_score = 0;
     g->game_mode = Game_Mode_Level;
     g->try_surprise_timer = 0.0f;
@@ -55,6 +55,7 @@ void game_init(Game *g)
     {
         static const char *filenames[] = {
             "f/sound/snake_sound_die.ogg",
+            "f/sound/snake_sound_eat.ogg",
         };
         _Static_assert(sizeof(filenames) / sizeof(filenames[0]) == TOTAL_SOUNDS,
                        "Must provide correct number of files for sounds!");
@@ -130,7 +131,7 @@ void game_init_next_level(Game *g)
     {
         g->game_mode = Game_Mode_Ending;
         g->cur_music = Music_Snake_Ending;
-        g->gs_ending = gs_init_Ending(g->global_score, g->global_deaths, g->global_evilness);
+        g->gs_ending = gs_init_Ending(g->global_score, g->global_deaths, g->global_evilness, g->sounds);
     }
     else
     // Next level
@@ -138,7 +139,7 @@ void game_init_next_level(Game *g)
         g->ld.level_enum++;
         g->cur_music = level_get_music(g->ld.level_enum);
         g->game_mode = Game_Mode_Level;
-        level_data_init(&g->ld, g->ld.level_enum, &g->allo);
+        level_data_init(&g->ld, g->ld.level_enum, &g->allo, g->sounds);
     }
 }
 
@@ -185,7 +186,7 @@ bool game_handle_level(Game *g)
         GOTO_RESET_LEVEL:
             g->global_deaths++;
             g->ld.deaths_in_level++;
-            level_init(&g->ld.l, g->ld.level_enum, &g->allo);
+            level_init(&g->ld.l, g->ld.level_enum, &g->allo, g->sounds);
 
             PlaySound(g->sounds[Sound_Snake_Die]);
 

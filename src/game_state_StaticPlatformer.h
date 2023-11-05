@@ -21,7 +21,7 @@ typedef struct {
 
 } Game_State_StaticPlatformer;
 
-void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g, Allo *allo); 
+void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g, Allo *allo, Sound sounds[]); 
 
 void map_draw(const SPlatformer_Block map[], const Int map_width, const Int map_height, const World_State0 *w);
 

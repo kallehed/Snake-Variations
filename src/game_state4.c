@@ -9,10 +9,10 @@ void level_set_HidingBoxes(Level *mg)
     mg->size = (sizeof(Game_State4));
 }
 
-void game_state4_init(Game_State4 *new_g, Allo *allo)
+void game_state4_init(Game_State4 *new_g, Allo *allo, Sound sounds[])
 {
     Game_State4 g;
-    g.w = world_state0_init(60);
+    g.w = world_state0_init(60, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 5, 100, Dir_Right, allo);
 
     food_init_position(&g.food, g.player, &g.w);

@@ -41,6 +41,7 @@ typedef struct World_State0
     // Cells in current world
     Coord width, height;
     Int block_pixel_len;
+    Sound *sounds;
 } World_State0;
 
 typedef enum Level_Return
@@ -61,7 +62,7 @@ typedef struct
 } Allo;
 
 typedef Level_Return (*Level_Frame_Code)(void *);
-typedef void (*Level_Init_Code)(void *, Allo *);
+typedef void (*Level_Init_Code)(void *, Allo *, Sound sounds[]);
 
 typedef struct
 {
@@ -113,9 +114,9 @@ void draw_blocks_at(Pos pos, Pos w_h, Color color, const World_State0 *w);
 void draw_blocks_warp(const Pos pos, const Pos w_h, const Color color, const World_State0 *w);
 void draw_snakelike(const Pos positions[], const Int length, const Color head, const Color body, const World_State0 *w);
 
-World_State0 world_state0_init(const Int width);
+World_State0 world_state0_init(const Int width, Sound sounds[]);
 // For when you want a scrollable world
-World_State0 world_state0_init_general(const Int width, const Int height, const Int block_pixel_len);
+World_State0 world_state0_init_general(const Int width, const Int height, const Int block_pixel_len, Sound sounds[]);
 
 // In pixels
 void draw_food_left_in_2D_space_general(const Int food_left_to_win, const Int width, const Int height, Int offset_x,

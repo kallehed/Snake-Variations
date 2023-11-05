@@ -18,5 +18,5 @@ typedef struct
     Seeker_Snake snakes[GS_MAX_SNAKES];
 } Game_State_Attack;
 
-void game_state_init_Attack(Game_State_Attack *new_g, Allo *allo);
+void game_state_init_Attack(Game_State_Attack *new_g, Allo *allo, Sound sounds[]);
 Level_Return game_state_frame_Attack(Game_State_Attack *g);

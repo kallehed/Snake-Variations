@@ -13,6 +13,6 @@ typedef struct
     double time_for_move;
 } Game_State4;
 
-void game_state4_init(Game_State4 *new_g, Allo *allo);
+void game_state4_init(Game_State4 *new_g, Allo *allo, Sound sounds[]);
 
 Level_Return game_state4_frame0(Game_State4 *g);

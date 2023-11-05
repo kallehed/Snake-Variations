@@ -26,5 +26,5 @@ typedef struct
     Maze0_Cell maze[GS_OBSCOURSE_HEIGHT][GS_OBSCOURSE_WIDTH];
 } Game_State_ObsCourse;
 
-void game_state_init_ObsCourse(Game_State_ObsCourse *new_g, Allo *allo);
+void game_state_init_ObsCourse(Game_State_ObsCourse *new_g, Allo *allo, Sound sounds[]);
 Level_Return game_state_frame_ObsCourse(Game_State_ObsCourse *g);

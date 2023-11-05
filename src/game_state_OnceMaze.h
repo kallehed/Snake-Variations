@@ -22,5 +22,5 @@ typedef struct
     Maze0_Cell maze[GS_HEIGHT][GS_WIDTH];
 } GS_OnceMaze;
 
-void game_state_OnceMaze_init(GS_OnceMaze *new_g, Allo *allo);
+void game_state_OnceMaze_init(GS_OnceMaze *new_g, Allo *allo, Sound sounds[]);
 Level_Return game_state_OnceMaze_frame(GS_OnceMaze *g);

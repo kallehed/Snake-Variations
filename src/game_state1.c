@@ -17,10 +17,10 @@ void level_set_UnSync(Level *mg)
     mg->size = (sizeof(Game_State1_UnSync));
 }
 
-void game_state1_init(Game_State1 *new_g, Allo *allo)
+void game_state1_init(Game_State1 *new_g, Allo *allo, Sound sounds[])
 {
     Game_State1 g;
-    g.w = world_state0_init(28);
+    g.w = world_state0_init(28, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
     food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;
@@ -30,11 +30,11 @@ void game_state1_init(Game_State1 *new_g, Allo *allo)
     *new_g = g;
 }
 
-void game_state1_init_UnSync(Game_State1_UnSync *new_g, Allo *allo)
+void game_state1_init_UnSync(Game_State1_UnSync *new_g, Allo *allo, Sound sounds[])
 {
     Game_State1_UnSync gu;
     Game_State1 g;
-    g.w = world_state0_init(28);
+    g.w = world_state0_init(28, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
     food_init_position(&g.food, g.player, &g.w);
     g.time_for_move = 1.0;

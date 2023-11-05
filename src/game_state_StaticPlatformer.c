@@ -11,10 +11,10 @@ void level_set_StaticPlatformer(Level *mg)
     mg->size = (sizeof(Game_State_StaticPlatformer));
 }
 
-void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g, Allo *allo)
+void game_state_init_StaticPlatformer(Game_State_StaticPlatformer *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_StaticPlatformer g;
-    g.w = world_state0_init(SPLATFORMER_MAP_WIDTH);
+    g.w = world_state0_init(SPLATFORMER_MAP_WIDTH, sounds);
     // HEIGHT 22, WIDTH 30
     g.player = player_init((Pos){.x = 1, 20}, 2, 100, Dir_Right, allo);
     g.time_for_move = 1.0;
@@ -150,7 +150,7 @@ Level_Return game_state_frame_StaticPlatformer(Game_State_StaticPlatformer *g)
         // g->player->positions[g->player->idx_pos].y++;
         for (Int i = 0; i < SPLATFORMER_MAX_FOODS; ++i)
         {
-            food_player_collision_logic_food_disappear(g->player, &g->foods[i]);
+            food_player_collision_logic_food_disappear(g->player, &g->foods[i], w);
         }
     }
 

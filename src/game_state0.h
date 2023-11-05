@@ -19,11 +19,11 @@ typedef struct
     double time_for_move;
 } Game_State_Wait;
 
-void game_state0_init0(Game_State0 *new_g, Allo *allo);
+void game_state0_init0(Game_State0 *new_g, Allo *allo, Sound sounds[]);
 // Gigantic free fast
-void game_state0_init1(Game_State0 *new_g, Allo *allo);
-void game_state0_init_GetSmall(Game_State0 *new_g, Allo *allo);
-void game_state_init_Wait(Game_State_Wait *new_g, Allo *allo);
+void game_state0_init1(Game_State0 *new_g, Allo *allo, Sound sounds[]);
+void game_state0_init_GetSmall(Game_State0 *new_g, Allo *allo, Sound sounds[]);
+void game_state_init_Wait(Game_State_Wait *new_g, Allo *allo, Sound sounds[]);
 
 // normal snake
 Level_Return game_state0_frame0(Game_State0 *g);

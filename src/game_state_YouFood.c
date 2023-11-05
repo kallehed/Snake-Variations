@@ -9,10 +9,10 @@ void level_set_YouFood(Level *mg)
     mg->size = (sizeof(Game_State_YouFood));
 }
 
-void game_state_YouFood_init(Game_State_YouFood *new_g, Allo *allo)
+void game_state_YouFood_init(Game_State_YouFood *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_YouFood g;
-    g.w = world_state0_init(24);
+    g.w = world_state0_init(24, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 1, 100, Dir_Right, allo);
     food_init_position(&g.food, g.player, &g.w);
     g.food_dir = Dir_Nothing;

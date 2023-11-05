@@ -1,4 +1,3 @@
-
 #include "game_state_Ending.h"
 #include "level.h"
 #include "level_declarations.h"
@@ -6,10 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-GS_Ending gs_init_Ending(Int score, Int deaths, Int evilness)
+GS_Ending gs_init_Ending(Int score, Int deaths, Int evilness, Sound sounds[])
 {
     GS_Ending g;
-    g.w = world_state0_init(28);
+    g.w = world_state0_init(28, sounds);
     g.time_for_move = 1.0;
 
     for (Int i = 0; i < GS_ENDING_MAX_SEEKERS; ++i)

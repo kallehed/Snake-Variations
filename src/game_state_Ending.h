@@ -21,5 +21,5 @@ typedef struct
 	Int evilness;
 } GS_Ending;
 
-GS_Ending gs_init_Ending(Int score, Int deaths, Int evilness);
+GS_Ending gs_init_Ending(Int score, Int deaths, Int evilness, Sound sounds[]);
 Level_Return gs_frame_Ending(GS_Ending *g);

@@ -18,6 +18,6 @@ typedef struct
     Maze0_Cell maze[GAME_STATE_OPENWORLD_HEIGHT][GAME_STATE_OPENWORLD_WIDTH];
 } Game_State_OpenWorld;
 
-void game_state_init_OpenWorld(Game_State_OpenWorld *new_g, Allo *allo);
+void game_state_init_OpenWorld(Game_State_OpenWorld *new_g, Allo *allo, Sound sounds[]);
 
 Level_Return game_state_frame_OpenWorld(Game_State_OpenWorld *g);

@@ -1,6 +1,6 @@
 #pragma once
-#include "very_general.h"
 #include "allocator.h"
+#include "very_general.h"
 
 typedef struct Player
 {
@@ -40,5 +40,6 @@ void food_draw_red(const Food *food, const World_State0 *w);
 void food_set_random_position(Food *food, const World_State0 *w);
 void food_init_position(Food *food, const Player *player, const World_State0 *w);
 
+void play_eat_sound(const World_State0 *w);
 void food_player_collision_logic(Player *player, Food *food, const World_State0 *w);
-void food_player_collision_logic_food_disappear(Player *player, Food *food);
+void food_player_collision_logic_food_disappear(Player *player, Food *foodconst, const World_State0 *w);

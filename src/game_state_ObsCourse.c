@@ -12,11 +12,11 @@ void level_set_ObsCourse(Level *mg)
     mg->size = (sizeof(Game_State_ObsCourse));
 }
 
-void game_state_init_ObsCourse(Game_State_ObsCourse *new_g, Allo *allo)
+void game_state_init_ObsCourse(Game_State_ObsCourse *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_ObsCourse g;
-    g.w = world_state0_init(20);
-    g.w = world_state0_init_general(GS_OBSCOURSE_WIDTH, GS_OBSCOURSE_HEIGHT, WINDOW_HEIGHT / GS_OBSCOURSE_HEIGHT);
+    g.w = world_state0_init(20, sounds);
+    g.w = world_state0_init_general(GS_OBSCOURSE_WIDTH, GS_OBSCOURSE_HEIGHT, WINDOW_HEIGHT / GS_OBSCOURSE_HEIGHT, sounds);
     g.player = player_init((Pos){4, 5}, GS_OBSCOURSE_PLAYER_START_LENGTH, 100, Dir_Right, allo);
     g.time_for_move = 1.0;
 
@@ -78,7 +78,7 @@ Level_Return game_state_frame_ObsCourse(Game_State_ObsCourse *g)
             return Level_Return_Reset_Level;
         }
         for (Int i = 0; i < GS_OBSCOURSE_MAX_FOODS; ++i)
-            food_player_collision_logic_food_disappear(g->player, &g->foods[i]);
+            food_player_collision_logic_food_disappear(g->player, &g->foods[i], w);
     }
 
     // die by going offscreen

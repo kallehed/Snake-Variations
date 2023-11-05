@@ -32,6 +32,6 @@ typedef struct
     Maze0_Cell maze[GS_ZELDA_HEIGHT][GS_ZELDA_WIDTH];
 } GS_Zelda;
 
-void game_state_init_Zelda(GS_Zelda *new_g, Allo *allo);
+void game_state_init_Zelda(GS_Zelda *new_g, Allo *allo, Sound sounds[]);
 
 Level_Return game_state_frame_Zelda(GS_Zelda *g);

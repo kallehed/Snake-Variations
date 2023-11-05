@@ -12,10 +12,10 @@ void level_set_Maze(Level *mg)
     mg->size = (sizeof(Game_State_Maze));
 }
 
-void game_state_Maze_init(Game_State_Maze *new_g, Allo *allo)
+void game_state_Maze_init(Game_State_Maze *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_Maze g;
-    g.w = world_state0_init(GAME_STATE_MAZE_WIDTH);
+    g.w = world_state0_init(GAME_STATE_MAZE_WIDTH, sounds);
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 2, 100, Dir_Right, allo);
 
     Snake_Pather_Way ways0[] = {{Dir_Right, 2}, {Dir_Down, 6}, {Dir_Left, 2}, {Dir_Up, 6}};
@@ -91,7 +91,7 @@ Level_Return game_state_Maze_frame(Game_State_Maze *g)
 
         for (Int i = 0; i < GAME_STATE_MAZE_FOODS; ++i)
         {
-            food_player_collision_logic_food_disappear(g->player, &g->foods[i]);
+            food_player_collision_logic_food_disappear(g->player, &g->foods[i], w);
         }
     }
 

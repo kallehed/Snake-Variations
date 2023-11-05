@@ -8,10 +8,10 @@ void level_set_Boxes(Level *mg)
     mg->init_code = (Level_Init_Code)game_state2_init;
     mg->size = (sizeof(Game_State2));
 }
-void game_state2_init(Game_State2 *new_g, Allo *allo)
+void game_state2_init(Game_State2 *new_g, Allo *allo, Sound sounds[])
 {
     Game_State2 g;
-    g.w = world_state0_init(24);
+    g.w = world_state0_init(24, sounds);
 
     g.player = player_init((Pos){.x = g.w.width / 2, g.w.height / 2}, 5, 100, Dir_Right, allo);
 
