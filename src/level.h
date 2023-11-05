@@ -51,9 +51,6 @@ typedef struct
 void level_init(Level *l, const Level_Enum level_enum, Allo *allo);
 
 void level_data_init(Level_Data *ld, const Level_Enum level_enum, Allo *allo);
-// handles just resetting and stuff, returns whether level was completed or not
-// DOES NOT FREE ANYTHING, just handles resets and the like
-Level_Return level_run_correctly(Level *l, Allo *allo);
 
 // gives the score depending on how long the player took to complete the level
 Int level_data_get_score(Level_Data *ld);

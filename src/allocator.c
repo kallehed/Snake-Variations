@@ -17,7 +17,6 @@ Allo bump_allo_init(void)
     return allo;
 }
 
-// TODO fix alignement problems
 void *bump_allo_alloc(void *_data, Int needed)
 {
     Bump_Allo *this = _data;

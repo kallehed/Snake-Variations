@@ -46,6 +46,7 @@ static Set_Level_Code get_set_level_code_from_enum(Level_Enum e)
     return LEVEL_SET_FUNCS[e];
 }
 
+// sets the level pointers and stuff, also initializes the level
 // frees previous level that was there
 void level_init(Level *l, const Level_Enum level_enum, Allo *allo)
 {
@@ -67,7 +68,7 @@ void level_init(Level *l, const Level_Enum level_enum, Allo *allo)
     printf("level_init: Level allocing size: %u\n", l->size);
     l->_data = allo_alloc(allo, l->size);
     if (NULL == l->_data) // Check for Out Of Memory
-        puts("!!!!!!!!! OUT OF MEMORY, MALLOC RETURNED NULL!!!!!!!!\n");
+        puts("!!!!!!!!! OUT OF MEMORY, ALLOC RETURNED NULL!!!!!!!!\n");
 
     l->init_code(l->_data, allo);
 }
@@ -80,40 +81,6 @@ void level_data_init(Level_Data *ld, Level_Enum level_enum, Allo *allo)
     ld->level_enum = level_enum;
     ld->death_wait_timer = 0.f;
     level_init(&ld->l, ld->level_enum, allo);
-}
-
-// handles just resetting and stuff, returns whether level was completed or not
-// DOES NOT FREE ANYTHING, just handles resets and the like
-Level_Return level_run_correctly(Level *l, Allo *allo)
-{
-    if (IsKeyPressed(KEY_R))
-    {
-        goto GOTO_RESET_LEVEL;
-    }
-    switch (l->frame_code(l->_data))
-    {
-    case Level_Return_Continue: {
-        if (DEV) // hacks
-        {
-            if (IsKeyPressed(KEY_N))
-                return Level_Return_Next_Level;
-        }
-        return Level_Return_Continue;
-    }
-    break;
-    case Level_Return_Next_Level: {
-        TraceLog(LOG_INFO, "%s", "Go To Next Level\n");
-        return Level_Return_Next_Level;
-    }
-    break;
-    case Level_Return_Reset_Level: {
-    GOTO_RESET_LEVEL:
-        l->init_code(l->_data, allo);
-        return Level_Return_Reset_Level;
-    }
-    break;
-    }
-    return Level_Return_Reset_Level; // control flow CANT go here
 }
 
 // gives the score depending on how long the player took to complete the level

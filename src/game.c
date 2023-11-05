@@ -81,7 +81,6 @@ void game_deinit(Game *g)
 
 void game_run_frame(Game *g)
 {
-
     switch (g->game_mode)
     {
     case Game_Mode_Level: {
@@ -155,7 +154,7 @@ bool game_handle_level(Game *g)
         g->cheat_counter = 0;
         return true;
     }
-    if (g->ld.death_wait_timer > 0.f)
+    if (g->ld.death_wait_timer > 0.f) // death screen, no music
     {
         g->ld.death_wait_timer -= GetFrameTime();
         BeginDrawing();
@@ -166,7 +165,10 @@ bool game_handle_level(Game *g)
     else
     {
         UpdateMusicStream(g->musics[g->cur_music]); // Update music buffer with new stream data
-        switch (level_run_correctly(&g->ld.l, &g->allo))
+        if (IsKeyPressed(KEY_R))
+            goto GOTO_RESET_LEVEL;
+
+        switch (g->ld.l.frame_code(g->ld.l._data))
         {
         case Level_Return_Continue: {
             // possibly start surprise easter egg thingy
@@ -175,12 +177,15 @@ bool game_handle_level(Game *g)
         break;
         case Level_Return_Next_Level: {
             // level is done, next can start
+            TraceLog(LOG_INFO, "%s", "Go To Next Level\n");
             return true;
         }
         break;
         case Level_Return_Reset_Level: {
+        GOTO_RESET_LEVEL:
             g->global_deaths++;
             g->ld.deaths_in_level++;
+            level_init(&g->ld.l, g->ld.level_enum, &g->allo);
 
             PlaySound(g->sounds[Sound_Snake_Die]);
 
@@ -191,7 +196,7 @@ bool game_handle_level(Game *g)
                 (int_time >= max_wait) || (GetRandomValue((int)time_since_death_stats, max_wait) == max_wait);
             printf("SHOULD DEATH STATS? time passed: %f, max_wait: %d\n", time_since_death_stats, max_wait);
 
-            if (should_show)
+            if (should_show) // death stats
             {
                 game_init_death_stats_cutscene(g);
             }
@@ -203,7 +208,6 @@ bool game_handle_level(Game *g)
         break;
         }
     }
-    // printf("deaths: %d\n", g->deaths);
     return false;
 }
 
