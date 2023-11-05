@@ -83,7 +83,6 @@ void map_draw(const SPlatformer_Block map[], const Int map_width, const Int map_
             Color col = {0, 255, 255, 255};
             switch (block)
             {
-
             case SPlatformer_Block_Air: {
                 continue;
             }
