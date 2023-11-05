@@ -10,11 +10,11 @@
 void level_set_OnceMaze(Level *mg)
 {
     mg->frame_code = (Level_Frame_Code)game_state_OnceMaze_frame;
-    mg->init_code = (Level_Init_Code)game_state_OnceMaze_init;
+    mg->init_code = (Level_Init_Code)game_state_init_OnceMaze;
     mg->size = (sizeof(GS_OnceMaze));
 }
 
-void game_state_OnceMaze_init(GS_OnceMaze *new_g, Allo *allo, Sound sounds[])
+void game_state_init_OnceMaze(GS_OnceMaze *new_g, Allo *allo, Sound sounds[])
 {
     GS_OnceMaze g;
     g.w = world_state0_init_general(GS_WIDTH, GS_HEIGHT, GS_PIXEL_SIZE, sounds);

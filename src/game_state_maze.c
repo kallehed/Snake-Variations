@@ -8,11 +8,11 @@
 void level_set_Maze(Level *mg)
 {
     mg->frame_code = (Level_Frame_Code)game_state_Maze_frame;
-    mg->init_code = (Level_Init_Code)game_state_Maze_init;
+    mg->init_code = (Level_Init_Code)game_state_init_Maze;
     mg->size = (sizeof(Game_State_Maze));
 }
 
-void game_state_Maze_init(Game_State_Maze *new_g, Allo *allo, Sound sounds[])
+void game_state_init_Maze(Game_State_Maze *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_Maze g;
     g.w = world_state0_init(GAME_STATE_MAZE_WIDTH, sounds);

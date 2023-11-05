@@ -19,6 +19,6 @@ typedef struct
     Maze0_Cell maze[GAME_STATE_MAZE_HEIGHT][GAME_STATE_MAZE_WIDTH];
 } Game_State_Maze;
 
-void game_state_Maze_init(Game_State_Maze *new_g, Allo *allo, Sound sounds[]);
+void game_state_init_Maze(Game_State_Maze *new_g, Allo *allo, Sound sounds[]);
 Level_Return game_state_Maze_frame(Game_State_Maze *g);
 

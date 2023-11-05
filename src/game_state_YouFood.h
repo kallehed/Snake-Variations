@@ -11,5 +11,5 @@ typedef struct
     double time_for_move;
 } Game_State_YouFood;
 
-void game_state_YouFood_init(Game_State_YouFood *new_g, Allo *allo, Sound sounds[]);
+void game_state_init_YouFood(Game_State_YouFood *new_g, Allo *allo, Sound sounds[]);
 Level_Return game_state_YouFood_frame(Game_State_YouFood *g);

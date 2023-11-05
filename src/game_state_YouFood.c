@@ -5,11 +5,11 @@
 void level_set_YouFood(Level *mg)
 {
     mg->frame_code = (Level_Frame_Code)game_state_YouFood_frame;
-    mg->init_code = (Level_Init_Code)game_state_YouFood_init;
+    mg->init_code = (Level_Init_Code)game_state_init_YouFood;
     mg->size = (sizeof(Game_State_YouFood));
 }
 
-void game_state_YouFood_init(Game_State_YouFood *new_g, Allo *allo, Sound sounds[])
+void game_state_init_YouFood(Game_State_YouFood *new_g, Allo *allo, Sound sounds[])
 {
     Game_State_YouFood g;
     g.w = world_state0_init(24, sounds);
